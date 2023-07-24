@@ -19,5 +19,5 @@ func Test_unmarshallWay(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	assert.Equal(t, int64(4620362), way.Elements[0].ID)
+	assert.Equal(t, int64(2154620362), way.Elements[0].ID)
 }
