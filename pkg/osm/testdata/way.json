@@ -1,0 +1,37 @@
+{
+    "version": "0.6",
+    "generator": "CGImap 0.8.8 (3953270 spike-07.openstreetmap.org)",
+    "copyright": "OpenStreetMap and contributors",
+    "attribution": "http://www.openstreetmap.org/copyright",
+    "license": "http://opendatacommons.org/licenses/odbl/1-0/",
+    "elements": [
+        {
+            "type": "way",
+            "id": 4620362,
+            "timestamp": "2023-06-10T20:15:46Z",
+            "version": 13,
+            "changeset": 137184595,
+            "user": "betacam",
+            "uid": 8586942,
+            "nodes": [
+                26790373,
+                26790374
+            ],
+            "tags": {
+                "bridge": "yes",
+                "bridge:ref": "6C",
+                "highway": "tertiary",
+                "lanes": "2",
+                "layer": "1",
+                "lit": "yes",
+                "maxspeed": "30 mph",
+                "maxweight:signed": "no",
+                "name": "Murrayburn Road",
+                "sidewalk": "both",
+                "sidewalk:both:surface": "asphalt",
+                "smoothness": "intermediate",
+                "surface": "asphalt"
+            }
+        }
+    ]
+}
