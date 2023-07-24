@@ -1,1 +1,1 @@
-# osm-pt-validator
+# OSM public transport validator

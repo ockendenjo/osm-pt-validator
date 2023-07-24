@@ -1,0 +1,7 @@
+.idea
+/bin/
+coverage.out
+.DS_Store
+build/
+cdk.out
+!scripts/build
