@@ -14,3 +14,6 @@ build:
 
 synth: build
 	cdk synth
+
+deploy: build
+	cdk deploy --require-approval never

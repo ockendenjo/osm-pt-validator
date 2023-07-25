@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/aws/aws-xray-sdk-go/xray"
 	"io"
 	"net/http"
 	"time"
@@ -23,6 +24,11 @@ type OSMClient struct {
 
 func (c *OSMClient) WithBaseUrl(baseUrl string) *OSMClient {
 	c.baseUrl = baseUrl
+	return c
+}
+
+func (c *OSMClient) WithXRay() *OSMClient {
+	c.httpClient.Transport = xray.RoundTripper(http.DefaultTransport)
 	return c
 }
 

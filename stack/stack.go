@@ -2,6 +2,8 @@ package main
 
 import (
 	"github.com/aws/aws-cdk-go/awscdk/v2"
+	"github.com/aws/aws-cdk-go/awscdk/v2/awslambda"
+	"github.com/aws/aws-cdk-go/awscdk/v2/awssns"
 	"github.com/aws/constructs-go/constructs/v10"
 	"github.com/aws/jsii-runtime-go"
 )
@@ -16,6 +18,23 @@ func NewStack(scope constructs.Construct, id string, props *OSMPTStackProps) aws
 		sprops = props.StackProps
 	}
 	stack := awscdk.NewStack(scope, &id, &sprops)
+
+	topic := awssns.NewTopic(stack, jsii.String("InvalidRelationTopic"), &awssns.TopicProps{})
+
+	lambdaFn := awslambda.NewFunction(stack, jsii.String("CheckRelationFunction"), &awslambda.FunctionProps{
+		Runtime:      awslambda.Runtime_PROVIDED_AL2(),
+		Architecture: awslambda.Architecture_ARM_64(),
+		Handler:      jsii.String("function"),
+		Code:         awslambda.Code_FromAsset(jsii.String("build/validate-route"), nil),
+		FunctionName: jsii.String("CheckRelationFunction"),
+		Environment: &map[string]*string{
+			"TOPIC_ARN": topic.TopicArn(),
+		},
+		Timeout:    awscdk.Duration_Seconds(jsii.Number(10)),
+		MemorySize: jsii.Number(1024),
+		Tracing:    awslambda.Tracing_ACTIVE,
+	})
+	topic.GrantPublish(lambdaFn.Role())
 
 	return stack
 }
