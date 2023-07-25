@@ -3,7 +3,6 @@ package osm
 import (
 	"context"
 	"fmt"
-	"sync"
 )
 
 func ValidateRelation(ctx context.Context, client *OSMClient, r Relation) ([]string, error) {
@@ -31,33 +30,62 @@ func validationRelationElement(ctx context.Context, client *OSMClient, re Relati
 	return validateRelationRoute(ctx, client, re)
 }
 
+const maxParallelOSMRequests = 10
+
+func loadWays(ctx context.Context, client *OSMClient, wayIds []int64) map[int64]*Way {
+	c := make(chan wayResult, len(wayIds))
+	wayMap := map[int64]*Way{}
+
+	remaining := 0
+	for idx, wayId := range wayIds {
+		go loadWay(ctx, client, wayId, c)
+		remaining++
+		if idx >= maxParallelOSMRequests {
+			//Wait before starting next request
+			wayResult := <-c
+			remaining--
+			wayMap[wayResult.WayID] = wayResult.Way
+		}
+	}
+	for i := 0; i < remaining; i++ {
+		wayResult := <-c
+		wayMap[wayResult.WayID] = wayResult.Way
+	}
+	return wayMap
+}
+
+func loadWay(ctx context.Context, client *OSMClient, wayId int64, c chan wayResult) {
+	way, err := client.GetWay(ctx, wayId)
+	if err != nil {
+		c <- wayResult{
+			WayID: wayId,
+			Way:   nil,
+		}
+		return
+	}
+	c <- wayResult{
+		WayID: wayId,
+		Way:   &way,
+	}
+}
+
+type wayResult struct {
+	WayID int64
+	Way   *Way
+}
+
 func validateRelationRoute(ctx context.Context, client *OSMClient, re RelationElement) ([]string, error) {
-	waysMap := map[int64]*Way{}
+	wayIds := []int64{}
 	ways := []Member{}
 
 	for _, member := range re.Members {
 		if member.Type == "way" && member.Role == "" {
-			waysMap[member.Ref] = nil
+			wayIds = append(wayIds, member.Ref)
 			ways = append(ways, member)
 		}
 	}
 
-	var wg sync.WaitGroup
-	var lock = sync.Mutex{}
-
-	for k := range waysMap {
-		wg.Add(1)
-		go func(wayId int64) {
-			defer wg.Done()
-			way, err := client.GetWay(ctx, wayId)
-			if err == nil {
-				lock.Lock()
-				defer lock.Unlock()
-				waysMap[wayId] = &way
-			}
-		}(k)
-	}
-	wg.Wait()
+	waysMap := loadWays(ctx, client, wayIds)
 
 	//Check for any nil ways
 	for k, way := range waysMap {
