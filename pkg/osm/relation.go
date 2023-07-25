@@ -12,6 +12,10 @@ type RelationElement struct {
 	Tags    map[string]string `json:"tags"`
 }
 
+func (re RelationElement) GetTags() map[string]string {
+	return re.Tags
+}
+
 type Member struct {
 	Type string `json:"type"`
 	Ref  int64  `json:"ref"`

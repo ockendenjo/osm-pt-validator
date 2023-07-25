@@ -11,3 +11,7 @@ type WayElement struct {
 	Nodes   []int64           `json:"nodes"`
 	Tags    map[string]string `json:"tags"`
 }
+
+func (we WayElement) GetTags() map[string]string {
+	return we.Tags
+}
