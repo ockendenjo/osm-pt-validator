@@ -1,13 +1,15 @@
 package osm
 
 import (
+	"context"
 	"fmt"
+	"sync"
 )
 
-func ValidateRelation(r Relation) ([]string, error) {
+func ValidateRelation(ctx context.Context, client *OSMClient, r Relation) ([]string, error) {
 	validationErrors := []string{}
 	for _, relationElement := range r.Elements {
-		ve, err := validationRelationElement(relationElement)
+		ve, err := validationRelationElement(ctx, client, relationElement)
 		if err != nil {
 			return []string{}, err
 		}
@@ -16,12 +18,118 @@ func ValidateRelation(r Relation) ([]string, error) {
 	return validationErrors, nil
 }
 
-func validationRelationElement(re RelationElement) ([]string, error) {
+func validationRelationElement(ctx context.Context, client *OSMClient, re RelationElement) ([]string, error) {
 	tagValidationErrors := validateRETags(re)
 	if len(tagValidationErrors) > 0 {
 		return tagValidationErrors, nil
 	}
-	return validateREMemberOrder(re), nil
+	memberValidationErrors := validateREMemberOrder(re)
+	if len(memberValidationErrors) > 0 {
+		return memberValidationErrors, nil
+	}
+
+	return validateRelationRoute(ctx, client, re)
+}
+
+func validateRelationRoute(ctx context.Context, client *OSMClient, re RelationElement) ([]string, error) {
+	waysMap := map[int64]*Way{}
+	ways := []Member{}
+
+	for _, member := range re.Members {
+		if member.Type == "way" && member.Role == "" {
+			waysMap[member.Ref] = nil
+			ways = append(ways, member)
+		}
+	}
+
+	var wg sync.WaitGroup
+	var lock = sync.Mutex{}
+
+	for k := range waysMap {
+		wg.Add(1)
+		go func(wayId int64) {
+			defer wg.Done()
+			way, err := client.GetWay(ctx, wayId)
+			if err == nil {
+				lock.Lock()
+				defer lock.Unlock()
+				waysMap[wayId] = &way
+			}
+		}(k)
+	}
+	wg.Wait()
+
+	//Check for any nil ways
+	for k, way := range waysMap {
+		if way == nil {
+			return []string{}, fmt.Errorf("failed to load way %d", k)
+		}
+	}
+
+	allowedNodes := map[int64]bool{}
+	for _, relationMemberWay := range ways {
+		way := (*waysMap[relationMemberWay.Ref]).Elements[0]
+
+		if len(allowedNodes) == 0 {
+			if way.IsCircular() {
+				allowedNodes = mapFromNodes(way.Nodes)
+				continue
+			}
+			allowedNodes = map[int64]bool{way.GetFirstNode(): true, way.GetLastNode(): true}
+			continue
+		}
+
+		found := false
+		var nextAllowedNodes map[int64]bool
+
+		for an, _ := range allowedNodes {
+			if way.IsCircular() {
+				for _, node := range way.Nodes {
+					if node == an {
+						nextAllowedNodes = mapFromNodes(way.Nodes)
+						delete(nextAllowedNodes, node)
+						found = true
+						break
+					}
+				}
+			} else if an == way.GetFirstNode() {
+				if way.IsCircular() {
+					nextAllowedNodes = mapFromNodes(way.Nodes)
+					delete(nextAllowedNodes, way.GetFirstNode())
+				} else {
+					nextAllowedNodes = map[int64]bool{way.GetLastNode(): true}
+				}
+				found = true
+				break
+			} else if an == way.GetLastNode() {
+				if way.IsCircular() {
+					nextAllowedNodes = mapFromNodes(way.Nodes)
+					delete(nextAllowedNodes, way.GetLastNode())
+				} else {
+					nextAllowedNodes = map[int64]bool{way.GetFirstNode(): true}
+				}
+				found = true
+				break
+			}
+		}
+
+		if found {
+			allowedNodes = nextAllowedNodes
+			continue
+		}
+
+		return []string{"ways are incorrectly ordered"}, nil
+	}
+
+	return []string{}, nil
+}
+
+func mapFromNodes(nodes []int64) map[int64]bool {
+	nodeMap := map[int64]bool{}
+	for _, node := range nodes {
+		nodeMap[node] = true
+	}
+	return nodeMap
 }
 
 func validateREMemberOrder(re RelationElement) []string {

@@ -1,7 +1,7 @@
 package osm
 
 type Way struct {
-	Elements []RelationElement `json:"elements"`
+	Elements []WayElement `json:"elements"`
 }
 
 type WayElement struct {
@@ -14,4 +14,16 @@ type WayElement struct {
 
 func (we WayElement) GetTags() map[string]string {
 	return we.Tags
+}
+
+func (we WayElement) GetFirstNode() int64 {
+	return we.Nodes[0]
+}
+
+func (we WayElement) GetLastNode() int64 {
+	return we.Nodes[len(we.Nodes)-1]
+}
+
+func (we WayElement) IsCircular() bool {
+	return we.GetFirstNode() == we.GetLastNode()
 }

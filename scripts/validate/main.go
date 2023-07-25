@@ -13,6 +13,7 @@ func main() {
 	if len(os.Args) < 2 {
 		panic("usage: main.go <relationId>")
 	}
+	ctx := context.Background()
 
 	relationIdStr := os.Args[1]
 	relationId, err := strconv.ParseInt(relationIdStr, 10, 64)
@@ -22,12 +23,12 @@ func main() {
 	log.Printf("validating relation %d", relationId)
 
 	osmClient := osm.NewClient()
-	relation, err := osmClient.GetRelation(context.Background(), relationId)
+	relation, err := osmClient.GetRelation(ctx, relationId)
 	if err != nil {
 		panic(err)
 	}
 
-	validationErrors, err := osm.ValidateRelation(relation)
+	validationErrors, err := osm.ValidateRelation(ctx, osmClient, relation)
 	if err != nil {
 		panic(err)
 	}
@@ -39,4 +40,5 @@ func main() {
 	for _, ve := range validationErrors {
 		log.Println(ve)
 	}
+	os.Exit(1)
 }
