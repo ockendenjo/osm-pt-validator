@@ -63,3 +63,128 @@ func Test_validateRETags(t *testing.T) {
 		})
 	}
 }
+
+func Test_validateREMemberOrder(t *testing.T) {
+
+	testcases := []struct {
+		name    string
+		members []Member
+		checkFn func(t *testing.T, validationErrors []string)
+	}{
+		{
+			name: "members in correct order",
+			members: []Member{
+				{
+					Type: "node",
+					Ref:  1234,
+					Role: "stop",
+				},
+				{
+					Type: "way",
+					Ref:  34567,
+					Role: "",
+				},
+			},
+			checkFn: func(t *testing.T, validationErrors []string) {
+				assert.Empty(t, validationErrors)
+			},
+		},
+		{
+			name: "way before stops",
+			members: []Member{
+				{
+					Type: "way",
+					Ref:  1234,
+					Role: "",
+				},
+				{
+					Type: "node",
+					Ref:  1234,
+					Role: "stop",
+				},
+				{
+					Type: "way",
+					Ref:  34567,
+					Role: "",
+				},
+			},
+			checkFn: func(t *testing.T, validationErrors []string) {
+				assert.Contains(t, validationErrors, "route way appears before stop/platform")
+			},
+		},
+		{
+			name: "stop after ways",
+			members: []Member{
+				{
+					Type: "node",
+					Ref:  1234,
+					Role: "stop",
+				},
+				{
+					Type: "way",
+					Ref:  34567,
+					Role: "",
+				},
+				{
+					Type: "node",
+					Ref:  1234,
+					Role: "platform",
+				},
+			},
+			checkFn: func(t *testing.T, validationErrors []string) {
+				assert.Contains(t, validationErrors, "stop/platform appears after route ways")
+			},
+		},
+		{
+			name: "node with missing role",
+			members: []Member{
+				{
+					Type: "node",
+					Ref:  1234,
+					Role: "",
+				},
+				{
+					Type: "way",
+					Ref:  34567,
+					Role: "",
+				},
+			},
+			checkFn: func(t *testing.T, validationErrors []string) {
+				assert.Contains(t, validationErrors, "stop/platform with empty role")
+			},
+		},
+		{
+			name: "missing stop/platforms",
+			members: []Member{
+				{
+					Type: "way",
+					Ref:  34567,
+					Role: "",
+				},
+			},
+			checkFn: func(t *testing.T, validationErrors []string) {
+				assert.Contains(t, validationErrors, "route does not contain a stop/platform")
+			},
+		},
+		{
+			name: "missing route ways",
+			members: []Member{
+				{
+					Type: "node",
+					Ref:  34567,
+					Role: "platform_exit_only",
+				},
+			},
+			checkFn: func(t *testing.T, validationErrors []string) {
+				assert.Contains(t, validationErrors, "route does not contain any route ways")
+			},
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			validationErrors := validateREMemberOrder(RelationElement{Members: tc.members})
+			tc.checkFn(t, validationErrors)
+		})
+	}
+}

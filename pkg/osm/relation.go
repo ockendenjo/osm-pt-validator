@@ -1,5 +1,7 @@
 package osm
 
+import "fmt"
+
 type Relation struct {
 	Elements []RelationElement `json:"elements"`
 }
@@ -20,4 +22,8 @@ type Member struct {
 	Type string `json:"type"`
 	Ref  int64  `json:"ref"`
 	Role string `json:"role"`
+}
+
+func (m Member) String() string {
+	return fmt.Sprintf("%s %d (%s)", m.Type, m.Ref, m.Role)
 }

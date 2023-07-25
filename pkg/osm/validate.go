@@ -1,6 +1,8 @@
 package osm
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func ValidateRelation(r Relation) ([]string, error) {
 	validationErrors := []string{}
@@ -15,7 +17,67 @@ func ValidateRelation(r Relation) ([]string, error) {
 }
 
 func validationRelationElement(re RelationElement) ([]string, error) {
-	return validateRETags(re), nil
+	tagValidationErrors := validateRETags(re)
+	if len(tagValidationErrors) > 0 {
+		return tagValidationErrors, nil
+	}
+	return validateREMemberOrder(re), nil
+}
+
+func validateREMemberOrder(re RelationElement) []string {
+	startedStops := false
+	startedRoute := false
+	routeBeforeStops := false
+	stopAfterRoute := false
+	nodeMissingRole := false
+	validationErrors := []string{}
+
+	roles := map[string]bool{
+		"stop":                true,
+		"stop_exit_only":      true,
+		"stop_entry_only":     true,
+		"platform":            true,
+		"platform_exit_only":  true,
+		"platform_entry_only": true,
+	}
+
+	for _, member := range re.Members {
+		if roles[member.Role] {
+			startedStops = true
+
+			if startedRoute {
+				stopAfterRoute = true
+			}
+		} else {
+			startedRoute = true
+
+			if !startedStops {
+				routeBeforeStops = true
+			}
+		}
+
+		if member.Type == "node" && member.Role == "" {
+			nodeMissingRole = true
+		}
+	}
+
+	if routeBeforeStops {
+		validationErrors = append(validationErrors, "route way appears before stop/platform")
+	}
+	if stopAfterRoute {
+		validationErrors = append(validationErrors, "stop/platform appears after route ways")
+	}
+	if nodeMissingRole {
+		validationErrors = append(validationErrors, "stop/platform with empty role")
+	}
+	if !startedStops {
+		validationErrors = append(validationErrors, "route does not contain a stop/platform")
+	}
+	if !startedRoute {
+		validationErrors = append(validationErrors, "route does not contain any route ways")
+	}
+
+	return validationErrors
 }
 
 func validateRETags(re RelationElement) []string {
