@@ -27,14 +27,14 @@ func main() {
 
 func buildProcessRecord(client *osm.OSMClient, publish publishApi, topicArn string) handler.SQSRecordProcessor {
 	return func(ctx context.Context, record events.SQSMessage) error {
-		logger := handler.GetLogger(ctx)
 
 		var event handler.CheckRelationEvent
 		err := json.Unmarshal([]byte(record.Body), &event)
 		if err != nil {
 			return err
 		}
-		logger.Info("validating relation", "relationID", event.RelationID)
+		logger := handler.GetLogger(ctx).With("relationID", event.RelationID)
+		logger.Info("validating relation")
 
 		relation, err := client.GetRelation(ctx, event.RelationID)
 		if err != nil {
@@ -47,6 +47,8 @@ func buildProcessRecord(client *osm.OSMClient, publish publishApi, topicArn stri
 		}
 
 		if len(validationErrors) > 0 {
+			logger.Error("relation is invalid", "validationErrors", validationErrors)
+
 			outputEvent := invalidRelationEvent{
 				RelationID:       event.RelationID,
 				ValidationErrors: validationErrors,
@@ -65,6 +67,7 @@ func buildProcessRecord(client *osm.OSMClient, publish publishApi, topicArn stri
 				return err
 			}
 		}
+		logger.Info("relation is valid")
 		return nil
 	}
 }
