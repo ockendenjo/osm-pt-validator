@@ -18,10 +18,27 @@ func NewStack(scope constructs.Construct, id string, props *OSMPTStackProps) aws
 		sprops = props.StackProps
 	}
 	stack := awscdk.NewStack(scope, &id, &sprops)
+	qb := NewQueueBuilder(stack)
 
 	topic := awssns.NewTopic(stack, jsii.String("InvalidRelationTopic"), &awssns.TopicProps{})
+	queues := qb.NewQueueWithDLQ("RelationValidation")
 
-	lambdaFn := awslambda.NewFunction(stack, jsii.String("CheckRelationFunction"), &awslambda.FunctionProps{
+	initFn := awslambda.NewFunction(stack, jsii.String("StartValidationFunction"), &awslambda.FunctionProps{
+		Runtime:      awslambda.Runtime_PROVIDED_AL2(),
+		Architecture: awslambda.Architecture_ARM_64(),
+		Handler:      jsii.String("function"),
+		Code:         awslambda.Code_FromAsset(jsii.String("build/validate-rm"), nil),
+		FunctionName: jsii.String("StartValidationFunction"),
+		Environment: &map[string]*string{
+			"QUEUE_URL": queues.Queue.QueueUrl(),
+		},
+		Timeout:    awscdk.Duration_Seconds(jsii.Number(10)),
+		MemorySize: jsii.Number(1024),
+		Tracing:    awslambda.Tracing_ACTIVE,
+	})
+	queues.Queue.GrantSendMessages(initFn)
+
+	validateFn := awslambda.NewFunction(stack, jsii.String("CheckRelationFunction"), &awslambda.FunctionProps{
 		Runtime:      awslambda.Runtime_PROVIDED_AL2(),
 		Architecture: awslambda.Architecture_ARM_64(),
 		Handler:      jsii.String("function"),
@@ -34,7 +51,7 @@ func NewStack(scope constructs.Construct, id string, props *OSMPTStackProps) aws
 		MemorySize: jsii.Number(1024),
 		Tracing:    awslambda.Tracing_ACTIVE,
 	})
-	topic.GrantPublish(lambdaFn.Role())
+	topic.GrantPublish(validateFn.Role())
 
 	return stack
 }

@@ -8,9 +8,11 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.19.0
 	github.com/aws/aws-sdk-go-v2/config v1.18.29
 	github.com/aws/aws-sdk-go-v2/service/sns v1.20.14
+	github.com/aws/aws-sdk-go-v2/service/sqs v1.23.3
 	github.com/aws/aws-xray-sdk-go v1.8.1
 	github.com/aws/constructs-go/constructs/v10 v10.2.69
 	github.com/aws/jsii-runtime-go v1.85.0
+	github.com/google/uuid v1.1.2
 	github.com/stretchr/testify v1.8.4
 	golang.org/x/exp v0.0.0-20230725093048-515e97ebf090
 )

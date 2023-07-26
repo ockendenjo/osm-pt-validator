@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sns"
@@ -28,7 +29,7 @@ func buildProcessRecord(client *osm.OSMClient, publish publishApi, topicArn stri
 	return func(ctx context.Context, record events.SQSMessage) error {
 		logger := handler.GetLogger(ctx)
 
-		var event checkRelationEvent
+		var event handler.CheckRelationEvent
 		err := json.Unmarshal([]byte(record.Body), &event)
 		if err != nil {
 			return err
@@ -69,10 +70,6 @@ func buildProcessRecord(client *osm.OSMClient, publish publishApi, topicArn stri
 }
 
 type publishApi func(ctx context.Context, params *sns.PublishInput, optFns ...func(*sns.Options)) (*sns.PublishOutput, error)
-
-type checkRelationEvent struct {
-	RelationID int64 `json:"relationID"`
-}
 
 type invalidRelationEvent struct {
 	RelationID       int64    `json:"relationID"`
