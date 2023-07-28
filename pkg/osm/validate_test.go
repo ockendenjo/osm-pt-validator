@@ -239,6 +239,18 @@ func Test_validateRelationRoute(t *testing.T) {
 				assert.Contains(t, validationErrors, "ways are incorrectly ordered")
 			},
 		},
+		{
+			name: "valid route entering and leaving circular way at the same node",
+			members: []Member{
+				{Ref: 3, Role: "", Type: "way"},
+				{Ref: 4, Role: "", Type: "way"},
+				{Ref: 3, Role: "", Type: "way"},
+			},
+			checkFn: func(t *testing.T, validationErrors []string, err error) {
+				assert.Nil(t, err)
+				assert.Empty(t, validationErrors)
+			},
+		},
 	}
 
 	svr, err := setupTestServer()

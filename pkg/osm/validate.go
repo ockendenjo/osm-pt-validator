@@ -115,7 +115,6 @@ func validateRelationRoute(ctx context.Context, client *OSMClient, re RelationEl
 				for _, node := range way.Nodes {
 					if node == an {
 						nextAllowedNodes = mapFromNodes(way.Nodes)
-						delete(nextAllowedNodes, node)
 						found = true
 						break
 					}
@@ -123,7 +122,6 @@ func validateRelationRoute(ctx context.Context, client *OSMClient, re RelationEl
 			} else if an == way.GetFirstNode() {
 				if way.IsCircular() {
 					nextAllowedNodes = mapFromNodes(way.Nodes)
-					delete(nextAllowedNodes, way.GetFirstNode())
 				} else {
 					nextAllowedNodes = map[int64]bool{way.GetLastNode(): true}
 				}
