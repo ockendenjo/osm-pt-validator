@@ -29,14 +29,16 @@ func (l *LambdaConstruct) AddSQSBatchTrigger(queueWithDLQ QueueWithDLQ) {
 	}))
 }
 
-func (l *LambdaConstruct) RunAtFixedRate(duration awscdk.Duration) *Rule {
-	rule := awsevents.NewRule(l.Construct, jsii.String("schedule"), &awsevents.RuleProps{
-		Schedule: awsevents.Schedule_Rate(duration),
+func (l *LambdaConstruct) RunAtFixedRate(ruleName string, schedule awsevents.Schedule, input awsevents.RuleTargetInput) *Rule {
+	rule := awsevents.NewRule(l.Construct, jsii.String(ruleName), &awsevents.RuleProps{
+		Schedule: schedule,
+		RuleName: jsii.String(ruleName),
 	})
 
 	rule.AddTarget(awseventstargets.NewLambdaFunction(l.LambdaFn, &awseventstargets.LambdaFunctionProps{
 		MaxEventAge:   awscdk.Duration_Minutes(jsii.Number(2)),
 		RetryAttempts: jsii.Number(1),
+		Event:         input,
 	}))
 	return &Rule{rule}
 }
