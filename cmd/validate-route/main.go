@@ -51,6 +51,7 @@ func buildProcessRecord(client *osm.OSMClient, publish publishApi, topicArn stri
 
 			outputEvent := invalidRelationEvent{
 				RelationID:       event.RelationID,
+				RelationName:     relation.Elements[0].Tags["name"],
 				ValidationErrors: validationErrors,
 			}
 			bytes, err := json.Marshal(outputEvent)
@@ -76,5 +77,6 @@ type publishApi func(ctx context.Context, params *sns.PublishInput, optFns ...fu
 
 type invalidRelationEvent struct {
 	RelationID       int64    `json:"relationID"`
+	RelationName     string   `json:"name"`
 	ValidationErrors []string `json:"validationErrors"`
 }
