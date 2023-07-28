@@ -144,7 +144,7 @@ func validateRelationRoute(ctx context.Context, client *OSMClient, re RelationEl
 			continue
 		}
 
-		return []string{"ways are incorrectly ordered"}, nil
+		return []string{fmt.Sprintf("ways are incorrectly ordered - way %d", way.ID)}, nil
 	}
 
 	return []string{}, nil
