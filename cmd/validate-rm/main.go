@@ -39,8 +39,29 @@ func buildHandlerFn(sendMessageBatch sendMessageBatchApi, queueUrl string, osmCl
 		if element.Tags["type"] == "route_master" {
 			return handleRouteMaster(ctx, logger, element, sendMessageBatch, queueUrl)
 		}
+		if element.Tags["type"] == "route" {
+			return handleRoute(ctx, logger, element, sendMessageBatch, queueUrl)
+		}
 		return nil, nil
 	}
+}
+
+func handleRoute(ctx context.Context, logger *slog.Logger, element osm.RelationElement, sendMessageBatch sendMessageBatchApi, queueUrl string) (any, error) {
+	logger.Info("processing route relation")
+	messages := []types.SendMessageBatchRequestEntry{}
+
+	outEvent := handler.CheckRelationEvent{RelationID: element.ID}
+	bytes, err := json.Marshal(outEvent)
+	if err != nil {
+		return nil, err
+	}
+
+	message := types.SendMessageBatchRequestEntry{
+		MessageBody: jsii.String(string(bytes)),
+		Id:          jsii.String(uuid.New().String()),
+	}
+	messages = append(messages, message)
+	return sendMessageBatch(ctx, &sqs.SendMessageBatchInput{QueueUrl: jsii.String(queueUrl), Entries: messages})
 }
 
 func handleRouteMaster(ctx context.Context, logger *slog.Logger, element osm.RelationElement, sendMessageBatch sendMessageBatchApi, queueUrl string) (any, error) {
