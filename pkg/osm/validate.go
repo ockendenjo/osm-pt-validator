@@ -158,10 +158,26 @@ func validateRelationRoute(ctx context.Context, client *OSMClient, re RelationEl
 	return validationErrors, nil
 }
 
+func isIgnoredWay(wayId int64) bool {
+	//Roadworks in Haymarket
+	ignoredWays := map[int64]bool{
+		61883421:  true,
+		4871756:   true,
+		9234350:   true,
+		224830909: true,
+	}
+	_, found := ignoredWays[wayId]
+	return found
+}
+
 func checkOneway(way WayElement, direction string) bool {
 	onewayTag := getOnewayTag(way)
 	if onewayTag == "" {
 		//No oneway restrictions
+		return true
+	}
+
+	if isIgnoredWay(way.ID) {
 		return true
 	}
 
