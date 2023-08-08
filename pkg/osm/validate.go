@@ -77,6 +77,7 @@ type wayResult struct {
 func validateRelationRoute(ctx context.Context, client *OSMClient, re RelationElement) ([]string, error) {
 	wayIds := []int64{}
 	ways := []Member{}
+	validationErrors := []string{}
 
 	for _, member := range re.Members {
 		if member.Type == "way" && member.Role == "" {
@@ -148,20 +149,21 @@ func validateRelationRoute(ctx context.Context, client *OSMClient, re RelationEl
 			if !owfound {
 				continue
 			}
-			if checkOneway(onewayTag, direction) {
-				continue
+			if !checkOneway(onewayTag, direction) {
+				validationErrors = append(validationErrors, fmt.Sprintf("way with oneway=%s is traversed in wrong direction - way %d", onewayTag, way.ID))
 			}
-			return []string{fmt.Sprintf("way with oneway=%s is traversed in wrong direction - way %d", onewayTag, way.ID)}, nil
+			continue
 		}
 
-		return []string{fmt.Sprintf("ways are incorrectly ordered - way %d", way.ID)}, nil
+		validationErrors = append(validationErrors, fmt.Sprintf("ways are incorrectly ordered - way %d", way.ID))
+		allowedNodes = mapFromNodes(way.Nodes)
 	}
 
-	return []string{}, nil
+	return validationErrors, nil
 }
 
 func checkOneway(onewayTag, direction string) bool {
-	if onewayTag == "no" {
+	if onewayTag == "no" || onewayTag == "alternating" || onewayTag == "reversible" {
 		return true
 	}
 
