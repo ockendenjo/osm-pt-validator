@@ -10,7 +10,9 @@
                 104,
                 106
             ],
-            "tags": {}
+            "tags": {
+                "junction": "roundabout"
+            }
         }
     ]
 }

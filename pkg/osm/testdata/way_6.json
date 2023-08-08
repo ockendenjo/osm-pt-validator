@@ -1,0 +1,15 @@
+{
+    "elements": [
+        {
+            "type": "way",
+            "id": 6,
+            "nodes": [
+                110,
+                111
+            ],
+            "tags": {
+                "oneyway": "yes"
+            }
+        }
+    ]
+}
