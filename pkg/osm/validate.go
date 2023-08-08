@@ -146,12 +146,12 @@ func validateRelationRoute(ctx context.Context, client *OSMClient, re RelationEl
 		if found {
 			allowedNodes = nextAllowedNodes
 			if !checkOneway(way, direction) {
-				validationErrors = append(validationErrors, fmt.Sprintf("way with oneway tag is traversed in wrong direction - way %d", way.ID))
+				validationErrors = append(validationErrors, fmt.Sprintf("way with oneway tag is traversed in wrong direction - https://www.openstreetmap.org/way/%d", way.ID))
 			}
 			continue
 		}
 
-		validationErrors = append(validationErrors, fmt.Sprintf("ways are incorrectly ordered - way %d", way.ID))
+		validationErrors = append(validationErrors, fmt.Sprintf("ways are incorrectly ordered - https://www.openstreetmap.org/way/%d", way.ID))
 		allowedNodes = mapFromNodes(way.Nodes)
 	}
 

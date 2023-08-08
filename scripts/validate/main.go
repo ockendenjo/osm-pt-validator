@@ -20,7 +20,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	log.Printf("validating relation %d", relationId)
+	log.Printf("validating relation: https://www.openstreetmap.org/relation/%d", relationId)
 
 	osmClient := osm.NewClient()
 	relation, err := osmClient.GetRelation(ctx, relationId)

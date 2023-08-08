@@ -202,7 +202,7 @@ func Test_validateRelationRoute(t *testing.T) {
 			},
 			checkFn: func(t *testing.T, validationErrors []string, err error) {
 				assert.Nil(t, err)
-				assert.Contains(t, validationErrors, "ways are incorrectly ordered - way 3")
+				assert.Contains(t, validationErrors, "ways are incorrectly ordered - https://www.openstreetmap.org/way/3")
 			},
 		},
 		{
@@ -236,7 +236,7 @@ func Test_validateRelationRoute(t *testing.T) {
 			},
 			checkFn: func(t *testing.T, validationErrors []string, err error) {
 				assert.Nil(t, err)
-				assert.Contains(t, validationErrors, "ways are incorrectly ordered - way 1")
+				assert.Contains(t, validationErrors, "ways are incorrectly ordered - https://www.openstreetmap.org/way/1")
 			},
 		},
 		{
@@ -270,7 +270,7 @@ func Test_validateRelationRoute(t *testing.T) {
 			},
 			checkFn: func(t *testing.T, validationErrors []string, err error) {
 				assert.Nil(t, err)
-				assert.Contains(t, validationErrors, "way with oneway tag is traversed in wrong direction - way 7")
+				assert.Contains(t, validationErrors, "way with oneway tag is traversed in wrong direction - https://www.openstreetmap.org/way/7")
 			},
 		},
 		{
