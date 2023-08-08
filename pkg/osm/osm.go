@@ -89,3 +89,32 @@ func (c *OSMClient) GetWay(ctx context.Context, wayId int64) (Way, error) {
 	}
 	return way, nil
 }
+
+func (c *OSMClient) GetNode(ctx context.Context, nodeId int64) (Node, error) {
+	url := fmt.Sprintf("%s/node/%d.json", c.baseUrl, nodeId)
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return Node{}, err
+	}
+
+	response, err := c.httpClient.Do(req)
+	if err != nil {
+		return Node{}, err
+	}
+
+	if response.StatusCode != 200 {
+		return Node{}, fmt.Errorf("HTTP status code %d", response.StatusCode)
+	}
+
+	bytes, err := io.ReadAll(response.Body)
+	if err != nil {
+		return Node{}, err
+	}
+
+	var node Node
+	err = json.Unmarshal(bytes, &node)
+	if err != nil {
+		return Node{}, err
+	}
+	return node, nil
+}
