@@ -251,6 +251,28 @@ func Test_validateRelationRoute(t *testing.T) {
 				assert.Empty(t, validationErrors)
 			},
 		},
+		{
+			name: "route with oneway way traversed in correct direction",
+			members: []Member{
+				{Ref: 5, Role: "", Type: "way"},
+				{Ref: 6, Role: "", Type: "way"},
+			},
+			checkFn: func(t *testing.T, validationErrors []string, err error) {
+				assert.Nil(t, err)
+				assert.Empty(t, validationErrors)
+			},
+		},
+		{
+			name: "route with oneway way traversed in wrong direction",
+			members: []Member{
+				{Ref: 5, Role: "", Type: "way"},
+				{Ref: 7, Role: "", Type: "way"},
+			},
+			checkFn: func(t *testing.T, validationErrors []string, err error) {
+				assert.Nil(t, err)
+				assert.Contains(t, validationErrors, "way with oneway=yes is traversed in wrong direction - way 7")
+			},
+		},
 	}
 
 	svr, err := setupTestServer()

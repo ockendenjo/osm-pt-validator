@@ -2,10 +2,10 @@
     "elements": [
         {
             "type": "way",
-            "id": 6,
+            "id": 7,
             "nodes": [
-                110,
-                111
+                111,
+                110
             ],
             "tags": {
                 "oneway": "yes"
