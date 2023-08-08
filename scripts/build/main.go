@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"strings"
@@ -42,7 +43,8 @@ func main() {
 
 func buildLambda(mainFile string) error {
 	inputDir := getInputDirectory(mainFile)
-	outPath := getOutputPath(mainFile)
+	outDir := getOutputDir(mainFile)
+	outPath := fmt.Sprintf("%s/bootstrap", outDir)
 
 	fmt.Printf("Build %s\n", inputDir)
 	cmd := exec.Command("go", "build", "-o", outPath, "-ldflags=-w -s", inputDir)
@@ -57,18 +59,62 @@ func buildLambda(mainFile string) error {
 		return err
 	}
 	fmt.Printf("OK    %s\n\n", outPath)
+
+	cmd = exec.Command("find", inputDir, "-type", "f", "-name", "*.json")
+	stdout, err := cmd.Output()
+	if err != nil {
+		return err
+	}
+	jsonFiles := strings.Split(string(stdout), "\n")
+
+	for _, file := range jsonFiles {
+		if file == "" {
+			continue
+		}
+		dest := strings.Replace(file, inputDir, outDir, 1)
+		_, err := copyFile(file, dest)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
+}
+
+func copyFile(src, dst string) (int64, error) {
+	sourceFileStat, err := os.Stat(src)
+	if err != nil {
+		return 0, err
+	}
+
+	if !sourceFileStat.Mode().IsRegular() {
+		return 0, fmt.Errorf("%s is not a regular file", src)
+	}
+
+	source, err := os.Open(src)
+	if err != nil {
+		return 0, err
+	}
+	defer source.Close()
+
+	destination, err := os.Create(dst)
+	if err != nil {
+		return 0, err
+	}
+	defer destination.Close()
+	nBytes, err := io.Copy(destination, source)
+	return nBytes, err
 }
 
 func getInputDirectory(mainFile string) string {
 	return strings.Replace(mainFile, "/main.go", "", 1)
 }
 
-// getOutputPath flattens the directory structure replacing `/` with `-` and sets the correct output directory
-func getOutputPath(mainFile string) string {
+// getOutputDir flattens the directory structure replacing `/` with `-` and sets the correct output directory
+func getOutputDir(mainFile string) string {
 	outDir := strings.Replace(mainFile, "/main.go", "", 1)
 	outDir = strings.Replace(outDir, "./cmd/", "", 1)
 	outDir = strings.ReplaceAll(outDir, "/", "-")
 
-	return fmt.Sprintf("build/%s/bootstrap", outDir)
+	return fmt.Sprintf("build/%s", outDir)
 }

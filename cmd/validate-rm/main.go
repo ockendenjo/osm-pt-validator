@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"github.com/aws/aws-lambda-go/events"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
@@ -17,21 +18,26 @@ import (
 func main() {
 	queueUrl := handler.MustGetEnv("QUEUE_URL")
 
-	handler.BuildAndStart(func(awsConfig aws.Config) handler.Handler[handler.CheckRelationEvent, any] {
+	handler.BuildAndStart(func(awsConfig aws.Config) handler.Handler[events.SQSEvent, events.SQSEventResponse] {
 		sqsClient := sqs.NewFromConfig(awsConfig)
 		osmClient := osm.NewClient().WithXRay()
 
-		handlerFn := buildHandlerFn(sqsClient.SendMessageBatch, queueUrl, osmClient)
-		return handlerFn
+		return handler.GetSQSHandler(buildProcessRecord(sqsClient.SendMessageBatch, queueUrl, osmClient))
 	})
 }
 
-func buildHandlerFn(sendMessageBatch sendMessageBatchApi, queueUrl string, osmClient *osm.OSMClient) handler.Handler[handler.CheckRelationEvent, any] {
-	return func(ctx context.Context, event handler.CheckRelationEvent) (any, error) {
+func buildProcessRecord(sendMessageBatch sendMessageBatchApi, queueUrl string, osmClient *osm.OSMClient) handler.SQSRecordProcessor {
+	return func(ctx context.Context, record events.SQSMessage) error {
+		var event handler.CheckRelationEvent
+		err := json.Unmarshal([]byte(record.Body), &event)
+		if err != nil {
+			return err
+		}
+
 		logger := handler.GetLogger(ctx).With("relationID", event.RelationID)
 		relation, err := osmClient.GetRelation(ctx, event.RelationID)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		element := relation.Elements[0]
 		logger.Info("processing relation", "type", element.Tags["type"])
@@ -42,18 +48,18 @@ func buildHandlerFn(sendMessageBatch sendMessageBatchApi, queueUrl string, osmCl
 		if element.Tags["type"] == "route" {
 			return handleRoute(ctx, logger, element, sendMessageBatch, queueUrl)
 		}
-		return nil, nil
+		return nil
 	}
 }
 
-func handleRoute(ctx context.Context, logger *slog.Logger, element osm.RelationElement, sendMessageBatch sendMessageBatchApi, queueUrl string) (any, error) {
+func handleRoute(ctx context.Context, logger *slog.Logger, element osm.RelationElement, sendMessageBatch sendMessageBatchApi, queueUrl string) error {
 	logger.Info("processing route relation")
 	messages := []types.SendMessageBatchRequestEntry{}
 
 	outEvent := handler.CheckRelationEvent{RelationID: element.ID}
 	bytes, err := json.Marshal(outEvent)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	message := types.SendMessageBatchRequestEntry{
@@ -61,10 +67,11 @@ func handleRoute(ctx context.Context, logger *slog.Logger, element osm.RelationE
 		Id:          jsii.String(uuid.New().String()),
 	}
 	messages = append(messages, message)
-	return sendMessageBatch(ctx, &sqs.SendMessageBatchInput{QueueUrl: jsii.String(queueUrl), Entries: messages})
+	_, err = sendMessageBatch(ctx, &sqs.SendMessageBatchInput{QueueUrl: jsii.String(queueUrl), Entries: messages})
+	return err
 }
 
-func handleRouteMaster(ctx context.Context, logger *slog.Logger, element osm.RelationElement, sendMessageBatch sendMessageBatchApi, queueUrl string) (any, error) {
+func handleRouteMaster(ctx context.Context, logger *slog.Logger, element osm.RelationElement, sendMessageBatch sendMessageBatchApi, queueUrl string) error {
 	logger.Info("processing route_master relation")
 	messages := []types.SendMessageBatchRequestEntry{}
 	for _, member := range element.Members {
@@ -73,7 +80,7 @@ func handleRouteMaster(ctx context.Context, logger *slog.Logger, element osm.Rel
 			outEvent := handler.CheckRelationEvent{RelationID: member.Ref}
 			bytes, err := json.Marshal(outEvent)
 			if err != nil {
-				return nil, err
+				return err
 			}
 
 			message := types.SendMessageBatchRequestEntry{
@@ -84,9 +91,10 @@ func handleRouteMaster(ctx context.Context, logger *slog.Logger, element osm.Rel
 		}
 	}
 	if len(messages) > 0 {
-		return sendMessageBatch(ctx, &sqs.SendMessageBatchInput{QueueUrl: jsii.String(queueUrl), Entries: messages})
+		_, err := sendMessageBatch(ctx, &sqs.SendMessageBatchInput{QueueUrl: jsii.String(queueUrl), Entries: messages})
+		return err
 	}
-	return nil, nil
+	return nil
 }
 
 type sendMessageBatchApi func(ctx context.Context, params *sqs.SendMessageBatchInput, optFns ...func(*sqs.Options)) (*sqs.SendMessageBatchOutput, error)

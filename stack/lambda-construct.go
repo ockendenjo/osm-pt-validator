@@ -25,7 +25,7 @@ func (l *LambdaConstruct) AddSQSBatchTrigger(queueWithDLQ QueueWithDLQ) {
 
 	l.LambdaFn.AddEventSource(lambdaEvents.NewSqsEventSource(queueWithDLQ.Queue, &lambdaEvents.SqsEventSourceProps{
 		ReportBatchItemFailures: jsii.Bool(true),
-		MaxBatchingWindow:       awscdk.Duration_Minutes(jsii.Number(0)),
+		BatchSize:               jsii.Number(1),
 	}))
 }
 
