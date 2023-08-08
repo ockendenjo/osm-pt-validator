@@ -26,6 +26,12 @@ func validationRelationElement(ctx context.Context, client *OSMClient, re Relati
 	memberOrderErrors := validateREMemberOrder(re)
 	allErrors = append(allErrors, memberOrderErrors...)
 
+	nodeErrors, err := validateRelationNodes(ctx, client, re)
+	allErrors = append(allErrors, nodeErrors...)
+	if err != nil {
+		return allErrors, err
+	}
+
 	routeErrors, err := validateRelationWays(ctx, client, re)
 	allErrors = append(allErrors, routeErrors...)
 
