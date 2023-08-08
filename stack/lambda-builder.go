@@ -107,6 +107,7 @@ func (lb *LambdaBuilder) Build() *LambdaConstruct {
 		Layers:       lb.layers,
 		Tracing:      lambda.Tracing_ACTIVE,
 		Timeout:      awscdk.Duration_Seconds(jsii.Number(8)),
+		MemorySize:   jsii.Number(1024),
 	})
 
 	awscloudwatch.NewAlarm(lb.scope, jsii.String("Alarm"), &awscloudwatch.AlarmProps{
