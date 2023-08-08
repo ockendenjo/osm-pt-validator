@@ -1,0 +1,16 @@
+{
+    "elements": [
+        {
+            "type": "way",
+            "id": 8,
+            "nodes": [
+                112,
+                110
+            ],
+            "tags": {
+                "oneway": "yes",
+                "oneway:psv": "no"
+            }
+        }
+    ]
+}

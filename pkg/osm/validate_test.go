@@ -270,7 +270,18 @@ func Test_validateRelationRoute(t *testing.T) {
 			},
 			checkFn: func(t *testing.T, validationErrors []string, err error) {
 				assert.Nil(t, err)
-				assert.Contains(t, validationErrors, "way with oneway=yes is traversed in wrong direction - way 7")
+				assert.Contains(t, validationErrors, "way with oneway tag is traversed in wrong direction - way 7")
+			},
+		},
+		{
+			name: "route with oneway=yes way traversed in wrong direction, but allowed because of oneway:psv=no",
+			members: []Member{
+				{Ref: 5, Role: "", Type: "way"},
+				{Ref: 8, Role: "", Type: "way"},
+			},
+			checkFn: func(t *testing.T, validationErrors []string, err error) {
+				assert.Nil(t, err)
+				assert.Empty(t, validationErrors)
 			},
 		},
 	}

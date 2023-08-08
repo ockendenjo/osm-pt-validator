@@ -145,12 +145,8 @@ func validateRelationRoute(ctx context.Context, client *OSMClient, re RelationEl
 
 		if found {
 			allowedNodes = nextAllowedNodes
-			onewayTag, owfound := way.Tags["oneway"]
-			if !owfound {
-				continue
-			}
-			if !checkOneway(onewayTag, direction) {
-				validationErrors = append(validationErrors, fmt.Sprintf("way with oneway=%s is traversed in wrong direction - way %d", onewayTag, way.ID))
+			if !checkOneway(way, direction) {
+				validationErrors = append(validationErrors, fmt.Sprintf("way with oneway tag is traversed in wrong direction - way %d", way.ID))
 			}
 			continue
 		}
@@ -162,7 +158,13 @@ func validateRelationRoute(ctx context.Context, client *OSMClient, re RelationEl
 	return validationErrors, nil
 }
 
-func checkOneway(onewayTag, direction string) bool {
+func checkOneway(way WayElement, direction string) bool {
+	onewayTag := getOnewayTag(way)
+	if onewayTag == "" {
+		//No oneway restrictions
+		return true
+	}
+
 	if onewayTag == "no" || onewayTag == "alternating" || onewayTag == "reversible" {
 		return true
 	}
@@ -176,6 +178,19 @@ func checkOneway(onewayTag, direction string) bool {
 	}
 
 	return false
+}
+
+func getOnewayTag(way WayElement) string {
+	if tag, found := way.Tags["oneway:psv"]; found {
+		return tag
+	}
+	if tag, found := way.Tags["oneway:bus"]; found {
+		return tag
+	}
+	if tag, found := way.Tags["oneway"]; found {
+		return tag
+	}
+	return ""
 }
 
 func mapFromNodes(nodes []int64) map[int64]bool {
