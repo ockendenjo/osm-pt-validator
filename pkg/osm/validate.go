@@ -18,16 +18,18 @@ func ValidateRelation(ctx context.Context, client *OSMClient, r Relation) ([]str
 }
 
 func validationRelationElement(ctx context.Context, client *OSMClient, re RelationElement) ([]string, error) {
-	tagValidationErrors := validateRETags(re)
-	if len(tagValidationErrors) > 0 {
-		return tagValidationErrors, nil
-	}
-	memberValidationErrors := validateREMemberOrder(re)
-	if len(memberValidationErrors) > 0 {
-		return memberValidationErrors, nil
-	}
+	allErrors := []string{}
 
-	return validateRelationRoute(ctx, client, re)
+	tagValidationErrors := validateRETags(re)
+	allErrors = append(allErrors, tagValidationErrors...)
+
+	memberOrderErrors := validateREMemberOrder(re)
+	allErrors = append(allErrors, memberOrderErrors...)
+
+	routeErrors, err := validateRelationWays(ctx, client, re)
+	allErrors = append(allErrors, routeErrors...)
+
+	return allErrors, err
 }
 
 const maxParallelOSMRequests = 10
@@ -74,7 +76,7 @@ type wayResult struct {
 	Way   *Way
 }
 
-func validateRelationRoute(ctx context.Context, client *OSMClient, re RelationElement) ([]string, error) {
+func validateRelationWays(ctx context.Context, client *OSMClient, re RelationElement) ([]string, error) {
 	wayIds := []int64{}
 	ways := []Member{}
 	validationErrors := []string{}

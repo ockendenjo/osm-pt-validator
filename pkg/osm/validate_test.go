@@ -296,7 +296,7 @@ func Test_validateRelationRoute(t *testing.T) {
 
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			validationErrors, err := validateRelationRoute(context.Background(), osmClient, RelationElement{Members: tc.members})
+			validationErrors, err := validateRelationWays(context.Background(), osmClient, RelationElement{Members: tc.members})
 			tc.checkFn(t, validationErrors, err)
 		})
 	}
