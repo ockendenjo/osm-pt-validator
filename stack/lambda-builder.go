@@ -97,17 +97,18 @@ func (lb *LambdaBuilder) WithEnvVar(envValue string, envKey string) *LambdaBuild
 func (lb *LambdaBuilder) Build() *LambdaConstruct {
 
 	lambdaFn := lambda.NewFunction(lb.scope, jsii.String("function"), &lambda.FunctionProps{
-		Runtime:      lambda.Runtime_PROVIDED_AL2(),
-		Architecture: lambda.Architecture_ARM_64(),
-		Handler:      jsii.String("function"),
-		Role:         lb.role,
-		Code:         lambda.Code_FromAsset(jsii.String(lb.codePath), nil),
-		FunctionName: jsii.String(lb.functionName),
-		Environment:  &lb.env,
-		Layers:       lb.layers,
-		Tracing:      lambda.Tracing_ACTIVE,
-		Timeout:      awscdk.Duration_Seconds(jsii.Number(8)),
-		MemorySize:   jsii.Number(1024),
+		Runtime:                      lambda.Runtime_PROVIDED_AL2(),
+		Architecture:                 lambda.Architecture_ARM_64(),
+		Handler:                      jsii.String("function"),
+		Role:                         lb.role,
+		Code:                         lambda.Code_FromAsset(jsii.String(lb.codePath), nil),
+		FunctionName:                 jsii.String(lb.functionName),
+		Environment:                  &lb.env,
+		Layers:                       lb.layers,
+		Tracing:                      lambda.Tracing_ACTIVE,
+		Timeout:                      awscdk.Duration_Seconds(jsii.Number(8)),
+		MemorySize:                   jsii.Number(1024),
+		ReservedConcurrentExecutions: jsii.Number(2),
 	})
 
 	awscloudwatch.NewAlarm(lb.scope, jsii.String("Alarm"), &awscloudwatch.AlarmProps{
