@@ -1,6 +1,6 @@
 module github.com/ockendenjo/osm-pt-validator
 
-go 1.20
+go 1.21
 
 require (
 	github.com/aws/aws-cdk-go/awscdk/v2 v2.88.0

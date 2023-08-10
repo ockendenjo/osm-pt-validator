@@ -3,15 +3,15 @@ package handler
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-xray-sdk-go/instrumentation/awsv2"
 	"log"
+	"log/slog"
 	"os"
 	"strings"
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
-	"golang.org/x/exp/slog"
+	"github.com/aws/aws-xray-sdk-go/instrumentation/awsv2"
 )
 
 const loggerKey = "logger"

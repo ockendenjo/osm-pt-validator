@@ -3,8 +3,9 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"github.com/aws/aws-lambda-go/events"
+	"log/slog"
 
+	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/aws/aws-sdk-go-v2/service/sqs/types"
@@ -12,7 +13,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/ockendenjo/osm-pt-validator/pkg/handler"
 	"github.com/ockendenjo/osm-pt-validator/pkg/osm"
-	"golang.org/x/exp/slog"
 )
 
 func main() {
