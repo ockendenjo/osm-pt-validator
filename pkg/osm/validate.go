@@ -104,66 +104,130 @@ func validateRelationWays(ctx context.Context, client *OSMClient, re RelationEle
 	}
 
 	allowedNodes := map[int64]bool{}
+	var wayDirects []wayDirection
+	hasGap := false
+
 	for _, relationMemberWay := range ways {
-		way := (*waysMap[relationMemberWay.Ref]).Elements[0]
+		wayElem := (*waysMap[relationMemberWay.Ref]).Elements[0]
 
 		if len(allowedNodes) == 0 {
-			if way.IsCircular() {
-				allowedNodes = mapFromNodes(way.Nodes)
-				continue
+			if wayElem.IsCircular() {
+				allowedNodes = mapFromNodes(wayElem.Nodes)
+				wayDirects = append(wayDirects, wayDirection{wayElem: wayElem, direction: "any"})
+			} else {
+				allowedNodes = map[int64]bool{wayElem.GetFirstNode(): true, wayElem.GetLastNode(): true}
+				wayDirects = append(wayDirects, wayDirection{wayElem: wayElem, direction: "tbc"})
 			}
-			allowedNodes = map[int64]bool{way.GetFirstNode(): true, way.GetLastNode(): true}
 			continue
 		}
 
-		found := false
 		direction := "any"
-		var nextAllowedNodes map[int64]bool
-
+		nextAllowedNodes := map[int64]bool{}
+		matches := 0
 		for an, _ := range allowedNodes {
-			if way.IsCircular() {
-				for _, node := range way.Nodes {
+			if wayElem.IsCircular() {
+				for _, node := range wayElem.Nodes {
 					if node == an {
-						nextAllowedNodes = mapFromNodes(way.Nodes)
-						found = true
+						nextAllowedNodes = mapFromNodes(wayElem.Nodes)
+						matches++
 						break
 					}
 				}
-			} else if an == way.GetFirstNode() {
-				if way.IsCircular() {
-					nextAllowedNodes = mapFromNodes(way.Nodes)
+			} else if an == wayElem.GetFirstNode() {
+				if wayElem.IsCircular() {
+					nextAllowedNodes = mapFromNodes(wayElem.Nodes)
 				} else {
-					nextAllowedNodes = map[int64]bool{way.GetLastNode(): true}
+					nextAllowedNodes[wayElem.GetLastNode()] = true
 					direction = "forward"
 				}
-				found = true
-				break
-			} else if an == way.GetLastNode() {
-				if way.IsCircular() {
-					nextAllowedNodes = mapFromNodes(way.Nodes)
-					delete(nextAllowedNodes, way.GetLastNode())
+				matches++
+			} else if an == wayElem.GetLastNode() {
+				if wayElem.IsCircular() {
+					nextAllowedNodes = mapFromNodes(wayElem.Nodes)
+					delete(nextAllowedNodes, wayElem.GetLastNode())
 				} else {
-					nextAllowedNodes = map[int64]bool{way.GetFirstNode(): true}
+					nextAllowedNodes[wayElem.GetFirstNode()] = true
 					direction = "reverse"
 				}
-				found = true
-				break
+				matches++
 			}
 		}
 
-		if found {
+		switch matches {
+		case 0:
+			validationErrors = append(validationErrors, fmt.Sprintf("ways are incorrectly ordered - https://www.openstreetmap.org/way/%d", wayElem.ID))
+			allowedNodes = mapFromNodes(wayElem.Nodes)
+			hasGap = true
+		case 1:
 			allowedNodes = nextAllowedNodes
-			if !checkOneway(way, direction) {
-				validationErrors = append(validationErrors, fmt.Sprintf("way with oneway tag is traversed in wrong direction - https://www.openstreetmap.org/way/%d", way.ID))
-			}
-			continue
+		default:
+			direction = "tbc"
+			allowedNodes = nextAllowedNodes
 		}
 
-		validationErrors = append(validationErrors, fmt.Sprintf("ways are incorrectly ordered - https://www.openstreetmap.org/way/%d", way.ID))
-		allowedNodes = mapFromNodes(way.Nodes)
+		wayDirects = append(wayDirects, wayDirection{wayElem: wayElem, direction: direction})
+	}
+
+	if hasGap {
+		//Don't bother checking one-way traversal
+		return validationErrors, nil
+	}
+
+	wayDirects = fillInMissingWayDirects(wayDirects)
+
+	for _, d := range wayDirects {
+		wayElem := d.wayElem
+		if !checkOneway(wayElem, d.direction) {
+			validationErrors = append(validationErrors, fmt.Sprintf("way with oneway tag is traversed in wrong direction - https://www.openstreetmap.org/way/%d", wayElem.ID))
+		}
 	}
 
 	return validationErrors, nil
+}
+
+func fillInMissingWayDirects(wayDirects []wayDirection) []wayDirection {
+
+	var previousWD wayDirection
+	for i := (len(wayDirects) - 1); i >= 0; i-- {
+		if wayDirects[i].direction == "tbc" {
+			pw := previousWD.wayElem
+			if pw.IsCircular() {
+				wayDirects[i].direction = getDirectionJoinCircular(pw, wayDirects[i].wayElem)
+			} else {
+				wayDirects[i].direction = getDirectionJoinLinear(pw, previousWD.direction, wayDirects[i].wayElem)
+			}
+		}
+		previousWD = wayDirects[i]
+	}
+	return wayDirects
+}
+
+func getDirectionJoinCircular(circularWay WayElement, joiningWay WayElement) string {
+	startNode := joiningWay.GetFirstNode()
+	lastNode := joiningWay.GetLastNode()
+
+	for _, nid := range circularWay.Nodes {
+		if nid == startNode {
+			return "reverse"
+		}
+		if nid == lastNode {
+			return "forward"
+		}
+	}
+	return "error"
+}
+
+func getDirectionJoinLinear(secondWay WayElement, direction string, joiningWay WayElement) string {
+	lastNode := joiningWay.GetLastNode()
+	compareNode := secondWay.GetFirstNode()
+	if direction == "reverse" {
+		compareNode = secondWay.GetLastNode()
+	}
+
+	if compareNode == lastNode {
+		return "forward"
+	}
+	return "reverse"
 }
 
 func isIgnoredWay(wayId int64) bool {
@@ -325,4 +389,9 @@ func checkTagValue(t Taggable, key string, expVal string) string {
 
 type Taggable interface {
 	GetTags() map[string]string
+}
+
+type wayDirection struct {
+	wayElem   WayElement
+	direction string
 }
