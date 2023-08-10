@@ -90,6 +90,14 @@
         {"name": "N113", "relation_id": 0},
         {"name": "N124", "relation_id": 0}
     ],
+    "borders_buses": [
+        {"name": "51", "relation_id": 13308277},
+        {"name": "52", "relation_id": 0},
+        {"name": "253", "relation_id": 0},
+        {"name": "X62", "relation_id": 14722579},
+        {"name": "X70", "relation_id": 0},
+        {"name": "X95", "relation_id": 15017105}
+    ],
     "lancaster_city": [
         {"name": "1", "relation_id": 10830127},
         {"name": "1A", "relation_id": 10840861},
