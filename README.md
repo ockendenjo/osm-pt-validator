@@ -2,12 +2,7 @@
 
 Validator for public transport bus routes in OpenStreetMap.
 
-## Usage
-
-```shell
-# go run scripts/validate/main.go <relationId>
-go run scripts/validate/main.go 103630
-```
+Provided as a Go script (runnable from terminal) and an AWS application for daily verification.
 
 ## Features
 
@@ -15,8 +10,25 @@ go run scripts/validate/main.go 103630
 * Validates that platforms/stops are ordered before ways
 * Validates that ways are correctly ordered in a continuous path
 * Validates that oneway ways are traversed in the correct direction
-* Validates that nodes have expected tags 
+* Validates that nodes have expected tags
 
 ## Limitations
 
 * Does not verify if stop nodes are also part of a way
+
+## Script
+
+```shell
+# go run scripts/validate/main.go <relationId>
+go run scripts/validate/main.go 103630
+```
+
+## AWS application
+
+Requires AWS CDK to be installed
+
+```shell
+make deploy
+```
+
+Limitation: List of relations cannot yet be configured (is hardcoded list)

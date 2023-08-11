@@ -1,4 +1,4 @@
-.PHONY: test build synth
+.PHONY: clean test build synth deploy
 
 clean:
 	rm -rf build
