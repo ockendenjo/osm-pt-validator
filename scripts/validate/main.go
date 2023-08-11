@@ -25,7 +25,7 @@ func main() {
 	osmClient := osm.NewClient()
 	relation, err := osmClient.GetRelation(ctx, relationId)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	validationErrors, err := osm.ValidateRelation(ctx, osmClient, relation)
