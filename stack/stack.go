@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/aws/aws-cdk-go/awscdk/v2"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsevents"
+	"github.com/aws/aws-cdk-go/awscdk/v2/awss3"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awssns"
 	"github.com/aws/constructs-go/constructs/v10"
 	"github.com/aws/jsii-runtime-go"
@@ -30,8 +31,13 @@ func NewStack(scope constructs.Construct, id string, props *OSMPTStackProps) aws
 		Day:    jsii.String("*"),
 	})
 
+	bucket := awss3.NewBucket(stack, jsii.String("Bucket"), &awss3.BucketProps{
+		RemovalPolicy: awscdk.RemovalPolicy_RETAIN,
+	})
+
 	NewLambda(stack, "Trigger", "build/trigger").
 		WithQueuePublish(rmQueues, "QUEUE_URL").
+		WithS3Read(bucket, "S3_BUCKET_NAME").
 		Build().
 		RunAtFixedRate("OSMDailyValidate", schedule, nil)
 

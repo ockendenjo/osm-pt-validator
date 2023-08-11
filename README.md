@@ -31,4 +31,4 @@ Requires AWS CDK to be installed
 make deploy
 ```
 
-Limitation: List of relations cannot yet be configured (is hardcoded list)
+Looks for `.json` files in `s3://<bucketName>/routes/**.json`
