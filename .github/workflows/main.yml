@@ -45,3 +45,40 @@ jobs:
         with:
           name: build
           path: build
+
+  deploy:
+    name: deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: prod
+    needs: [build]
+    permissions:
+      id-token: write   # This is required for requesting the JWT
+      contents: read    # This is required for actions/checkout
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        timeout-minutes: 1
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.21"
+
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: build
+          path: build
+
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{vars.DEPLOYMENT_ROLE_ARN}}
+          aws-region: eu-west-1
+
+      - name: Install CDK
+        run: npm i -g aws-cdk
+
+      - name: CDK deploy
+        run: cdk deploy --require-approval never

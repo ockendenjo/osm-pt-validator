@@ -1,4 +1,4 @@
-.PHONY: clean test build synth deploy
+.PHONY: clean test build synth deploy cfn
 
 clean:
 	rm -rf build
@@ -17,3 +17,6 @@ synth: build
 
 deploy: build
 	cdk deploy --require-approval never
+
+cfn:
+	aws cloudformation deploy --template-file setup.yml --stack-name "OSMPTSetup" --capabilities "CAPABILITY_NAMED_IAM" --region=eu-west-1
