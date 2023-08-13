@@ -1,0 +1,29 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://example.com/product.schema.json",
+    "title": "Routefile",
+    "description": "A file with routes to be validated",
+    "type": "object",
+    "patternProperties": {
+        "^.*$": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "relation_id": {
+                        "type": "number"
+                    },
+                    "comment": {
+                        "type": "string"
+                    }
+                },
+                "required": ["name", "relation_id"],
+                "additionalProperties": false
+            }
+        }
+    },
+    "additionalProperties": false
+}

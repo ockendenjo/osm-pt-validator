@@ -46,12 +46,28 @@ jobs:
           name: build
           path: build
 
+  validate:
+    name: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3
+
+      - name: Install JSON validator
+        run: |
+          wget https://github.com/neilpa/yajsv/releases/download/v1.4.0/yajsv.linux.amd64
+          chmod +x ./yajsv.linux.amd64
+
+      - name: Validate JSON
+        run: |
+          find ./routes/ -type f -name "*.json" -print0 | xargs -0 -I{} ./yajsv.linux.amd64 -s schema/routefile.schema.json {}
+
   deploy:
     name: deploy
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: prod
-    needs: [build]
+    needs: [build, validate]
     permissions:
       id-token: write   # This is required for requesting the JWT
       contents: read    # This is required for actions/checkout
