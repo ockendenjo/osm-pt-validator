@@ -11,10 +11,11 @@ Provided as a Go script (runnable from terminal) and an AWS application for dail
 * Validates that ways are correctly ordered in a continuous path
 * Validates that oneway ways are traversed in the correct direction
 * Validates that nodes have expected tags
+* Validates order of stops, and they are part of the route
 
 ## Limitations
 
-* Does not verify if stop nodes are also part of a way
+* Only for bus routes
 
 ## Script
 

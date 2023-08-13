@@ -115,7 +115,7 @@ func Test_validateWayOrder(t *testing.T) {
 	for _, tc := range testcases {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			validationErrors, err := validateWayOrder(context.Background(), osmClient, RelationElement{Members: tc.members})
+			validationErrors, _, err := validateWayOrder(context.Background(), osmClient, RelationElement{Members: tc.members})
 			tc.checkFn(t, validationErrors, err)
 		})
 	}

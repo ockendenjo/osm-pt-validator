@@ -32,8 +32,13 @@ func validationRelationElement(ctx context.Context, client *OSMClient, re Relati
 		return allErrors, err
 	}
 
-	routeErrors, err := validateWayOrder(ctx, client, re)
+	routeErrors, wayDirects, err := validateWayOrder(ctx, client, re)
 	allErrors = append(allErrors, routeErrors...)
+
+	if len(routeErrors) == 0 {
+		stopErrors := validateStopOrder(wayDirects, re)
+		allErrors = append(allErrors, stopErrors...)
+	}
 
 	return allErrors, err
 }

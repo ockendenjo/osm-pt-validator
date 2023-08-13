@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-func validateWayOrder(ctx context.Context, client *OSMClient, re RelationElement) ([]string, error) {
+func validateWayOrder(ctx context.Context, client *OSMClient, re RelationElement) ([]string, []wayDirection, error) {
 	wayIds := []int64{}
 	ways := []Member{}
 	validationErrors := []string{}
@@ -22,7 +22,7 @@ func validateWayOrder(ctx context.Context, client *OSMClient, re RelationElement
 	//Check for any nil ways
 	for k, way := range waysMap {
 		if way == nil {
-			return []string{}, fmt.Errorf("failed to load way %d", k)
+			return []string{}, nil, fmt.Errorf("failed to load way %d", k)
 		}
 	}
 
@@ -93,7 +93,7 @@ func validateWayOrder(ctx context.Context, client *OSMClient, re RelationElement
 
 	if hasGap {
 		//Don't bother checking one-way traversal
-		return validationErrors, nil
+		return validationErrors, nil, nil
 	}
 
 	wayDirects = fillInMissingWayDirects(wayDirects)
@@ -105,7 +105,7 @@ func validateWayOrder(ctx context.Context, client *OSMClient, re RelationElement
 		}
 	}
 
-	return validationErrors, nil
+	return validationErrors, wayDirects, nil
 }
 
 func fillInMissingWayDirects(wayDirects []wayDirection) []wayDirection {
