@@ -57,8 +57,8 @@ func validateStopOrder(wayDirects []wayDirection, re RelationElement) []string {
 	return validationErrors
 }
 
-func getNodesInOrder(direction string, we WayElement) []int64 {
-	if direction == "forward" || direction == "any" {
+func getNodesInOrder(direction wayTraversal, we WayElement) []int64 {
+	if direction == traverseForward || direction == traverseAny {
 		return we.Nodes
 	}
 	count := len(we.Nodes)

@@ -44,7 +44,7 @@ func validateWayOrder(ctx context.Context, client *OSMClient, re RelationElement
 			continue
 		}
 
-		direction := "any"
+		wayDir := traverseAny
 		nextAllowedNodes := map[int64]bool{}
 		matches := 0
 		for an, _ := range allowedNodes {
@@ -61,7 +61,7 @@ func validateWayOrder(ctx context.Context, client *OSMClient, re RelationElement
 					nextAllowedNodes = mapFromNodes(wayElem.Nodes)
 				} else {
 					nextAllowedNodes[wayElem.GetLastNode()] = true
-					direction = "forward"
+					wayDir = traverseForward
 				}
 				matches++
 			} else if an == wayElem.GetLastNode() {
@@ -70,7 +70,7 @@ func validateWayOrder(ctx context.Context, client *OSMClient, re RelationElement
 					delete(nextAllowedNodes, wayElem.GetLastNode())
 				} else {
 					nextAllowedNodes[wayElem.GetFirstNode()] = true
-					direction = "reverse"
+					wayDir = traverseReverse
 				}
 				matches++
 			}
@@ -84,11 +84,11 @@ func validateWayOrder(ctx context.Context, client *OSMClient, re RelationElement
 		case 1:
 			allowedNodes = nextAllowedNodes
 		default:
-			direction = "tbc"
+			wayDir = traverseTBC
 			allowedNodes = nextAllowedNodes
 		}
 
-		wayDirects = append(wayDirects, wayDirection{wayElem: wayElem, direction: direction})
+		wayDirects = append(wayDirects, wayDirection{wayElem: wayElem, direction: wayDir})
 	}
 
 	if hasGap {
@@ -133,32 +133,32 @@ func mapFromNodes(nodes []int64) map[int64]bool {
 	return nodeMap
 }
 
-func getDirectionJoinCircular(circularWay WayElement, joiningWay WayElement) string {
+func getDirectionJoinCircular(circularWay WayElement, joiningWay WayElement) wayTraversal {
 	startNode := joiningWay.GetFirstNode()
 	lastNode := joiningWay.GetLastNode()
 
 	for _, nid := range circularWay.Nodes {
 		if nid == startNode {
-			return "reverse"
+			return traverseReverse
 		}
 		if nid == lastNode {
-			return "forward"
+			return traverseForward
 		}
 	}
-	return "error"
+	return traverseError
 }
 
-func getDirectionJoinLinear(secondWay WayElement, direction string, joiningWay WayElement) string {
+func getDirectionJoinLinear(secondWay WayElement, direction wayTraversal, joiningWay WayElement) wayTraversal {
 	lastNode := joiningWay.GetLastNode()
 	compareNode := secondWay.GetFirstNode()
-	if direction == "reverse" {
+	if direction == traverseReverse {
 		compareNode = secondWay.GetLastNode()
 	}
 
 	if compareNode == lastNode {
-		return "forward"
+		return traverseForward
 	}
-	return "reverse"
+	return traverseReverse
 }
 
 func isIgnoredWay(wayId int64) bool {
@@ -173,7 +173,7 @@ func isIgnoredWay(wayId int64) bool {
 	return found
 }
 
-func checkOneway(way WayElement, direction string) bool {
+func checkOneway(way WayElement, direction wayTraversal) bool {
 	onewayTag := getOnewayTag(way)
 	if onewayTag == "" {
 		//No oneway restrictions
@@ -189,11 +189,11 @@ func checkOneway(way WayElement, direction string) bool {
 	}
 
 	if onewayTag == "yes" || onewayTag == "true" || onewayTag == "1" {
-		return direction == "forward" || direction == "any"
+		return direction == traverseForward || direction == traverseAny
 	}
 
-	if onewayTag == "-1" || onewayTag == "reverse" {
-		return direction == "reverse" || direction == "any"
+	if onewayTag == "-1" || onewayTag == "directionReverse" {
+		return direction == traverseReverse || direction == traverseAny
 	}
 
 	return false
@@ -214,5 +214,15 @@ func getOnewayTag(way WayElement) string {
 
 type wayDirection struct {
 	wayElem   WayElement
-	direction string
+	direction wayTraversal
 }
+
+type wayTraversal string
+
+const (
+	traverseForward wayTraversal = "forward"
+	traverseReverse wayTraversal = "reverse"
+	traverseAny     wayTraversal = "any"
+	traverseError   wayTraversal = "error"
+	traverseTBC     wayTraversal = "tbc"
+)

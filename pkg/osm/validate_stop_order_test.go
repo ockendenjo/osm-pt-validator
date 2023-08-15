@@ -1,8 +1,9 @@
 package osm
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_validateStopOrder(t *testing.T) {
@@ -16,8 +17,8 @@ func Test_validateStopOrder(t *testing.T) {
 			name:     "stops in correct order",
 			relation: makeRelation(102, 104),
 			wayDirects: []wayDirection{
-				makeWayWithDirection("forward", 101, 102, 103),
-				makeWayWithDirection("forward", 103, 104, 105),
+				makeWayWithDirection(traverseForward, 101, 102, 103),
+				makeWayWithDirection(traverseForward, 103, 104, 105),
 			},
 			checkFn: func(t *testing.T, validationErrors []string) {
 				assert.Empty(t, validationErrors)
@@ -27,8 +28,8 @@ func Test_validateStopOrder(t *testing.T) {
 			name:     "stops in incorrect order",
 			relation: makeRelation(104, 102),
 			wayDirects: []wayDirection{
-				makeWayWithDirection("forward", 101, 102, 103),
-				makeWayWithDirection("forward", 103, 104, 105),
+				makeWayWithDirection(traverseForward, 101, 102, 103),
+				makeWayWithDirection(traverseForward, 103, 104, 105),
 			},
 			checkFn: func(t *testing.T, validationErrors []string) {
 				assert.Len(t, validationErrors, 1)
@@ -39,9 +40,9 @@ func Test_validateStopOrder(t *testing.T) {
 			name:     "multiple stops in incorrect order",
 			relation: makeRelation(104, 102, 105, 103),
 			wayDirects: []wayDirection{
-				makeWayWithDirection("forward", 101, 102, 103),
-				makeWayWithDirection("forward", 103, 104, 105),
-				makeWayWithDirection("forward", 105, 106, 107),
+				makeWayWithDirection(traverseForward, 101, 102, 103),
+				makeWayWithDirection(traverseForward, 103, 104, 105),
+				makeWayWithDirection(traverseForward, 105, 106, 107),
 			},
 			checkFn: func(t *testing.T, validationErrors []string) {
 				assert.Len(t, validationErrors, 2)
@@ -53,7 +54,7 @@ func Test_validateStopOrder(t *testing.T) {
 			name:     "multiple stops in correct order on same way",
 			relation: makeRelation(102, 104),
 			wayDirects: []wayDirection{
-				makeWayWithDirection("forward", 101, 102, 103, 104, 105),
+				makeWayWithDirection(traverseForward, 101, 102, 103, 104, 105),
 			},
 			checkFn: func(t *testing.T, validationErrors []string) {
 				assert.Empty(t, validationErrors)
@@ -73,11 +74,25 @@ func Test_validateStopOrder(t *testing.T) {
 			name:     "stop not on route",
 			relation: makeRelation(102, 109),
 			wayDirects: []wayDirection{
-				makeWayWithDirection("forward", 101, 102, 103, 104, 105),
+				makeWayWithDirection(traverseForward, 101, 102, 103, 104, 105),
 			},
 			checkFn: func(t *testing.T, validationErrors []string) {
 				assert.Len(t, validationErrors, 1)
 				assert.Contains(t, validationErrors, "stop is not on route - https://www.openstreetmap.org/node/109")
+			},
+		},
+		{
+			name:     "stop on repeated way",
+			relation: makeRelation(101, 103, 107),
+			wayDirects: []wayDirection{
+				makeWayWithDirection(traverseForward, 100, 101, 102),
+				makeWayWithDirection(traverseForward, 102, 103, 104),
+				makeWayWithDirection(traverseForward, 104, 105, 106, 104),
+				makeWayWithDirection(traverseReverse, 102, 103, 104),
+				makeWayWithDirection(traverseForward, 102, 107, 108),
+			},
+			checkFn: func(t *testing.T, validationErrors []string) {
+				assert.Empty(t, validationErrors)
 			},
 		},
 	}
@@ -100,7 +115,7 @@ func makeRelation(stops ...int64) RelationElement {
 	}
 }
 
-func makeWayWithDirection(direction string, nodes ...int64) wayDirection {
+func makeWayWithDirection(direction wayTraversal, nodes ...int64) wayDirection {
 	return wayDirection{
 		direction: direction,
 		wayElem: WayElement{
