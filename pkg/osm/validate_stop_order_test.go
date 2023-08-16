@@ -33,7 +33,7 @@ func Test_validateStopOrder(t *testing.T) {
 			},
 			checkFn: func(t *testing.T, validationErrors []string) {
 				assert.Len(t, validationErrors, 1)
-				assert.Contains(t, validationErrors, "stop is incorrectly ordered - https://www.openstreetmap.org/node/104")
+				assert.Contains(t, validationErrors, "stop is incorrectly ordered - https://www.openstreetmap.org/node/102")
 			},
 		},
 		{
@@ -46,8 +46,8 @@ func Test_validateStopOrder(t *testing.T) {
 			},
 			checkFn: func(t *testing.T, validationErrors []string) {
 				assert.Len(t, validationErrors, 2)
-				assert.Contains(t, validationErrors, "stop is incorrectly ordered - https://www.openstreetmap.org/node/104")
-				assert.Contains(t, validationErrors, "stop is incorrectly ordered - https://www.openstreetmap.org/node/105")
+				assert.Contains(t, validationErrors, "stop is incorrectly ordered - https://www.openstreetmap.org/node/102")
+				assert.Contains(t, validationErrors, "stop is incorrectly ordered - https://www.openstreetmap.org/node/103")
 			},
 		},
 		{
@@ -83,13 +83,25 @@ func Test_validateStopOrder(t *testing.T) {
 		},
 		{
 			name:     "stop on repeated way",
-			relation: makeRelation(101, 103, 107),
+			relation: makeRelation(101, 103, 109, 107),
 			wayDirects: []wayDirection{
 				makeWayWithDirection(traverseForward, 100, 101, 102),
-				makeWayWithDirection(traverseForward, 102, 103, 104),
+				makeWayWithDirection(traverseForward, 102, 109, 103, 104),
 				makeWayWithDirection(traverseForward, 104, 105, 106, 104),
-				makeWayWithDirection(traverseReverse, 102, 103, 104),
+				makeWayWithDirection(traverseReverse, 102, 109, 103, 104),
 				makeWayWithDirection(traverseForward, 102, 107, 108),
+			},
+			checkFn: func(t *testing.T, validationErrors []string) {
+				assert.Empty(t, validationErrors)
+			},
+		},
+		{
+			name:     "stop at start and end of loop",
+			relation: makeRelation(101, 104, 101),
+			wayDirects: []wayDirection{
+				makeWayWithDirection(traverseForward, 101, 102, 103),
+				makeWayWithDirection(traverseForward, 103, 104, 105),
+				makeWayWithDirection(traverseForward, 106, 107, 101),
 			},
 			checkFn: func(t *testing.T, validationErrors []string) {
 				assert.Empty(t, validationErrors)

@@ -4,54 +4,45 @@ import "fmt"
 
 func validateStopOrder(wayDirects []wayDirection, re RelationElement) []string {
 	stops := []Member{}
-	stopMap := map[int64]int{}
-	stopFound := map[int64]bool{}
+	stopMap := map[int64][]int{}
+	validationErrors := []string{}
 
-	i := 0
 	for _, member := range re.Members {
 		if member.Type == "node" && member.Role == "stop" {
 			stops = append(stops, member)
-			stopMap[member.Ref] = i
-			stopFound[member.Ref] = false
-			i++
+			stopMap[member.Ref] = nil
 		}
 	}
-
 	stopCount := len(stops)
 	if stopCount < 2 {
 		return []string{}
 	}
 
-	expectedNextIndex := 0
-	validationErrors := []string{}
-
-	for _, direct := range wayDirects {
-		//Loop through nodes and check again stops
-		nodes := getNodesInOrder(direct.direction, direct.wayElem)
-		for _, node := range nodes {
-			nodeStopIndex, found := stopMap[node]
-			if found {
-				stopFound[node] = true
-
-				if nodeStopIndex < expectedNextIndex {
-					//Error already reported
-					continue
-				}
-
-				if nodeStopIndex > expectedNextIndex {
-					for i := expectedNextIndex; i < nodeStopIndex; i++ {
-						validationErrors = append(validationErrors, fmt.Sprintf("stop is incorrectly ordered - https://www.openstreetmap.org/node/%d", stops[i].Ref))
-					}
-				}
-				expectedNextIndex = nodeStopIndex + 1
-			}
+	//For each stop, record the node index in the route
+	nodes := getAllNodesInOrder(wayDirects)
+	for i, node := range nodes {
+		slice, found := stopMap[node]
+		if found {
+			slice = append(slice, i)
+			stopMap[node] = slice
 		}
 	}
 
-	for nodeId, found := range stopFound {
-		if !found {
-			validationErrors = append(validationErrors, fmt.Sprintf("stop is not on route - https://www.openstreetmap.org/node/%d", nodeId))
+	lastIndex := -1
+	for _, stop := range stops {
+		indices := stopMap[stop.Ref]
+		if len(indices) < 1 {
+			validationErrors = append(validationErrors, fmt.Sprintf("stop is not on route - https://www.openstreetmap.org/node/%d", stop.Ref))
+			continue
 		}
+
+		indices = filterGt(indices, lastIndex)
+		if len(indices) < 1 {
+			validationErrors = append(validationErrors, fmt.Sprintf("stop is incorrectly ordered - https://www.openstreetmap.org/node/%d", stop.Ref))
+			continue
+		}
+
+		lastIndex = indices[0]
 	}
 
 	return validationErrors
@@ -67,4 +58,23 @@ func getNodesInOrder(direction wayTraversal, we WayElement) []int64 {
 		reversed[count-1-i] = node
 	}
 	return reversed
+}
+
+func getAllNodesInOrder(wayDirects []wayDirection) []int64 {
+	allNodes := []int64{}
+	for _, direct := range wayDirects {
+		thisNodes := getNodesInOrder(direct.direction, direct.wayElem)
+		allNodes = append(allNodes, thisNodes...)
+	}
+	return allNodes
+}
+
+func filterGt(indices []int, threshold int) []int {
+	newIndices := []int{}
+	for _, node := range indices {
+		if node > threshold {
+			newIndices = append(newIndices, node)
+		}
+	}
+	return newIndices
 }
