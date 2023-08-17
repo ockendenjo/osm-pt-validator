@@ -11,7 +11,7 @@
         {"name": "10", "relation_id": 2190289},
         {"name": "11", "relation_id": 11221362},
         {"name": "12", "relation_id": 10529100},
-        {"name": "14", "relation_id": 11221421, "comment": "not a routemaster"},
+        {"name": "14", "relation_id": 16214073},
         {"name": "15", "relation_id": 0},
         {"name": "16", "relation_id": 10529294},
         {"name": "19", "relation_id": 11909907},
@@ -97,21 +97,5 @@
         {"name": "X62", "relation_id": 14722579},
         {"name": "X70", "relation_id": 0},
         {"name": "X95", "relation_id": 15017105}
-    ],
-    "lancaster_city": [
-        {"name": "1", "relation_id": 10830127},
-        {"name": "1A", "relation_id": 10840861},
-        {"name": "2X", "relation_id": 7945655},
-        {"name": "5", "relation_id": 8094149},
-        {"name": "6", "relation_id": 8134663},
-        {"name": "6A", "relation_id": 8009457},
-        {"name": "7", "relation_id": 8012003},
-        {"name": "8", "relation_id": 8012002}
-    ],
-    "lancashire": [
-        {"name": "755", "relation_id": 10840953}
-    ],
-    "new_zealand": [
-        {"name": "IC9557 ChCh => QT", "relation_id": 15628957}
     ]
 }
