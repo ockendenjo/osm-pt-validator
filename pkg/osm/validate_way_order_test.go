@@ -103,6 +103,16 @@ func Test_validateWayOrder(t *testing.T) {
 			members: setupWays(1, 9, 2),
 			checkFn: expectedValid,
 		},
+		{
+			name:    "route where roundabout segment is traversed in wrong direction",
+			members: setupWays(2, 10),
+			checkFn: expectedOneWayError(10),
+		},
+		{
+			name:    "route where roundabout segment is traversed in correct direction",
+			members: setupWays(10, 2),
+			checkFn: expectedValid,
+		},
 	}
 
 	svr, err := setupTestServer()

@@ -1,0 +1,15 @@
+{
+    "elements": [
+        {
+            "type": "way",
+            "id": 10,
+            "nodes": [
+                114,
+                101
+            ],
+            "tags": {
+                "junction": "roundabout"
+            }
+        }
+    ]
+}

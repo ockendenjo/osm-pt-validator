@@ -209,6 +209,9 @@ func getOnewayTag(way WayElement) string {
 	if tag, found := way.Tags["oneway"]; found {
 		return tag
 	}
+	if tag := way.Tags["junction"]; tag == "roundabout" {
+		return "yes"
+	}
 	return ""
 }
 
