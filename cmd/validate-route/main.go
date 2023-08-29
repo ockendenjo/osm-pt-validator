@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/ockendenjo/osm-pt-validator/pkg/snsEvents"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -49,7 +50,7 @@ func buildProcessRecord(client *osm.OSMClient, publish publishApi, topicArn stri
 		if len(validationErrors) > 0 {
 			logger.Error("relation is invalid", "validationErrors", validationErrors)
 
-			outputEvent := invalidRelationEvent{
+			outputEvent := snsEvents.InvalidRelationEvent{
 				RelationID:       event.RelationID,
 				RelationName:     relation.Elements[0].Tags["name"],
 				ValidationErrors: validationErrors,
@@ -74,9 +75,3 @@ func buildProcessRecord(client *osm.OSMClient, publish publishApi, topicArn stri
 }
 
 type publishApi func(ctx context.Context, params *sns.PublishInput, optFns ...func(*sns.Options)) (*sns.PublishOutput, error)
-
-type invalidRelationEvent struct {
-	RelationID       int64    `json:"relationID"`
-	RelationName     string   `json:"name"`
-	ValidationErrors []string `json:"validationErrors"`
-}

@@ -43,6 +43,7 @@ func NewStack(scope constructs.Construct, id string, props *OSMPTStackProps) aws
 
 	NewLambda(stack, "SplitRelation", "build/validate-rm").
 		WithQueuePublish(routeQueues, "QUEUE_URL").
+		WithTopicPublish(topic, "TOPIC_ARN").
 		Build().
 		AddSQSBatchTrigger(rmQueues)
 
