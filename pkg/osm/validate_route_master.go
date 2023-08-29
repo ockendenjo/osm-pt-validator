@@ -21,7 +21,7 @@ func ValidateRouteMasterElement(r RelationElement) []string {
 		}
 	}
 
-	for _, s := range []string{"name", "network", "operator"} {
+	for _, s := range []string{"name", "ref", "operator"} {
 		ve := checkTagPresent(r, s)
 		if ve != "" {
 			validationErrors = append(validationErrors, ve)

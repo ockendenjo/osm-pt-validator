@@ -35,7 +35,7 @@ func TestValidationRouteMasterMembers(t *testing.T) {
 			checkFn: func(t *testing.T, validationErrors []string) {
 				assert.Contains(t, validationErrors, "missing tag 'name'")
 				assert.Contains(t, validationErrors, "missing tag 'operator'")
-				assert.Contains(t, validationErrors, "missing tag 'network'")
+				assert.Contains(t, validationErrors, "missing tag 'ref'")
 			},
 		},
 		{
@@ -49,7 +49,7 @@ func TestValidationRouteMasterMembers(t *testing.T) {
 			tags: map[string]string{
 				"name":     "Route 1: A <=> B",
 				"operator": "BusCo",
-				"network":  "Edinburgh",
+				"ref":      "1",
 			},
 			checkFn: func(t *testing.T, validationErrors []string) {
 				assert.Empty(t, validationErrors)
