@@ -16,7 +16,7 @@ synth: build
 	cdk synth
 
 deploy: build
-	cdk deploy --require-approval never
+	cdk deploy --require-approval never --method direct
 
 cfn:
 	aws cloudformation deploy --template-file setup.yml --stack-name "OSMPTSetup" --capabilities "CAPABILITY_NAMED_IAM" --region=eu-west-1

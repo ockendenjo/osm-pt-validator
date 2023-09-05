@@ -51,6 +51,12 @@ func validatePlatformNode(node *Node) []string {
 			validationErrors = append(validationErrors, fmt.Sprintf("node should have public_transport=platform - https://www.openstreetmap.org/node/%d", element.ID))
 		}
 
+		_, found = element.Tags["disused:highway"]
+		if found {
+			validationErrors = append(validationErrors, fmt.Sprintf("node has disused:highway tag - https://www.openstreetmap.org/node/%d", element.ID))
+		}
+
+		//Don't require the highway tag to be present - Naptan imported stops don't have it set (to prevent rendering)
 		highway, found := element.Tags["highway"]
 		if found && highway != "bus_stop" {
 			validationErrors = append(validationErrors, fmt.Sprintf("node should have highway=bus_stop - https://www.openstreetmap.org/node/%d", element.ID))
