@@ -2,7 +2,6 @@ package osm
 
 import (
 	"context"
-	"fmt"
 )
 
 func ValidateRelation(ctx context.Context, client *OSMClient, r Relation) ([]string, error) {
@@ -146,12 +145,8 @@ func validateREMemberOrder(re RelationElement) []string {
 func validateRETags(re RelationElement) []string {
 	validationErrors := []string{}
 
-	for _, s := range []string{"from", "to", "name", "network", "operator", "ref"} {
-		ve := checkTagPresent(re, s)
-		if ve != "" {
-			validationErrors = append(validationErrors, ve)
-		}
-	}
+	missingTagErrors := checkTagsPresent(re, "from", "to", "name", "network", "operator", "ref")
+	validationErrors = append(validationErrors, missingTagErrors...)
 
 	for k, v := range map[string]string{
 		"type":                     "route",
@@ -164,28 +159,4 @@ func validateRETags(re RelationElement) []string {
 	}
 
 	return validationErrors
-}
-
-func checkTagPresent(t Taggable, key string) string {
-	_, found := t.GetTags()[key]
-	if !found {
-		return fmt.Sprintf("missing tag '%s' - %s", key, t.GetElementURL())
-	}
-	return ""
-}
-
-func checkTagValue(t Taggable, key string, expVal string) string {
-	val, found := t.GetTags()[key]
-	if !found {
-		return fmt.Sprintf("missing tag '%s'", key)
-	}
-	if val != expVal {
-		return fmt.Sprintf("tag '%s' should have value '%s'", key, expVal)
-	}
-	return ""
-}
-
-type Taggable interface {
-	GetTags() map[string]string
-	GetElementURL() string
 }
