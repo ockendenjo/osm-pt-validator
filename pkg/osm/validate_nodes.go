@@ -27,11 +27,12 @@ func validateRelationNodes(ctx context.Context, client *OSMClient, re RelationEl
 		}
 	}
 
+	checkNaptan := shouldCheckNaptanTags()
 	for _, node := range nodes {
 		role := node.Role
 		nodeObj := nodesMap[node.Ref]
 		if role == "platform" || role == "platform_exit_only" || role == "platform_entry_only" {
-			validationErrors = append(validationErrors, validatePlatformNode(nodeObj)...)
+			validationErrors = append(validationErrors, validatePlatformNode(nodeObj, checkNaptan)...)
 		}
 
 		if role == "stop" || role == "stop_exit_only" || role == "stop_entry_only" {
@@ -48,7 +49,7 @@ func shouldCheckNaptanTags() bool {
 	return rand.Float64() > threshold
 }
 
-func validatePlatformNode(node *Node) []string {
+func validatePlatformNode(node *Node, checkNaptan bool) []string {
 	validationErrors := []string{}
 
 	for _, element := range node.Elements {
@@ -70,8 +71,8 @@ func validatePlatformNode(node *Node) []string {
 			validationErrors = append(validationErrors, fmt.Sprintf("node should have highway=bus_stop - %s", element.GetElementURL()))
 		}
 
-		if shouldCheckNaptanTags() {
-			missingTagErrors := checkTagsPresent(element, "naptan:AtcoCode", "naptan:NaptanCode", "naptan:CommonName")
+		if checkNaptan {
+			missingTagErrors := checkTagsPresent(element, "naptan:AtcoCode", "naptan:NaptanCode")
 			validationErrors = append(validationErrors, missingTagErrors...)
 		}
 	}
