@@ -78,7 +78,7 @@ func validateWayOrder(ctx context.Context, client *OSMClient, re RelationElement
 
 		switch matches {
 		case 0:
-			validationErrors = append(validationErrors, fmt.Sprintf("ways are incorrectly ordered - https://www.openstreetmap.org/way/%d", wayElem.ID))
+			validationErrors = append(validationErrors, fmt.Sprintf("ways are incorrectly ordered - %s", wayElem.GetElementURL()))
 			allowedNodes = mapFromNodes(wayElem.Nodes)
 			hasGap = true
 		case 1:
@@ -101,7 +101,7 @@ func validateWayOrder(ctx context.Context, client *OSMClient, re RelationElement
 	for _, d := range wayDirects {
 		wayElem := d.wayElem
 		if !checkOneway(wayElem, d.direction) {
-			validationErrors = append(validationErrors, fmt.Sprintf("way with oneway tag is traversed in wrong direction - https://www.openstreetmap.org/way/%d", wayElem.ID))
+			validationErrors = append(validationErrors, fmt.Sprintf("way with oneway tag is traversed in wrong direction - %s", wayElem.GetElementURL()))
 		}
 	}
 

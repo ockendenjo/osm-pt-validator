@@ -51,7 +51,7 @@ func doValidation(ctx context.Context, osmClient *osm.OSMClient, relation osm.Re
 }
 
 func validateRouteMaster(ctx context.Context, osmClient *osm.OSMClient, relation osm.Relation) (bool, error) {
-	log.Printf("validating relation: https://www.openstreetmap.org/relation/%d", relation.Elements[0].ID)
+	log.Printf("validating relation: %s", relation.Elements[0].GetElementURL())
 	validationErrors := osm.ValidateRouteMaster(relation)
 	printErrors(validationErrors)
 	isValid := len(validationErrors) < 1
@@ -77,7 +77,7 @@ func validateRouteMaster(ctx context.Context, osmClient *osm.OSMClient, relation
 }
 
 func validateRoute(ctx context.Context, osmClient *osm.OSMClient, relation osm.Relation) (bool, error) {
-	log.Printf("validating relation: https://www.openstreetmap.org/relation/%d", relation.Elements[0].ID)
+	log.Printf("validating relation: %s", relation.Elements[0].GetElementURL())
 	validationErrors, err := osm.ValidateRelation(ctx, osmClient, relation)
 	if err != nil {
 		return false, err

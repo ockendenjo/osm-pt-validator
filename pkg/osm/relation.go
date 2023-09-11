@@ -31,3 +31,7 @@ type Member struct {
 func (m Member) String() string {
 	return fmt.Sprintf("%s %d (%s)", m.Type, m.Ref, m.Role)
 }
+
+func (m Member) GetElementURL() string {
+	return fmt.Sprintf("https://www.openstreetmap.org/%s/%d", m.Type, m.Ref)
+}

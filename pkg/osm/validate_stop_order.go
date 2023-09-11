@@ -32,13 +32,13 @@ func validateStopOrder(wayDirects []wayDirection, re RelationElement) []string {
 	for _, stop := range stops {
 		indices := stopMap[stop.Ref]
 		if len(indices) < 1 {
-			validationErrors = append(validationErrors, fmt.Sprintf("stop is not on route - https://www.openstreetmap.org/node/%d", stop.Ref))
+			validationErrors = append(validationErrors, fmt.Sprintf("stop is not on route - %s", stop.GetElementURL()))
 			continue
 		}
 
 		indices = filterGt(indices, lastIndex)
 		if len(indices) < 1 {
-			validationErrors = append(validationErrors, fmt.Sprintf("stop is incorrectly ordered - https://www.openstreetmap.org/node/%d", stop.Ref))
+			validationErrors = append(validationErrors, fmt.Sprintf("stop is incorrectly ordered - %s", stop.GetElementURL()))
 			continue
 		}
 

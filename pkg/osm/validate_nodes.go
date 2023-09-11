@@ -46,20 +46,20 @@ func validatePlatformNode(node *Node) []string {
 	for _, element := range node.Elements {
 		pt, found := element.Tags["public_transport"]
 		if !found {
-			validationErrors = append(validationErrors, fmt.Sprintf("node is missing public_transport tag - https://www.openstreetmap.org/node/%d", element.ID))
+			validationErrors = append(validationErrors, fmt.Sprintf("node is missing public_transport tag - %s", element.GetElementURL()))
 		} else if pt != "platform" {
-			validationErrors = append(validationErrors, fmt.Sprintf("node should have public_transport=platform - https://www.openstreetmap.org/node/%d", element.ID))
+			validationErrors = append(validationErrors, fmt.Sprintf("node should have public_transport=platform - %s", element.GetElementURL()))
 		}
 
 		_, found = element.Tags["disused:highway"]
 		if found {
-			validationErrors = append(validationErrors, fmt.Sprintf("node has disused:highway tag - https://www.openstreetmap.org/node/%d", element.ID))
+			validationErrors = append(validationErrors, fmt.Sprintf("node has disused:highway tag - %s", element.GetElementURL()))
 		}
 
 		//Don't require the highway tag to be present - Naptan imported stops don't have it set (to prevent rendering)
 		highway, found := element.Tags["highway"]
 		if found && highway != "bus_stop" {
-			validationErrors = append(validationErrors, fmt.Sprintf("node should have highway=bus_stop - https://www.openstreetmap.org/node/%d", element.ID))
+			validationErrors = append(validationErrors, fmt.Sprintf("node should have highway=bus_stop - %s", element.GetElementURL()))
 		}
 	}
 
@@ -72,19 +72,19 @@ func validateStopNode(node *Node) []string {
 	for _, element := range node.Elements {
 		pt, found := element.Tags["public_transport"]
 		if !found {
-			validationErrors = append(validationErrors, fmt.Sprintf("node is missing public_transport tag - https://www.openstreetmap.org/node/%d", element.ID))
+			validationErrors = append(validationErrors, fmt.Sprintf("node is missing public_transport tag - %s", element.GetElementURL()))
 		} else if pt != "stop_position" {
-			validationErrors = append(validationErrors, fmt.Sprintf("node should have public_transport=stop_position - https://www.openstreetmap.org/node/%d", element.ID))
+			validationErrors = append(validationErrors, fmt.Sprintf("node should have public_transport=stop_position - %s", element.GetElementURL()))
 		}
 
 		bus, found := element.Tags["bus"]
 		if found && bus != "yes" {
-			validationErrors = append(validationErrors, fmt.Sprintf("node should have bus=yes - https://www.openstreetmap.org/node/%d", element.ID))
+			validationErrors = append(validationErrors, fmt.Sprintf("node should have bus=yes - %s", element.GetElementURL()))
 		}
 
 		name, found := element.Tags["name"]
 		if !found || len(name) < 1 {
-			validationErrors = append(validationErrors, fmt.Sprintf("node is missing name tag - https://www.openstreetmap.org/node/%d", element.ID))
+			validationErrors = append(validationErrors, fmt.Sprintf("node is missing name tag - %s", element.GetElementURL()))
 		}
 	}
 

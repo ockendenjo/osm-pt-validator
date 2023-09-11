@@ -17,7 +17,7 @@ func ValidateRouteMasterElement(r RelationElement) []string {
 
 	for _, member := range r.Members {
 		if member.Type != "relation" {
-			validationErrors = append(validationErrors, fmt.Sprintf("member is not a relation - https://www.openstreetmap.org/%s/%d", member.Type, member.Ref))
+			validationErrors = append(validationErrors, fmt.Sprintf("member is not a relation - %s", member.GetElementURL()))
 		}
 	}
 
