@@ -18,6 +18,10 @@ func (re RelationElement) GetTags() map[string]string {
 	return re.Tags
 }
 
+func (re RelationElement) GetElementURL() string {
+	return fmt.Sprintf("https://www.openstreetmap.org/relation/%d", re.ID)
+}
+
 type Member struct {
 	Type string `json:"type"`
 	Ref  int64  `json:"ref"`

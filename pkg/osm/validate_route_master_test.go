@@ -1,8 +1,9 @@
 package osm
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestValidationRouteMasterMembers(t *testing.T) {
@@ -33,9 +34,9 @@ func TestValidationRouteMasterMembers(t *testing.T) {
 				},
 			},
 			checkFn: func(t *testing.T, validationErrors []string) {
-				assert.Contains(t, validationErrors, "missing tag 'name'")
-				assert.Contains(t, validationErrors, "missing tag 'operator'")
-				assert.Contains(t, validationErrors, "missing tag 'ref'")
+				assert.Contains(t, validationErrors, "missing tag 'name' - https://www.openstreetmap.org/relation/1234")
+				assert.Contains(t, validationErrors, "missing tag 'operator' - https://www.openstreetmap.org/relation/1234")
+				assert.Contains(t, validationErrors, "missing tag 'ref' - https://www.openstreetmap.org/relation/1234")
 			},
 		},
 		{
@@ -58,7 +59,7 @@ func TestValidationRouteMasterMembers(t *testing.T) {
 	}
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			validationErrors := ValidateRouteMasterElement(RelationElement{Members: tc.members, Tags: tc.tags})
+			validationErrors := ValidateRouteMasterElement(RelationElement{Members: tc.members, Tags: tc.tags, ID: 1234})
 			tc.checkFn(t, validationErrors)
 		})
 	}

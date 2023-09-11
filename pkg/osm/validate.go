@@ -169,7 +169,7 @@ func validateRETags(re RelationElement) []string {
 func checkTagPresent(t Taggable, key string) string {
 	_, found := t.GetTags()[key]
 	if !found {
-		return fmt.Sprintf("missing tag '%s'", key)
+		return fmt.Sprintf("missing tag '%s' - %s", key, t.GetElementURL())
 	}
 	return ""
 }
@@ -187,4 +187,5 @@ func checkTagValue(t Taggable, key string, expVal string) string {
 
 type Taggable interface {
 	GetTags() map[string]string
+	GetElementURL() string
 }

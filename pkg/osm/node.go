@@ -1,5 +1,7 @@
 package osm
 
+import "fmt"
+
 type Node struct {
 	Elements []NodeElement `json:"elements"`
 }
@@ -15,4 +17,8 @@ type NodeElement struct {
 
 func (ne NodeElement) GetTags() map[string]string {
 	return ne.Tags
+}
+
+func (ne NodeElement) GetElementURL() string {
+	return fmt.Sprintf("https://www.openstreetmap.org/node/%d", ne.ID)
 }

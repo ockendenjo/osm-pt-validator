@@ -1,5 +1,7 @@
 package osm
 
+import "fmt"
+
 type Way struct {
 	Elements []WayElement `json:"elements"`
 }
@@ -14,6 +16,10 @@ type WayElement struct {
 
 func (we WayElement) GetTags() map[string]string {
 	return we.Tags
+}
+
+func (we WayElement) GetElementURL() string {
+	return fmt.Sprintf("https://www.openstreetmap.org/way/%d", we.ID)
 }
 
 func (we WayElement) GetFirstNode() int64 {
