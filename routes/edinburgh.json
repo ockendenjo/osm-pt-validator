@@ -99,6 +99,6 @@
         {"name": "X95", "relation_id": 15017105}
     ],
     "stagecoach_east_scotland": [
-        {"name": "X52", "relation_id": 15082675, "comment": "not a route_master"}
+        {"name": "X52", "relation_id": 16314703}
     ]
 }
