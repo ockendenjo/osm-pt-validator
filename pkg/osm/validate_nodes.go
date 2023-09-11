@@ -3,6 +3,8 @@ package osm
 import (
 	"context"
 	"fmt"
+	"math/rand"
+	"time"
 )
 
 func validateRelationNodes(ctx context.Context, client *OSMClient, re RelationElement) ([]string, error) {
@@ -40,6 +42,12 @@ func validateRelationNodes(ctx context.Context, client *OSMClient, re RelationEl
 	return validationErrors, nil
 }
 
+func shouldCheckNaptanTags() bool {
+	//Gradual roll out
+	threshold := float64(1695168000-time.Now().Unix()) / (24 * 60 * 60 * 10)
+	return rand.Float64() > threshold
+}
+
 func validatePlatformNode(node *Node) []string {
 	validationErrors := []string{}
 
@@ -60,6 +68,11 @@ func validatePlatformNode(node *Node) []string {
 		highway, found := element.Tags["highway"]
 		if found && highway != "bus_stop" {
 			validationErrors = append(validationErrors, fmt.Sprintf("node should have highway=bus_stop - %s", element.GetElementURL()))
+		}
+
+		if shouldCheckNaptanTags() {
+			missingTagErrors := checkTagsPresent(element, "naptan:AtcoCode", "naptan:NaptanCode", "naptan:CommonName")
+			validationErrors = append(validationErrors, missingTagErrors...)
 		}
 	}
 
