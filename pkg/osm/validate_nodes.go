@@ -72,7 +72,7 @@ func validatePlatformNode(node *Node, checkNaptan bool) []string {
 		}
 
 		if checkNaptan {
-			missingTagErrors := checkTagsPresent(element, "naptan:AtcoCode", "naptan:NaptanCode")
+			missingTagErrors := checkTagsPresent(element, "naptan:AtcoCode")
 			validationErrors = append(validationErrors, missingTagErrors...)
 		}
 	}
