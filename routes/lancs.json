@@ -18,7 +18,7 @@
         {"name": "41", "relation_id": 8090864, "comment": "Preston"},
         {"name": "42", "relation_id": 8090863, "comment": "Blackpool"},
         {"name": "100", "relation_id": 7945161, "comment": "Morecambe"},
-        {"name": "881", "relation_id": 8481752, "comment": "Malham"}
+        {"name": "881", "relation_id": 0, "comment": "Malham - service might not exist (8481752)"}
     ],
     "lancashire": [
         {"name": "755", "relation_id": 10840953}
