@@ -3,25 +3,26 @@ package main
 import (
 	"context"
 	"errors"
+	"flag"
 	"fmt"
 	"log"
 	"os"
-	"strconv"
 
 	"github.com/ockendenjo/osm-pt-validator/pkg/osm"
 	"github.com/ockendenjo/osm-pt-validator/pkg/validation"
 )
 
 func main() {
-	if len(os.Args) < 2 {
-		panic("usage: main.go <relationId>")
-	}
 	ctx := context.Background()
 
-	relationIdStr := os.Args[1]
-	relationId, err := strconv.ParseInt(relationIdStr, 10, 64)
-	if err != nil {
-		panic(err)
+	var relationId int64
+	flag.Int64Var(&relationId, "r", 0, "Relation ID")
+	var npt bool
+	flag.BoolVar(&npt, "npt", false, "Verify NaPTAN platform tags")
+	flag.Parse()
+
+	if relationId < 1 {
+		panic(errors.New("relationID (-r) must be specified"))
 	}
 
 	osmClient := osm.NewClient()
@@ -30,7 +31,7 @@ func main() {
 		panic(err)
 	}
 
-	validator := validation.DefaultValidator(osmClient)
+	validator := validation.NewValidator(validation.Config{NaptanPlatformTags: npt}, osmClient)
 
 	isValid, err := doValidation(ctx, validator, osmClient, relation)
 	if err != nil {
