@@ -1,6 +1,6 @@
 {
     "config": {
-        "naptan": false
+        "naptanPlatformTags": false
     },
     "routes": {
         "new_zealand": [

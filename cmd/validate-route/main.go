@@ -44,7 +44,7 @@ func buildProcessRecord(client *osm.OSMClient, publish publishApi, topicArn stri
 			return err
 		}
 
-		validator := validation.NewValidator(validation.Config{}, client)
+		validator := validation.NewValidator(event.Config, client)
 		validationErrors, err := validator.RouteRelation(ctx, relation)
 		if err != nil {
 			return err

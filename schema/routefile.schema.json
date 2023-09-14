@@ -8,10 +8,11 @@
         "config": {
             "type": "object",
             "properties": {
-                "naptan": {
+                "naptanPlatformTags": {
                     "type": "boolean"
                 }
-            }
+            },
+            "additionalProperties": false
         },
         "routes": {
             "type": "object",
