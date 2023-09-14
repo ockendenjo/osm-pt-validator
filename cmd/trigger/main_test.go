@@ -6,12 +6,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"testing"
+
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/aws/jsii-runtime-go"
 	"github.com/stretchr/testify/assert"
-	"io"
-	"testing"
 )
 
 func Test_listObjectKeys(t *testing.T) {
@@ -156,7 +157,7 @@ func Test_getRelationIDs(t *testing.T) {
 				for _, id := range ids {
 					routeGroup = append(routeGroup, Route{RelationID: id})
 				}
-				routeFile := map[string][]Route{"foo": routeGroup}
+				routeFile := RoutesFile{Routes: map[string][]Route{"foo": routeGroup}, Config: Config{Naptan: true}}
 
 				b, err := json.Marshal(routeFile)
 				assert.NoError(t, err)

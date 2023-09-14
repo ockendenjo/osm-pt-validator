@@ -160,15 +160,15 @@ func readFile(ctx context.Context, getObject getObjectApi, bucketName, objectKey
 		return
 	}
 
-	var routesFile map[string][]Route
-	err = json.Unmarshal(bytes, &routesFile)
+	var file RoutesFile
+	err = json.Unmarshal(bytes, &file)
 	if err != nil {
 		c <- readResult{err: err}
 		return
 	}
 
 	relationIDs := []int64{}
-	for _, routes := range routesFile {
+	for _, routes := range file.Routes {
 		for _, route := range routes {
 			if route.RelationID == 0 {
 				continue
@@ -177,10 +177,20 @@ func readFile(ctx context.Context, getObject getObjectApi, bucketName, objectKey
 		}
 	}
 
-	c <- readResult{relationIDs: relationIDs}
+	c <- readResult{relationIDs: relationIDs, config: file.Config}
 }
 
 type readResult struct {
 	relationIDs []int64
 	err         error
+	config      Config
+}
+
+type RoutesFile struct {
+	Config Config             `json:"config"`
+	Routes map[string][]Route `json:"routes"`
+}
+
+type Config struct {
+	Naptan bool `json:"naptan"`
 }

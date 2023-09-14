@@ -4,26 +4,41 @@
     "title": "Routefile",
     "description": "A file with routes to be validated",
     "type": "object",
-    "patternProperties": {
-        "^.*$": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "name": {
-                        "type": "string"
-                    },
-                    "relation_id": {
-                        "type": "number"
-                    },
-                    "comment": {
-                        "type": "string"
-                    }
-                },
-                "required": ["name", "relation_id"],
-                "additionalProperties": false
+    "properties": {
+        "config": {
+            "type": "object",
+            "properties": {
+                "naptan": {
+                    "type": "boolean"
+                }
             }
+        },
+        "routes": {
+            "type": "object",
+            "patternProperties": {
+                "^.*$": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "type": "string"
+                            },
+                            "relation_id": {
+                                "type": "number"
+                            },
+                            "comment": {
+                                "type": "string"
+                            }
+                        },
+                        "required": ["name", "relation_id"],
+                        "additionalProperties": false
+                    }
+                }
+            },
+            "additionalProperties": false
         }
     },
+    "required": ["routes"],
     "additionalProperties": false
 }

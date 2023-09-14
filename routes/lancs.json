@@ -1,26 +1,31 @@
 {
-    "lancaster_city": [
-        {"name": "1", "relation_id": 10830127},
-        {"name": "1A", "relation_id": 10840861},
-        {"name": "2X", "relation_id": 7945655},
-        {"name": "5", "relation_id": 8094149},
-        {"name": "4X", "relation_id": 10723615},
-        {"name": "6", "relation_id": 8134663},
-        {"name": "6A", "relation_id": 8009457},
-        {"name": "7", "relation_id": 8012003},
-        {"name": "8", "relation_id": 8012002},
-        {"name": "9", "relation_id": 7972483, "comment": "Newlands"},
-        {"name": "10", "relation_id": 7972750, "comment": "Ridge"},
-        {"name": "11", "relation_id": 7972746, "comment": "Marsh"},
-        {"name": "18", "relation_id": 7972825, "comment": "Lancaster farms"},
-        {"name": "40", "relation_id": 7973098, "comment": "Preston"},
-        {"name": "40A", "relation_id": 8090865, "comment": "Preston"},
-        {"name": "41", "relation_id": 8090864, "comment": "Preston"},
-        {"name": "42", "relation_id": 8090863, "comment": "Blackpool"},
-        {"name": "100", "relation_id": 7945161, "comment": "Morecambe"},
-        {"name": "881", "relation_id": 0, "comment": "Malham - service might not exist (8481752)"}
-    ],
-    "lancashire": [
-        {"name": "755", "relation_id": 10840953}
-    ]
+    "config": {
+        "naptan": true
+    },
+    "routes": {
+        "lancaster_city": [
+            {"name": "1", "relation_id": 10830127},
+            {"name": "1A", "relation_id": 10840861},
+            {"name": "2X", "relation_id": 7945655},
+            {"name": "5", "relation_id": 8094149},
+            {"name": "4X", "relation_id": 10723615},
+            {"name": "6", "relation_id": 8134663},
+            {"name": "6A", "relation_id": 8009457},
+            {"name": "7", "relation_id": 8012003},
+            {"name": "8", "relation_id": 8012002},
+            {"name": "9", "relation_id": 7972483, "comment": "Newlands"},
+            {"name": "10", "relation_id": 7972750, "comment": "Ridge"},
+            {"name": "11", "relation_id": 7972746, "comment": "Marsh"},
+            {"name": "18", "relation_id": 7972825, "comment": "Lancaster farms"},
+            {"name": "40", "relation_id": 7973098, "comment": "Preston"},
+            {"name": "40A", "relation_id": 8090865, "comment": "Preston"},
+            {"name": "41", "relation_id": 8090864, "comment": "Preston"},
+            {"name": "42", "relation_id": 8090863, "comment": "Blackpool"},
+            {"name": "100", "relation_id": 7945161, "comment": "Morecambe"},
+            {"name": "881", "relation_id": 0, "comment": "Malham - service might not exist (8481752)"}
+        ],
+        "lancashire": [
+            {"name": "755", "relation_id": 10840953}
+        ]
+    }
 }
