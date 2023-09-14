@@ -21,6 +21,7 @@
             {"name": "40A", "relation_id": 8090865, "comment": "Preston"},
             {"name": "41", "relation_id": 8090864, "comment": "Preston"},
             {"name": "42", "relation_id": 8090863, "comment": "Blackpool"},
+            {"name": "80", "relation_id": 8075384, "comment": "Ingleton"},
             {"name": "100", "relation_id": 7945161, "comment": "Morecambe"},
             {"name": "881", "relation_id": 0, "comment": "Malham - service might not exist (8481752)"}
         ],
