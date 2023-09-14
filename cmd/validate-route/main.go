@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
 	"github.com/ockendenjo/osm-pt-validator/pkg/snsEvents"
+	"github.com/ockendenjo/osm-pt-validator/pkg/validation"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -42,7 +44,8 @@ func buildProcessRecord(client *osm.OSMClient, publish publishApi, topicArn stri
 			return err
 		}
 
-		validationErrors, err := osm.ValidateRelation(ctx, client, relation)
+		validator := validation.NewValidator(validation.Config{}, client)
+		validationErrors, err := validator.RouteRelation(ctx, relation)
 		if err != nil {
 			return err
 		}

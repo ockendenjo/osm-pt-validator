@@ -1,4 +1,4 @@
-package osm
+package validation
 
 import (
 	"context"
@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/ockendenjo/osm-pt-validator/pkg/osm"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -29,7 +30,7 @@ func Test_validateWayOrder(t *testing.T) {
 
 	testcases := []struct {
 		name    string
-		members []Member
+		members []osm.Member
 		checkFn func(t *testing.T, validationErrors []string, err error)
 	}{
 		{
@@ -121,21 +122,22 @@ func Test_validateWayOrder(t *testing.T) {
 	}
 	defer svr.Close()
 
-	osmClient := NewClient().WithBaseUrl(svr.URL)
+	osmClient := osm.NewClient().WithBaseUrl(svr.URL)
 
 	for _, tc := range testcases {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			validationErrors, _, err := validateWayOrder(context.Background(), osmClient, RelationElement{Members: tc.members})
+			validator := DefaultValidator(osmClient)
+			validationErrors, _, err := validator.validateWayOrder(context.Background(), osm.RelationElement{Members: tc.members})
 			tc.checkFn(t, validationErrors, err)
 		})
 	}
 }
 
-func setupWays(ids ...int64) []Member {
-	members := []Member{}
+func setupWays(ids ...int64) []osm.Member {
+	members := []osm.Member{}
 	for _, id := range ids {
-		members = append(members, Member{Ref: id, Role: "", Type: "way"})
+		members = append(members, osm.Member{Ref: id, Role: "", Type: "way"})
 	}
 	return members
 }

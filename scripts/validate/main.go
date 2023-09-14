@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/ockendenjo/osm-pt-validator/pkg/osm"
+	"github.com/ockendenjo/osm-pt-validator/pkg/validation"
 )
 
 func main() {
@@ -29,7 +30,9 @@ func main() {
 		panic(err)
 	}
 
-	isValid, err := doValidation(ctx, osmClient, relation)
+	validator := validation.DefaultValidator(osmClient)
+
+	isValid, err := doValidation(ctx, validator, osmClient, relation)
 	if err != nil {
 		panic(err)
 	}
@@ -38,21 +41,22 @@ func main() {
 	}
 }
 
-func doValidation(ctx context.Context, osmClient *osm.OSMClient, relation osm.Relation) (bool, error) {
+func doValidation(ctx context.Context, validator *validation.Validator, osmClient *osm.OSMClient, relation osm.Relation) (bool, error) {
 
 	switch relation.Elements[0].Tags["type"] {
 	case "route":
-		return validateRoute(ctx, osmClient, relation)
+		return validateRoute(ctx, validator, relation)
 	case "route_master":
-		return validateRouteMaster(ctx, osmClient, relation)
+		return validateRouteMaster(ctx, validator, osmClient, relation)
 	default:
 		return false, errors.New("unknown relation type")
 	}
 }
 
-func validateRouteMaster(ctx context.Context, osmClient *osm.OSMClient, relation osm.Relation) (bool, error) {
+func validateRouteMaster(ctx context.Context, validator *validation.Validator, osmClient *osm.OSMClient, relation osm.Relation) (bool, error) {
 	log.Printf("validating relation: %s", relation.Elements[0].GetElementURL())
-	validationErrors := osm.ValidateRouteMaster(relation)
+
+	validationErrors := validator.RouteMaster(relation)
 	printErrors(validationErrors)
 	isValid := len(validationErrors) < 1
 
@@ -64,7 +68,7 @@ func validateRouteMaster(ctx context.Context, osmClient *osm.OSMClient, relation
 				if err != nil {
 					return false, err
 				}
-				subIsValid, err := validateRoute(ctx, osmClient, subRelation)
+				subIsValid, err := validateRoute(ctx, validator, subRelation)
 				isValid = isValid && subIsValid
 				if err != nil {
 					return false, err
@@ -76,9 +80,9 @@ func validateRouteMaster(ctx context.Context, osmClient *osm.OSMClient, relation
 	return isValid, nil
 }
 
-func validateRoute(ctx context.Context, osmClient *osm.OSMClient, relation osm.Relation) (bool, error) {
+func validateRoute(ctx context.Context, validator *validation.Validator, relation osm.Relation) (bool, error) {
 	log.Printf("validating relation: %s", relation.Elements[0].GetElementURL())
-	validationErrors, err := osm.ValidateRelation(ctx, osmClient, relation)
+	validationErrors, err := validator.RouteRelation(ctx, relation)
 	if err != nil {
 		return false, err
 	}

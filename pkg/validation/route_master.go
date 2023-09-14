@@ -1,18 +1,20 @@
-package osm
+package validation
 
 import (
 	"fmt"
+
+	"github.com/ockendenjo/osm-pt-validator/pkg/osm"
 )
 
-func ValidateRouteMaster(r Relation) []string {
+func (v *Validator) RouteMaster(r osm.Relation) []string {
 	validationErrors := []string{}
 	for _, relationElement := range r.Elements {
-		validationErrors = append(validationErrors, ValidateRouteMasterElement(relationElement)...)
+		validationErrors = append(validationErrors, v.RouteMasterElement(relationElement)...)
 	}
 	return validationErrors
 }
 
-func ValidateRouteMasterElement(r RelationElement) []string {
+func (v *Validator) RouteMasterElement(r osm.RelationElement) []string {
 	validationErrors := []string{}
 
 	for _, member := range r.Members {

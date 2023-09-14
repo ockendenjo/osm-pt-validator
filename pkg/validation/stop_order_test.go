@@ -1,8 +1,9 @@
-package osm
+package validation
 
 import (
 	"testing"
 
+	"github.com/ockendenjo/osm-pt-validator/pkg/osm"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -10,7 +11,7 @@ func Test_validateStopOrder(t *testing.T) {
 	testcases := []struct {
 		name       string
 		wayDirects []wayDirection
-		relation   RelationElement
+		relation   osm.RelationElement
 		checkFn    func(t *testing.T, validationErrors []string)
 	}{
 		{
@@ -116,13 +117,13 @@ func Test_validateStopOrder(t *testing.T) {
 	}
 }
 
-func makeRelation(stops ...int64) RelationElement {
-	members := make([]Member, len(stops))
+func makeRelation(stops ...int64) osm.RelationElement {
+	members := make([]osm.Member, len(stops))
 	for i, stop := range stops {
-		members[i] = Member{Type: "node", Role: "stop", Ref: stop}
+		members[i] = osm.Member{Type: "node", Role: "stop", Ref: stop}
 	}
 
-	return RelationElement{
+	return osm.RelationElement{
 		Members: members,
 	}
 }
@@ -130,7 +131,7 @@ func makeRelation(stops ...int64) RelationElement {
 func makeWayWithDirection(direction wayTraversal, nodes ...int64) wayDirection {
 	return wayDirection{
 		direction: direction,
-		wayElem: WayElement{
+		wayElem: osm.WayElement{
 			Nodes: nodes,
 		},
 	}

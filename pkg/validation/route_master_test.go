@@ -1,21 +1,22 @@
-package osm
+package validation
 
 import (
 	"testing"
 
+	"github.com/ockendenjo/osm-pt-validator/pkg/osm"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestValidationRouteMasterMembers(t *testing.T) {
 	testcases := []struct {
 		name    string
-		members []Member
+		members []osm.Member
 		tags    map[string]string
 		checkFn func(t *testing.T, validationErrors []string)
 	}{
 		{
 			name: "non-relation member",
-			members: []Member{
+			members: []osm.Member{
 				{
 					Type: "way",
 					Ref:  34567,
@@ -27,7 +28,7 @@ func TestValidationRouteMasterMembers(t *testing.T) {
 		},
 		{
 			name: "missing tags",
-			members: []Member{
+			members: []osm.Member{
 				{
 					Type: "relation",
 					Ref:  34567,
@@ -41,7 +42,7 @@ func TestValidationRouteMasterMembers(t *testing.T) {
 		},
 		{
 			name: "valid route master",
-			members: []Member{
+			members: []osm.Member{
 				{
 					Type: "relation",
 					Ref:  34567,
@@ -59,7 +60,8 @@ func TestValidationRouteMasterMembers(t *testing.T) {
 	}
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			validationErrors := ValidateRouteMasterElement(RelationElement{Members: tc.members, Tags: tc.tags, ID: 1234})
+			validator := DefaultValidator(nil)
+			validationErrors := validator.RouteMasterElement(osm.RelationElement{Members: tc.members, Tags: tc.tags, ID: 1234})
 			tc.checkFn(t, validationErrors)
 		})
 	}

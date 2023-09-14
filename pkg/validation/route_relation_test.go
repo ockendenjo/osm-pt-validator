@@ -1,8 +1,9 @@
-package osm
+package validation
 
 import (
 	"testing"
 
+	"github.com/ockendenjo/osm-pt-validator/pkg/osm"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -11,7 +12,7 @@ func Test_validateRETags(t *testing.T) {
 	testcases := []struct {
 		name    string
 		tags    map[string]string
-		element RelationElement
+		element osm.RelationElement
 		checkFn func(t *testing.T, validationErrors []string)
 	}{
 		{
@@ -38,7 +39,7 @@ func Test_validateRETags(t *testing.T) {
 	}
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			validationErrors := validateRETags(RelationElement{Tags: tc.tags})
+			validationErrors := validateRETags(osm.RelationElement{Tags: tc.tags})
 			tc.checkFn(t, validationErrors)
 		})
 	}
@@ -48,12 +49,12 @@ func Test_validateREMemberOrder(t *testing.T) {
 
 	testcases := []struct {
 		name    string
-		members []Member
+		members []osm.Member
 		checkFn func(t *testing.T, validationErrors []string)
 	}{
 		{
 			name: "members in correct order",
-			members: []Member{
+			members: []osm.Member{
 				{
 					Type: "node",
 					Ref:  1234,
@@ -71,7 +72,7 @@ func Test_validateREMemberOrder(t *testing.T) {
 		},
 		{
 			name: "way before stops",
-			members: []Member{
+			members: []osm.Member{
 				{
 					Type: "way",
 					Ref:  1234,
@@ -94,7 +95,7 @@ func Test_validateREMemberOrder(t *testing.T) {
 		},
 		{
 			name: "stop after ways",
-			members: []Member{
+			members: []osm.Member{
 				{
 					Type: "node",
 					Ref:  1234,
@@ -117,7 +118,7 @@ func Test_validateREMemberOrder(t *testing.T) {
 		},
 		{
 			name: "node with missing role",
-			members: []Member{
+			members: []osm.Member{
 				{
 					Type: "node",
 					Ref:  1234,
@@ -135,7 +136,7 @@ func Test_validateREMemberOrder(t *testing.T) {
 		},
 		{
 			name: "missing stop/platforms",
-			members: []Member{
+			members: []osm.Member{
 				{
 					Type: "way",
 					Ref:  34567,
@@ -148,7 +149,7 @@ func Test_validateREMemberOrder(t *testing.T) {
 		},
 		{
 			name: "missing route ways",
-			members: []Member{
+			members: []osm.Member{
 				{
 					Type: "node",
 					Ref:  34567,
@@ -163,7 +164,7 @@ func Test_validateREMemberOrder(t *testing.T) {
 
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			validationErrors := validateREMemberOrder(RelationElement{Members: tc.members})
+			validationErrors := validateREMemberOrder(osm.RelationElement{Members: tc.members})
 			tc.checkFn(t, validationErrors)
 		})
 	}

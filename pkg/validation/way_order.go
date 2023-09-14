@@ -1,13 +1,15 @@
-package osm
+package validation
 
 import (
 	"context"
 	"fmt"
+
+	"github.com/ockendenjo/osm-pt-validator/pkg/osm"
 )
 
-func validateWayOrder(ctx context.Context, client *OSMClient, re RelationElement) ([]string, []wayDirection, error) {
+func (v *Validator) validateWayOrder(ctx context.Context, re osm.RelationElement) ([]string, []wayDirection, error) {
 	wayIds := []int64{}
-	ways := []Member{}
+	ways := []osm.Member{}
 	validationErrors := []string{}
 
 	for _, member := range re.Members {
@@ -17,7 +19,7 @@ func validateWayOrder(ctx context.Context, client *OSMClient, re RelationElement
 		}
 	}
 
-	waysMap := loadWays(ctx, client, wayIds)
+	waysMap := v.osmClient.LoadWays(ctx, wayIds)
 
 	//Check for any nil ways
 	for k, way := range waysMap {
@@ -133,7 +135,7 @@ func mapFromNodes(nodes []int64) map[int64]bool {
 	return nodeMap
 }
 
-func getDirectionJoinCircular(circularWay WayElement, joiningWay WayElement) wayTraversal {
+func getDirectionJoinCircular(circularWay osm.WayElement, joiningWay osm.WayElement) wayTraversal {
 	startNode := joiningWay.GetFirstNode()
 	lastNode := joiningWay.GetLastNode()
 
@@ -148,7 +150,7 @@ func getDirectionJoinCircular(circularWay WayElement, joiningWay WayElement) way
 	return traverseError
 }
 
-func getDirectionJoinLinear(secondWay WayElement, direction wayTraversal, joiningWay WayElement) wayTraversal {
+func getDirectionJoinLinear(secondWay osm.WayElement, direction wayTraversal, joiningWay osm.WayElement) wayTraversal {
 	lastNode := joiningWay.GetLastNode()
 	compareNode := secondWay.GetFirstNode()
 	if direction == traverseReverse {
@@ -173,7 +175,7 @@ func isIgnoredWay(wayId int64) bool {
 	return found
 }
 
-func checkOneway(way WayElement, direction wayTraversal) bool {
+func checkOneway(way osm.WayElement, direction wayTraversal) bool {
 	onewayTag := getOnewayTag(way)
 	if onewayTag == "" {
 		//No oneway restrictions
@@ -199,7 +201,7 @@ func checkOneway(way WayElement, direction wayTraversal) bool {
 	return false
 }
 
-func getOnewayTag(way WayElement) string {
+func getOnewayTag(way osm.WayElement) string {
 	if tag, found := way.Tags["oneway:psv"]; found {
 		return tag
 	}
@@ -216,7 +218,7 @@ func getOnewayTag(way WayElement) string {
 }
 
 type wayDirection struct {
-	wayElem   WayElement
+	wayElem   osm.WayElement
 	direction wayTraversal
 }
 

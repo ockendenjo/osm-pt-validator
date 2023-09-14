@@ -1,13 +1,15 @@
-package osm
+package validation
 
 import (
 	"context"
+
+	"github.com/ockendenjo/osm-pt-validator/pkg/osm"
 )
 
-func ValidateRelation(ctx context.Context, client *OSMClient, r Relation) ([]string, error) {
+func (v *Validator) RouteRelation(ctx context.Context, r osm.Relation) ([]string, error) {
 	validationErrors := []string{}
 	for _, relationElement := range r.Elements {
-		ve, err := validationRelationElement(ctx, client, relationElement)
+		ve, err := v.validationRelationElement(ctx, relationElement)
 		if err != nil {
 			return []string{}, err
 		}
@@ -16,7 +18,7 @@ func ValidateRelation(ctx context.Context, client *OSMClient, r Relation) ([]str
 	return validationErrors, nil
 }
 
-func validationRelationElement(ctx context.Context, client *OSMClient, re RelationElement) ([]string, error) {
+func (v *Validator) validationRelationElement(ctx context.Context, re osm.RelationElement) ([]string, error) {
 	allErrors := []string{}
 
 	tagValidationErrors := validateRETags(re)
@@ -25,13 +27,13 @@ func validationRelationElement(ctx context.Context, client *OSMClient, re Relati
 	memberOrderErrors := validateREMemberOrder(re)
 	allErrors = append(allErrors, memberOrderErrors...)
 
-	nodeErrors, err := validateRelationNodes(ctx, client, re)
+	nodeErrors, err := v.validateRelationNodes(ctx, re)
 	allErrors = append(allErrors, nodeErrors...)
 	if err != nil {
 		return allErrors, err
 	}
 
-	routeErrors, wayDirects, err := validateWayOrder(ctx, client, re)
+	routeErrors, wayDirects, err := v.validateWayOrder(ctx, re)
 	allErrors = append(allErrors, routeErrors...)
 
 	if len(routeErrors) == 0 {
@@ -42,51 +44,7 @@ func validationRelationElement(ctx context.Context, client *OSMClient, re Relati
 	return allErrors, err
 }
 
-const maxParallelOSMRequests = 10
-
-func loadWays(ctx context.Context, client *OSMClient, wayIds []int64) map[int64]*Way {
-	c := make(chan wayResult, len(wayIds))
-	wayMap := map[int64]*Way{}
-
-	remaining := 0
-	for idx, wayId := range wayIds {
-		go loadWay(ctx, client, wayId, c)
-		remaining++
-		if idx >= maxParallelOSMRequests {
-			//Wait before starting next request
-			wayResult := <-c
-			remaining--
-			wayMap[wayResult.WayID] = wayResult.Way
-		}
-	}
-	for i := 0; i < remaining; i++ {
-		wayResult := <-c
-		wayMap[wayResult.WayID] = wayResult.Way
-	}
-	return wayMap
-}
-
-func loadWay(ctx context.Context, client *OSMClient, wayId int64, c chan wayResult) {
-	way, err := client.GetWay(ctx, wayId)
-	if err != nil {
-		c <- wayResult{
-			WayID: wayId,
-			Way:   nil,
-		}
-		return
-	}
-	c <- wayResult{
-		WayID: wayId,
-		Way:   &way,
-	}
-}
-
-type wayResult struct {
-	WayID int64
-	Way   *Way
-}
-
-func validateREMemberOrder(re RelationElement) []string {
+func validateREMemberOrder(re osm.RelationElement) []string {
 	startedStops := false
 	startedRoute := false
 	routeBeforeStops := false
@@ -142,7 +100,7 @@ func validateREMemberOrder(re RelationElement) []string {
 	return validationErrors
 }
 
-func validateRETags(re RelationElement) []string {
+func validateRETags(re osm.RelationElement) []string {
 	validationErrors := []string{}
 
 	missingTagErrors := checkTagsPresent(re, "from", "to", "name", "network", "operator", "ref")

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sns"
@@ -14,6 +15,8 @@ import (
 	"github.com/ockendenjo/osm-pt-validator/pkg/handler"
 	"github.com/ockendenjo/osm-pt-validator/pkg/osm"
 	"github.com/ockendenjo/osm-pt-validator/pkg/snsEvents"
+	"github.com/ockendenjo/osm-pt-validator/pkg/validation"
+
 	"log/slog"
 )
 
@@ -38,6 +41,8 @@ func buildProcessRecord(sendMessageBatch sendMessageBatchApi, queueUrl string, o
 			return err
 		}
 
+		validator := validation.DefaultValidator(osmClient)
+
 		logger := handler.GetLogger(ctx).With("relationID", event.RelationID)
 		relation, err := osmClient.GetRelation(ctx, event.RelationID)
 		if err != nil {
@@ -47,16 +52,16 @@ func buildProcessRecord(sendMessageBatch sendMessageBatchApi, queueUrl string, o
 		logger.Info("processing relation", "type", element.Tags["type"])
 
 		if element.Tags["type"] == "route_master" {
-			return handleRouteMaster(ctx, logger, element, sendMessageBatch, queueUrl, publish, topicArn)
+			return handleRouteMaster(ctx, logger, validator, element, sendMessageBatch, queueUrl, publish, topicArn)
 		}
 		if element.Tags["type"] == "route" {
-			return handleRoute(ctx, logger, element, sendMessageBatch, queueUrl)
+			return handleRoute(ctx, logger, validator, element, sendMessageBatch, queueUrl)
 		}
 		return nil
 	}
 }
 
-func handleRoute(ctx context.Context, logger *slog.Logger, element osm.RelationElement, sendMessageBatch sendMessageBatchApi, queueUrl string) error {
+func handleRoute(ctx context.Context, logger *slog.Logger, validator *validation.Validator, element osm.RelationElement, sendMessageBatch sendMessageBatchApi, queueUrl string) error {
 	logger.Info("processing route relation")
 	messages := []types.SendMessageBatchRequestEntry{}
 
@@ -75,11 +80,11 @@ func handleRoute(ctx context.Context, logger *slog.Logger, element osm.RelationE
 	return err
 }
 
-func handleRouteMaster(ctx context.Context, logger *slog.Logger, element osm.RelationElement, sendMessageBatch sendMessageBatchApi, queueUrl string, publish publishApi, topicArn string) error {
+func handleRouteMaster(ctx context.Context, logger *slog.Logger, validator *validation.Validator, element osm.RelationElement, sendMessageBatch sendMessageBatchApi, queueUrl string, publish publishApi, topicArn string) error {
 	logger.Info("processing route_master relation")
 	messages := []types.SendMessageBatchRequestEntry{}
 
-	validationErrors := osm.ValidateRouteMasterElement(element)
+	validationErrors := validator.RouteMasterElement(element)
 	if len(validationErrors) > 0 {
 		logger.Error("relation is invalid", "validationErrors", validationErrors)
 

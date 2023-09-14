@@ -1,15 +1,17 @@
-package osm
+package validation
 
 import (
 	"context"
 	"fmt"
 	"math/rand"
 	"time"
+
+	"github.com/ockendenjo/osm-pt-validator/pkg/osm"
 )
 
-func validateRelationNodes(ctx context.Context, client *OSMClient, re RelationElement) ([]string, error) {
+func (v *Validator) validateRelationNodes(ctx context.Context, re osm.RelationElement) ([]string, error) {
 	nodeIds := []int64{}
-	nodes := []Member{}
+	nodes := []osm.Member{}
 	validationErrors := []string{}
 
 	for _, member := range re.Members {
@@ -19,7 +21,7 @@ func validateRelationNodes(ctx context.Context, client *OSMClient, re RelationEl
 		}
 	}
 
-	nodesMap := loadNodes(ctx, client, nodeIds)
+	nodesMap := v.osmClient.LoadNodes(ctx, nodeIds)
 
 	for k, way := range nodesMap {
 		if way == nil {
@@ -27,12 +29,11 @@ func validateRelationNodes(ctx context.Context, client *OSMClient, re RelationEl
 		}
 	}
 
-	checkNaptan := shouldCheckNaptanTags()
 	for _, node := range nodes {
 		role := node.Role
 		nodeObj := nodesMap[node.Ref]
 		if role == "platform" || role == "platform_exit_only" || role == "platform_entry_only" {
-			validationErrors = append(validationErrors, validatePlatformNode(nodeObj, checkNaptan)...)
+			validationErrors = append(validationErrors, validatePlatformNode(nodeObj, v.config.NaptanPlatformTags)...)
 		}
 
 		if role == "stop" || role == "stop_exit_only" || role == "stop_entry_only" {
@@ -49,7 +50,7 @@ func shouldCheckNaptanTags() bool {
 	return rand.Float64() > threshold
 }
 
-func validatePlatformNode(node *Node, checkNaptan bool) []string {
+func validatePlatformNode(node *osm.Node, checkNaptan bool) []string {
 	validationErrors := []string{}
 
 	for _, element := range node.Elements {
@@ -80,7 +81,7 @@ func validatePlatformNode(node *Node, checkNaptan bool) []string {
 	return validationErrors
 }
 
-func validateStopNode(node *Node) []string {
+func validateStopNode(node *osm.Node) []string {
 	validationErrors := []string{}
 
 	for _, element := range node.Elements {
@@ -103,46 +104,4 @@ func validateStopNode(node *Node) []string {
 	}
 
 	return validationErrors
-}
-
-func loadNodes(ctx context.Context, client *OSMClient, nodeIds []int64) map[int64]*Node {
-	c := make(chan nodeResult, len(nodeIds))
-	nodeMap := map[int64]*Node{}
-
-	remaining := 0
-	for idx, wayId := range nodeIds {
-		go loadNode(ctx, client, wayId, c)
-		remaining++
-		if idx >= maxParallelOSMRequests {
-			//Wait before starting next request
-			nodeResult := <-c
-			remaining--
-			nodeMap[nodeResult.nodeID] = nodeResult.node
-		}
-	}
-	for i := 0; i < remaining; i++ {
-		wayResult := <-c
-		nodeMap[wayResult.nodeID] = wayResult.node
-	}
-	return nodeMap
-}
-
-func loadNode(ctx context.Context, client *OSMClient, wayId int64, c chan nodeResult) {
-	node, err := client.GetNode(ctx, wayId)
-	if err != nil {
-		c <- nodeResult{
-			nodeID: wayId,
-			node:   nil,
-		}
-		return
-	}
-	c <- nodeResult{
-		nodeID: wayId,
-		node:   &node,
-	}
-}
-
-type nodeResult struct {
-	nodeID int64
-	node   *Node
 }

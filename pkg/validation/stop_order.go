@@ -1,9 +1,13 @@
-package osm
+package validation
 
-import "fmt"
+import (
+	"fmt"
 
-func validateStopOrder(wayDirects []wayDirection, re RelationElement) []string {
-	stops := []Member{}
+	"github.com/ockendenjo/osm-pt-validator/pkg/osm"
+)
+
+func validateStopOrder(wayDirects []wayDirection, re osm.RelationElement) []string {
+	stops := []osm.Member{}
 	stopMap := map[int64][]int{}
 	validationErrors := []string{}
 
@@ -48,7 +52,7 @@ func validateStopOrder(wayDirects []wayDirection, re RelationElement) []string {
 	return validationErrors
 }
 
-func getNodesInOrder(direction wayTraversal, we WayElement) []int64 {
+func getNodesInOrder(direction wayTraversal, we osm.WayElement) []int64 {
 	if direction == traverseForward || direction == traverseAny {
 		return we.Nodes
 	}
