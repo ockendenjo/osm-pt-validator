@@ -103,7 +103,7 @@ func validateREMemberOrder(re osm.RelationElement) []string {
 func validateRETags(re osm.RelationElement) []string {
 	validationErrors := []string{}
 
-	missingTagErrors := checkTagsPresent(re, "from", "to", "name", "network", "operator", "ref")
+	missingTagErrors := checkTagsPresent(re, "from", "to", "name", "operator", "ref")
 	validationErrors = append(validationErrors, missingTagErrors...)
 
 	for k, v := range map[string]string{
