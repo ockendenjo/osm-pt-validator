@@ -5,7 +5,8 @@
     "routes": {
         "cumbria": [
             {"name": "78", "relation_id": 10844238, "comment": "Keswick <=> Borrowdale"},
-            {"name": "516", "relation_id": 8483115, "comment": "Ambleside <=> Dungeon Ghyll"}
+            {"name": "516", "relation_id": 8483115, "comment": "Ambleside <=> Dungeon Ghyll"},
+            {"name": "555", "relation_id": 8025080, "comment": "Lancaster <=> Keswick"}
         ]
     }
 }
