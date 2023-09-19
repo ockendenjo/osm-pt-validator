@@ -20,8 +20,8 @@ Provided as a Go script (runnable from terminal) and an AWS application for dail
 ## Script
 
 ```shell
-# go run scripts/validate/main.go <relationId>
-go run scripts/validate/main.go 103630
+# go run scripts/validate/main.go [-npt] -r <relationId>
+go run scripts/validate/main.go -r 103630
 ```
 
 ## AWS application
