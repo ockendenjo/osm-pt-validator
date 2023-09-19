@@ -35,3 +35,23 @@ func (m Member) String() string {
 func (m Member) GetElementURL() string {
 	return fmt.Sprintf("https://www.openstreetmap.org/%s/%d", m.Type, m.Ref)
 }
+
+func (m Member) RoleIsStop() bool {
+	roles := []string{"stop", "stop_entry_only", "stop_exit_only"}
+	for _, role := range roles {
+		if m.Role == role {
+			return true
+		}
+	}
+	return false
+}
+
+func (m Member) RoleIsPlatform() bool {
+	roles := []string{"platform", "platform_entry_only", "platform_exit_only"}
+	for _, role := range roles {
+		if m.Role == role {
+			return true
+		}
+	}
+	return false
+}

@@ -30,13 +30,12 @@ func (v *Validator) validateRelationNodes(ctx context.Context, re osm.RelationEl
 	}
 
 	for _, node := range nodes {
-		role := node.Role
 		nodeObj := nodesMap[node.Ref]
-		if role == "platform" || role == "platform_exit_only" || role == "platform_entry_only" {
+		if node.RoleIsPlatform() {
 			validationErrors = append(validationErrors, validatePlatformNode(nodeObj, v.config.NaptanPlatformTags)...)
 		}
 
-		if role == "stop" || role == "stop_exit_only" || role == "stop_entry_only" {
+		if node.RoleIsStop() {
 			validationErrors = append(validationErrors, validateStopNode(nodeObj)...)
 		}
 	}

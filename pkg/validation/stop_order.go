@@ -12,7 +12,7 @@ func validateStopOrder(wayDirects []wayDirection, re osm.RelationElement) []stri
 	validationErrors := []string{}
 
 	for _, member := range re.Members {
-		if member.Type == "node" && member.Role == "stop" {
+		if member.Type == "node" && member.RoleIsStop() {
 			stops = append(stops, member)
 			stopMap[member.Ref] = nil
 		}
