@@ -71,6 +71,11 @@ func validatePlatformNode(node *osm.Node, checkNaptan bool) []string {
 			validationErrors = append(validationErrors, fmt.Sprintf("node should have highway=bus_stop - %s", element.GetElementURL()))
 		}
 
+		_, found = element.Tags["name"]
+		if !found {
+			validationErrors = append(validationErrors, fmt.Sprintf("node is missing name tag - %s", element.GetElementURL()))
+		}
+
 		if checkNaptan {
 			missingTagErrors := checkTagsPresent(element, "naptan:AtcoCode")
 			validationErrors = append(validationErrors, missingTagErrors...)
