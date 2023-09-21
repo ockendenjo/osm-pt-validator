@@ -51,6 +51,7 @@
             {"name": "47B", "relation_id": 0},
             {"name": "48", "relation_id": 0},
             {"name": "49", "relation_id": 7654545},
+            {"name": "63", "relation_id": 16358697, "comment": "Balerno <=> Queensferry"},
             {"name": "98", "relation_id": 0}
         ],
         "edinburgh_airport": [
