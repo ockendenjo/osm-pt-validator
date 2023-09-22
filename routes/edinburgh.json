@@ -27,7 +27,7 @@
             {"name": "24", "relation_id": 946201},
             {"name": "25", "relation_id": 7650283},
             {"name": "26", "relation_id": 11074556},
-            {"name": "X26", "relation_id": 0},
+            {"name": "X26", "relation_id": 16364083},
             {"name": "27", "relation_id": 1358434},
             {"name": "29", "relation_id": 12561097},
             {"name": "X29", "relation_id": 0},
@@ -49,7 +49,7 @@
             {"name": "46", "relation_id": 0},
             {"name": "47", "relation_id": 11245656},
             {"name": "47B", "relation_id": 0},
-            {"name": "48", "relation_id": 0},
+            {"name": "48", "relation_id": 16364632},
             {"name": "49", "relation_id": 7654545},
             {"name": "63", "relation_id": 16358697, "comment": "Balerno <=> Queensferry"},
             {"name": "98", "relation_id": 0}
