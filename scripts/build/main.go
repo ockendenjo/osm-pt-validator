@@ -47,7 +47,7 @@ func buildLambda(mainFile string) error {
 	outPath := fmt.Sprintf("%s/bootstrap", outDir)
 
 	fmt.Printf("Build %s\n", inputDir)
-	cmd := exec.Command("go", "build", "-o", outPath, "-ldflags=-w -s", inputDir)
+	cmd := exec.Command("go", "build", "-o", outPath, "-trimpath", "-buildvcs=false", "-ldflags=-w -s", inputDir)
 	cmd.Env = os.Environ()
 	cmd.Env = append(cmd.Env, "GOOS=linux")
 	cmd.Env = append(cmd.Env, "GOARCH=arm64")
