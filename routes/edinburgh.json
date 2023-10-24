@@ -1,6 +1,7 @@
 {
     "config": {
-        "naptanPlatformTags": true
+        "naptanPlatformTags": true,
+        "minimumNodeMembers": 10
     },
     "routes": {
         "edinburgh_city": [

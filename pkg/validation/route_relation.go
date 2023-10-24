@@ -41,6 +41,9 @@ func (v *Validator) validationRelationElement(ctx context.Context, re osm.Relati
 		allErrors = append(allErrors, stopErrors...)
 	}
 
+	if !v.validateNodeMembersCount(re) {
+		allErrors = append(allErrors, "relation does not have enough node members")
+	}
 	return allErrors, err
 }
 

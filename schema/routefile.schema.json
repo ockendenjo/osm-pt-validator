@@ -10,6 +10,9 @@
             "properties": {
                 "naptanPlatformTags": {
                     "type": "boolean"
+                },
+                "minimumNodeMembers": {
+                    "type": "number"
                 }
             },
             "additionalProperties": false
