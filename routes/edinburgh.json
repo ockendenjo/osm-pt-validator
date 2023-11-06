@@ -63,7 +63,7 @@
         ],
         "edinburgh_country": [
             {"name": "43", "relation_id": 11105014},
-            {"name": "X18", "relation_id": 0},
+            {"name": "X18", "relation_id": 16459450, "comment": "Edinburgh <=> Whitburn"},
             {"name": "X27", "relation_id": 0},
             {"name": "X28", "relation_id": 0}
         ],
@@ -108,6 +108,9 @@
         "stagecoach_east_scotland": [
             {"name": "X52", "relation_id": 16314703},
             {"name": "X54", "relation_id": 16465378, "comment": "Edinburgh <=> St Andrews"}
+        ],
+        "ember": [
+            {"name": "E1", "relation_id": 16622637, "comment": "Edinburgh <=> Dundee"}
         ]
     }
 }
