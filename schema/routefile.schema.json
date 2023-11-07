@@ -1,18 +1,20 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://example.com/product.schema.json",
     "title": "Routefile",
     "description": "A file with routes to be validated",
     "type": "object",
     "properties": {
         "config": {
             "type": "object",
+            "description": "Configuration options for the validator",
             "properties": {
                 "naptanPlatformTags": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "description": "Whether to validate NaPTAN tags on platform nodes"
                 },
                 "minimumNodeMembers": {
-                    "type": "number"
+                    "type": "number",
+                    "description": "Minimum number of nodes (platforms/stops) a route must contain to be considered valid"
                 },
                 "ignoreTraversalDirectionWays": {
                     "description": "Ways where the one-way direction will not be checked",
@@ -33,13 +35,16 @@
                         "type": "object",
                         "properties": {
                             "name": {
-                                "type": "string"
+                                "type": "string",
+                                "description": "Data in this field is not used by the validator, but can make the config file more understandable to humans"
                             },
                             "relation_id": {
-                                "type": "number"
+                                "type": "number",
+                                "description": "Must be non-zero for the route to be validated"
                             },
                             "comment": {
-                                "type": "string"
+                                "type": "string",
+                                "description": "Data in this field is not used by the validator"
                             }
                         },
                         "required": ["name", "relation_id"],

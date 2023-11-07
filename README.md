@@ -33,3 +33,5 @@ make deploy
 ```
 
 Looks for `.json` files in `s3://<bucketName>/routes/**.json`
+
+See [routefile.schema.json](schema/routefile.schema.json) for the JSON-schema or [routes](routes) for example files.
