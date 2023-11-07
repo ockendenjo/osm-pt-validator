@@ -13,6 +13,13 @@
                 },
                 "minimumNodeMembers": {
                     "type": "number"
+                },
+                "ignoreTraversalDirectionWays": {
+                    "description": "Ways where the one-way direction will not be checked",
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
                 }
             },
             "additionalProperties": false

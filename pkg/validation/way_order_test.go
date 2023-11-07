@@ -29,9 +29,10 @@ func Test_validateWayOrder(t *testing.T) {
 	}
 
 	testcases := []struct {
-		name    string
-		members []osm.Member
-		checkFn func(t *testing.T, validationErrors []string, err error)
+		name      string
+		members   []osm.Member
+		setConfig func(config *Config)
+		checkFn   func(t *testing.T, validationErrors []string, err error)
 	}{
 		{
 			name:    "valid route",
@@ -114,6 +115,14 @@ func Test_validateWayOrder(t *testing.T) {
 			members: setupWays(10, 2),
 			checkFn: expectedValid,
 		},
+		{
+			name:    "route with oneway way traversed in wrong direction, but allowed because of config",
+			members: setupWays(5, 7),
+			setConfig: func(config *Config) {
+				config.IgnoreTraversalDirectionWays = []int64{7}
+			},
+			checkFn: expectedValid,
+		},
 	}
 
 	svr, err := setupTestServer()
@@ -127,7 +136,11 @@ func Test_validateWayOrder(t *testing.T) {
 	for _, tc := range testcases {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			validator := DefaultValidator(osmClient)
+			c := Config{}
+			if tc.setConfig != nil {
+				tc.setConfig(&c)
+			}
+			validator := NewValidator(c, osmClient)
 			validationErrors, _, err := validator.validateWayOrder(context.Background(), osm.RelationElement{Members: tc.members})
 			tc.checkFn(t, validationErrors, err)
 		})

@@ -1,7 +1,13 @@
 {
     "config": {
         "naptanPlatformTags": true,
-        "minimumNodeMembers": 10
+        "minimumNodeMembers": 10,
+        "ignoreTraversalDirectionWays": [
+            61883421,
+            4871756,
+            9234350,
+            224830909
+        ]
     },
     "routes": {
         "edinburgh_city": [

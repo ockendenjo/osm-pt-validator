@@ -102,7 +102,7 @@ func (v *Validator) validateWayOrder(ctx context.Context, re osm.RelationElement
 
 	for _, d := range wayDirects {
 		wayElem := d.wayElem
-		if !checkOneway(wayElem, d.direction) {
+		if !v.checkOneway(wayElem, d.direction) {
 			validationErrors = append(validationErrors, fmt.Sprintf("way with oneway tag is traversed in wrong direction - %s", wayElem.GetElementURL()))
 		}
 	}
@@ -163,26 +163,14 @@ func getDirectionJoinLinear(secondWay osm.WayElement, direction wayTraversal, jo
 	return traverseReverse
 }
 
-func isIgnoredWay(wayId int64) bool {
-	//Roadworks in Haymarket
-	ignoredWays := map[int64]bool{
-		61883421:  true,
-		4871756:   true,
-		9234350:   true,
-		224830909: true,
-	}
-	_, found := ignoredWays[wayId]
-	return found
-}
-
-func checkOneway(way osm.WayElement, direction wayTraversal) bool {
+func (v *Validator) checkOneway(way osm.WayElement, direction wayTraversal) bool {
 	onewayTag := getOnewayTag(way)
 	if onewayTag == "" {
 		//No oneway restrictions
 		return true
 	}
 
-	if isIgnoredWay(way.ID) {
+	if v.config.IsWayDirectionIgnored(way.ID) {
 		return true
 	}
 
