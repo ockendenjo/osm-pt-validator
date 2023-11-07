@@ -58,7 +58,14 @@ func buildLambda(mainFile string) error {
 		fmt.Printf("\n")
 		return err
 	}
-	fmt.Printf("OK    %s\n\n", outPath)
+	size := float64(0)
+	fi, err := os.Stat(outPath)
+	if err == nil {
+		size = float64(fi.Size()) / (1000 * 1000)
+		fmt.Printf("OK    %s %.1fMB\n\n", outPath, size)
+	} else {
+		fmt.Printf("OK    %s\n\n", outPath)
+	}
 
 	cmd = exec.Command("find", inputDir, "-type", "f", "-name", "*.json")
 	stdout, err := cmd.Output()
