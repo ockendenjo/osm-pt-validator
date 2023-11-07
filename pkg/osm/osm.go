@@ -4,11 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/aws/aws-xray-sdk-go/xray"
 	"io"
 	"net/http"
 	"sync"
 	"time"
+
+	"github.com/aws/aws-xray-sdk-go/xray"
 )
 
 const defaultBaseUrl = "https://api.openstreetmap.org/api/0.6"
@@ -141,14 +142,19 @@ func (c *OSMClient) GetNode(ctx context.Context, nodeId int64) (Node, error) {
 		return Node{}, err
 	}
 
-	var node Node
-	err = json.Unmarshal(bytes, &node)
+	var nodeRes nodeResponse
+	err = json.Unmarshal(bytes, &nodeRes)
 	if err != nil {
 		return Node{}, err
 	}
 
+	node := nodeRes.Elements[0]
 	c.cacheNode(node)
 	return node, nil
+}
+
+type nodeResponse struct {
+	Elements []Node `json:"elements"`
 }
 
 func (c *OSMClient) getCachedNode(nodeId int64) (Node, bool) {
@@ -159,7 +165,7 @@ func (c *OSMClient) getCachedNode(nodeId int64) (Node, bool) {
 }
 
 func (c *OSMClient) cacheNode(node Node) {
-	nodeId := node.Elements[0].ID
+	nodeId := node.ID
 	c.nodeCache.mu.Lock()
 	defer c.nodeCache.mu.Unlock()
 	c.nodeCache.v[nodeId] = node

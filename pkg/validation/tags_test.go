@@ -18,21 +18,21 @@ func Test_checkTagsPresent(t *testing.T) {
 	}{
 		{
 			name:   "all tags present",
-			object: osm.NodeElement{Tags: map[string]string{"foo": "value", "bar": "value"}},
+			object: osm.Node{Tags: map[string]string{"foo": "value", "bar": "value"}},
 			checkFn: func(t *testing.T, ve []string) {
 				assert.Empty(t, ve)
 			},
 		},
 		{
 			name:   "one tag missing",
-			object: osm.NodeElement{Tags: map[string]string{"foo": "value"}},
+			object: osm.Node{Tags: map[string]string{"foo": "value"}},
 			checkFn: func(t *testing.T, ve []string) {
 				assert.Contains(t, ve, "missing tag 'bar' - https://www.openstreetmap.org/node/0")
 			},
 		},
 		{
 			name:   "multiple tags missing",
-			object: osm.NodeElement{Tags: map[string]string{}},
+			object: osm.Node{Tags: map[string]string{}},
 			checkFn: func(t *testing.T, ve []string) {
 				assert.Contains(t, ve, "missing tag 'foo' - https://www.openstreetmap.org/node/0")
 				assert.Contains(t, ve, "missing tag 'bar' - https://www.openstreetmap.org/node/0")

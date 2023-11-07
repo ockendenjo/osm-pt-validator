@@ -52,34 +52,32 @@ func shouldCheckNaptanTags() bool {
 func validatePlatformNode(node *osm.Node, checkNaptan bool) []string {
 	validationErrors := []string{}
 
-	for _, element := range node.Elements {
-		pt, found := element.Tags["public_transport"]
-		if !found {
-			validationErrors = append(validationErrors, fmt.Sprintf("node is missing public_transport tag - %s", element.GetElementURL()))
-		} else if pt != "platform" {
-			validationErrors = append(validationErrors, fmt.Sprintf("node should have public_transport=platform - %s", element.GetElementURL()))
-		}
+	pt, found := node.Tags["public_transport"]
+	if !found {
+		validationErrors = append(validationErrors, fmt.Sprintf("node is missing public_transport tag - %s", node.GetElementURL()))
+	} else if pt != "platform" {
+		validationErrors = append(validationErrors, fmt.Sprintf("node should have public_transport=platform - %s", node.GetElementURL()))
+	}
 
-		_, found = element.Tags["disused:highway"]
-		if found {
-			validationErrors = append(validationErrors, fmt.Sprintf("node has disused:highway tag - %s", element.GetElementURL()))
-		}
+	_, found = node.Tags["disused:highway"]
+	if found {
+		validationErrors = append(validationErrors, fmt.Sprintf("node has disused:highway tag - %s", node.GetElementURL()))
+	}
 
-		//Don't require the highway tag to be present - Naptan imported stops don't have it set (to prevent rendering)
-		highway, found := element.Tags["highway"]
-		if found && highway != "bus_stop" {
-			validationErrors = append(validationErrors, fmt.Sprintf("node should have highway=bus_stop - %s", element.GetElementURL()))
-		}
+	//Don't require the highway tag to be present - Naptan imported stops don't have it set (to prevent rendering)
+	highway, found := node.Tags["highway"]
+	if found && highway != "bus_stop" {
+		validationErrors = append(validationErrors, fmt.Sprintf("node should have highway=bus_stop - %s", node.GetElementURL()))
+	}
 
-		_, found = element.Tags["name"]
-		if !found {
-			validationErrors = append(validationErrors, fmt.Sprintf("node is missing name tag - %s", element.GetElementURL()))
-		}
+	_, found = node.Tags["name"]
+	if !found {
+		validationErrors = append(validationErrors, fmt.Sprintf("node is missing name tag - %s", node.GetElementURL()))
+	}
 
-		if checkNaptan {
-			missingTagErrors := checkTagsPresent(element, "naptan:AtcoCode")
-			validationErrors = append(validationErrors, missingTagErrors...)
-		}
+	if checkNaptan {
+		missingTagErrors := checkTagsPresent(node, "naptan:AtcoCode")
+		validationErrors = append(validationErrors, missingTagErrors...)
 	}
 
 	return validationErrors
@@ -88,23 +86,21 @@ func validatePlatformNode(node *osm.Node, checkNaptan bool) []string {
 func validateStopNode(node *osm.Node) []string {
 	validationErrors := []string{}
 
-	for _, element := range node.Elements {
-		pt, found := element.Tags["public_transport"]
-		if !found {
-			validationErrors = append(validationErrors, fmt.Sprintf("node is missing public_transport tag - %s", element.GetElementURL()))
-		} else if pt != "stop_position" {
-			validationErrors = append(validationErrors, fmt.Sprintf("node should have public_transport=stop_position - %s", element.GetElementURL()))
-		}
+	pt, found := node.Tags["public_transport"]
+	if !found {
+		validationErrors = append(validationErrors, fmt.Sprintf("node is missing public_transport tag - %s", node.GetElementURL()))
+	} else if pt != "stop_position" {
+		validationErrors = append(validationErrors, fmt.Sprintf("node should have public_transport=stop_position - %s", node.GetElementURL()))
+	}
 
-		bus, found := element.Tags["bus"]
-		if found && bus != "yes" {
-			validationErrors = append(validationErrors, fmt.Sprintf("node should have bus=yes - %s", element.GetElementURL()))
-		}
+	bus, found := node.Tags["bus"]
+	if found && bus != "yes" {
+		validationErrors = append(validationErrors, fmt.Sprintf("node should have bus=yes - %s", node.GetElementURL()))
+	}
 
-		name, found := element.Tags["name"]
-		if !found || len(name) < 1 {
-			validationErrors = append(validationErrors, fmt.Sprintf("node is missing name tag - %s", element.GetElementURL()))
-		}
+	name, found := node.Tags["name"]
+	if !found || len(name) < 1 {
+		validationErrors = append(validationErrors, fmt.Sprintf("node is missing name tag - %s", node.GetElementURL()))
 	}
 
 	return validationErrors

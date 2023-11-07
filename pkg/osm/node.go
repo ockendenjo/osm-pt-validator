@@ -3,10 +3,6 @@ package osm
 import "fmt"
 
 type Node struct {
-	Elements []NodeElement `json:"elements"`
-}
-
-type NodeElement struct {
 	Type    string            `json:"type"`
 	ID      int64             `json:"id"`
 	Lat     float32           `json:"lat"`
@@ -15,10 +11,10 @@ type NodeElement struct {
 	Tags    map[string]string `json:"tags"`
 }
 
-func (ne NodeElement) GetTags() map[string]string {
-	return ne.Tags
+func (n Node) GetTags() map[string]string {
+	return n.Tags
 }
 
-func (ne NodeElement) GetElementURL() string {
-	return fmt.Sprintf("https://www.openstreetmap.org/node/%d", ne.ID)
+func (n Node) GetElementURL() string {
+	return fmt.Sprintf("https://www.openstreetmap.org/node/%d", n.ID)
 }
