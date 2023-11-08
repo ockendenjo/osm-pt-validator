@@ -9,7 +9,7 @@ import (
 	"github.com/ockendenjo/osm-pt-validator/pkg/osm"
 )
 
-func (v *Validator) validateRelationNodes(ctx context.Context, re osm.RelationElement) ([]string, error) {
+func (v *Validator) validateRelationNodes(ctx context.Context, re osm.Relation) ([]string, error) {
 	nodeIds := []int64{}
 	nodes := []osm.Member{}
 	validationErrors := []string{}

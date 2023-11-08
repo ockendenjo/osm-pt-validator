@@ -44,7 +44,7 @@ func main() {
 
 func doValidation(ctx context.Context, validator *validation.Validator, osmClient *osm.OSMClient, relation osm.Relation) (bool, error) {
 
-	switch relation.Elements[0].Tags["type"] {
+	switch relation.Tags["type"] {
 	case "route":
 		return validateRoute(ctx, validator, relation)
 	case "route_master":
@@ -55,25 +55,23 @@ func doValidation(ctx context.Context, validator *validation.Validator, osmClien
 }
 
 func validateRouteMaster(ctx context.Context, validator *validation.Validator, osmClient *osm.OSMClient, relation osm.Relation) (bool, error) {
-	log.Printf("validating relation: %s", relation.Elements[0].GetElementURL())
+	log.Printf("validating relation: %s", relation.GetElementURL())
 
 	validationErrors := validator.RouteMaster(relation)
 	printErrors(validationErrors)
 	isValid := len(validationErrors) < 1
 
-	for _, element := range relation.Elements {
-		for _, member := range element.Members {
-			if member.Type == "relation" {
-				fmt.Println("")
-				subRelation, err := osmClient.GetRelation(ctx, member.Ref)
-				if err != nil {
-					return false, err
-				}
-				subIsValid, err := validateRoute(ctx, validator, subRelation)
-				isValid = isValid && subIsValid
-				if err != nil {
-					return false, err
-				}
+	for _, member := range relation.Members {
+		if member.Type == "relation" {
+			fmt.Println("")
+			subRelation, err := osmClient.GetRelation(ctx, member.Ref)
+			if err != nil {
+				return false, err
+			}
+			subIsValid, err := validateRoute(ctx, validator, subRelation)
+			isValid = isValid && subIsValid
+			if err != nil {
+				return false, err
 			}
 		}
 	}
@@ -82,7 +80,7 @@ func validateRouteMaster(ctx context.Context, validator *validation.Validator, o
 }
 
 func validateRoute(ctx context.Context, validator *validation.Validator, relation osm.Relation) (bool, error) {
-	log.Printf("validating relation: %s", relation.Elements[0].GetElementURL())
+	log.Printf("validating relation: %s", relation.GetElementURL())
 	validationErrors, err := validator.RouteRelation(ctx, relation)
 	if err != nil {
 		return false, err

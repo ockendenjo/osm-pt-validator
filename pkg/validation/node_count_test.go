@@ -12,25 +12,25 @@ func TestValidator_validateNodeMembersCount(t *testing.T) {
 	testcases := []struct {
 		name           string
 		config         Config
-		relElement     osm.RelationElement
+		relElement     osm.Relation
 		expectedResult bool
 	}{
 		{
 			name:           "should return true if config ignores node count",
 			config:         Config{MinimumNodeMembers: 0},
-			relElement:     osm.RelationElement{Members: []osm.Member{}},
+			relElement:     osm.Relation{Members: []osm.Member{}},
 			expectedResult: true,
 		},
 		{
 			name:           "should return true if relation element has enough nodes",
 			config:         Config{MinimumNodeMembers: 1},
-			relElement:     osm.RelationElement{Members: []osm.Member{{Type: "node"}}},
+			relElement:     osm.Relation{Members: []osm.Member{{Type: "node"}}},
 			expectedResult: true,
 		},
 		{
 			name:           "should return false if relation element has too few nodes",
 			config:         Config{MinimumNodeMembers: 1},
-			relElement:     osm.RelationElement{Members: []osm.Member{{Type: "way"}}},
+			relElement:     osm.Relation{Members: []osm.Member{{Type: "way"}}},
 			expectedResult: false,
 		},
 	}

@@ -55,7 +55,7 @@ func buildProcessRecord(client *osm.OSMClient, publish publishApi, topicArn stri
 
 			outputEvent := snsEvents.InvalidRelationEvent{
 				RelationID:       event.RelationID,
-				RelationName:     relation.Elements[0].Tags["name"],
+				RelationName:     relation.Tags["name"],
 				ValidationErrors: validationErrors,
 			}
 			bytes, err := json.Marshal(outputEvent)

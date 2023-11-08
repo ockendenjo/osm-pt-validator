@@ -62,12 +62,16 @@ func (c *OSMClient) GetRelation(ctx context.Context, relationId int64) (Relation
 		return Relation{}, err
 	}
 
-	var relation Relation
+	var relation relationsResponse
 	err = json.Unmarshal(bytes, &relation)
 	if err != nil {
 		return Relation{}, err
 	}
-	return relation, nil
+	return relation.Elements[0], nil
+}
+
+type relationsResponse struct {
+	Elements []Relation `json:"elements"`
 }
 
 type WayCache struct {

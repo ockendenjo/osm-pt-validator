@@ -2,9 +2,10 @@ package osm
 
 import (
 	"encoding/json"
-	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_unmarshallRelation(t *testing.T) {
@@ -13,7 +14,7 @@ func Test_unmarshallRelation(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	var relation Relation
+	var relation relationsResponse
 	err = json.Unmarshal(bytes, &relation)
 	if err != nil {
 		t.Fatal(err)

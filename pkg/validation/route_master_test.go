@@ -61,7 +61,7 @@ func TestValidationRouteMasterMembers(t *testing.T) {
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
 			validator := DefaultValidator(nil)
-			validationErrors := validator.RouteMasterElement(osm.RelationElement{Members: tc.members, Tags: tc.tags, ID: 1234})
+			validationErrors := validator.RouteMaster(osm.Relation{Members: tc.members, Tags: tc.tags, ID: 1234})
 			tc.checkFn(t, validationErrors)
 		})
 	}

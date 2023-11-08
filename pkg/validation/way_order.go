@@ -7,7 +7,7 @@ import (
 	"github.com/ockendenjo/osm-pt-validator/pkg/osm"
 )
 
-func (v *Validator) validateWayOrder(ctx context.Context, re osm.RelationElement) ([]string, []wayDirection, error) {
+func (v *Validator) validateWayOrder(ctx context.Context, re osm.Relation) ([]string, []wayDirection, error) {
 	wayIds := []int64{}
 	ways := []osm.Member{}
 	validationErrors := []string{}

@@ -48,20 +48,20 @@ func buildProcessRecord(sendMessageBatch sendMessageBatchApi, queueUrl string, o
 		if err != nil {
 			return err
 		}
-		element := relation.Elements[0]
-		logger.Info("processing relation", "type", element.Tags["type"])
 
-		if element.Tags["type"] == "route_master" {
-			return handleRouteMaster(ctx, logger, validator, element, sendMessageBatch, queueUrl, publish, topicArn)
+		logger.Info("processing relation", "type", relation.Tags["type"])
+
+		if relation.Tags["type"] == "route_master" {
+			return handleRouteMaster(ctx, logger, validator, relation, sendMessageBatch, queueUrl, publish, topicArn)
 		}
-		if element.Tags["type"] == "route" {
-			return handleRoute(ctx, logger, element, event.Config, sendMessageBatch, queueUrl)
+		if relation.Tags["type"] == "route" {
+			return handleRoute(ctx, logger, relation, event.Config, sendMessageBatch, queueUrl)
 		}
 		return nil
 	}
 }
 
-func handleRoute(ctx context.Context, logger *slog.Logger, element osm.RelationElement, config validation.Config, sendMessageBatch sendMessageBatchApi, queueUrl string) error {
+func handleRoute(ctx context.Context, logger *slog.Logger, element osm.Relation, config validation.Config, sendMessageBatch sendMessageBatchApi, queueUrl string) error {
 	logger.Info("processing route relation")
 	messages := []types.SendMessageBatchRequestEntry{}
 
@@ -80,11 +80,11 @@ func handleRoute(ctx context.Context, logger *slog.Logger, element osm.RelationE
 	return err
 }
 
-func handleRouteMaster(ctx context.Context, logger *slog.Logger, validator *validation.Validator, element osm.RelationElement, sendMessageBatch sendMessageBatchApi, queueUrl string, publish publishApi, topicArn string) error {
+func handleRouteMaster(ctx context.Context, logger *slog.Logger, validator *validation.Validator, element osm.Relation, sendMessageBatch sendMessageBatchApi, queueUrl string, publish publishApi, topicArn string) error {
 	logger.Info("processing route_master relation")
 	messages := []types.SendMessageBatchRequestEntry{}
 
-	validationErrors := validator.RouteMasterElement(element)
+	validationErrors := validator.RouteMaster(element)
 	if len(validationErrors) > 0 {
 		logger.Error("relation is invalid", "validationErrors", validationErrors)
 

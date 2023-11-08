@@ -7,18 +7,14 @@ import (
 )
 
 func (v *Validator) RouteRelation(ctx context.Context, r osm.Relation) ([]string, error) {
-	validationErrors := []string{}
-	for _, relationElement := range r.Elements {
-		ve, err := v.validationRelationElement(ctx, relationElement)
-		if err != nil {
-			return []string{}, err
-		}
-		validationErrors = append(validationErrors, ve...)
+	ve, err := v.validationRelationElement(ctx, r)
+	if err != nil {
+		return []string{}, err
 	}
-	return validationErrors, nil
+	return ve, nil
 }
 
-func (v *Validator) validationRelationElement(ctx context.Context, re osm.RelationElement) ([]string, error) {
+func (v *Validator) validationRelationElement(ctx context.Context, re osm.Relation) ([]string, error) {
 	allErrors := []string{}
 
 	tagValidationErrors := validateRETags(re)
@@ -47,7 +43,7 @@ func (v *Validator) validationRelationElement(ctx context.Context, re osm.Relati
 	return allErrors, err
 }
 
-func validateREMemberOrder(re osm.RelationElement) []string {
+func validateREMemberOrder(re osm.Relation) []string {
 	startedStops := false
 	startedRoute := false
 	routeBeforeStops := false
@@ -103,7 +99,7 @@ func validateREMemberOrder(re osm.RelationElement) []string {
 	return validationErrors
 }
 
-func validateRETags(re osm.RelationElement) []string {
+func validateRETags(re osm.Relation) []string {
 	validationErrors := []string{}
 
 	missingTagErrors := checkTagsPresent(re, "from", "to", "name", "operator", "ref")

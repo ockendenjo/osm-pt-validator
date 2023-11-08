@@ -11,7 +11,7 @@ func Test_validateStopOrder(t *testing.T) {
 	testcases := []struct {
 		name       string
 		wayDirects []wayDirection
-		relation   osm.RelationElement
+		relation   osm.Relation
 		checkFn    func(t *testing.T, validationErrors []string)
 	}{
 		{
@@ -117,14 +117,14 @@ func Test_validateStopOrder(t *testing.T) {
 	}
 }
 
-func makeRelation(stops ...int64) osm.RelationElement {
+func makeRelation(stops ...int64) osm.Relation {
 	members := make([]osm.Member, len(stops))
 	roles := []string{"stop", "stop_entry_only", "stop_exit_only"}
 	for i, stop := range stops {
 		members[i] = osm.Member{Type: "node", Role: roles[i%3], Ref: stop}
 	}
 
-	return osm.RelationElement{
+	return osm.Relation{
 		Members: members,
 	}
 }

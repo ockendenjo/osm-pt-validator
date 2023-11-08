@@ -141,7 +141,7 @@ func Test_validateWayOrder(t *testing.T) {
 				tc.setConfig(&c)
 			}
 			validator := NewValidator(c, osmClient)
-			validationErrors, _, err := validator.validateWayOrder(context.Background(), osm.RelationElement{Members: tc.members})
+			validationErrors, _, err := validator.validateWayOrder(context.Background(), osm.Relation{Members: tc.members})
 			tc.checkFn(t, validationErrors, err)
 		})
 	}

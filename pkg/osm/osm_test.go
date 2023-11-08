@@ -34,7 +34,7 @@ func Test_getRelation(t *testing.T) {
 			},
 			checkFn: func(t *testing.T, r Relation, err error) {
 				assert.Nil(t, err)
-				assert.Equal(t, int64(3411082864), r.Elements[0].ID)
+				assert.Equal(t, int64(3411082864), r.ID)
 			},
 		},
 		{

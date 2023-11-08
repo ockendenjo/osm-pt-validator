@@ -12,7 +12,7 @@ func Test_validateRETags(t *testing.T) {
 	testcases := []struct {
 		name    string
 		tags    map[string]string
-		element osm.RelationElement
+		element osm.Relation
 		checkFn func(t *testing.T, validationErrors []string)
 	}{
 		{
@@ -39,7 +39,7 @@ func Test_validateRETags(t *testing.T) {
 	}
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			validationErrors := validateRETags(osm.RelationElement{Tags: tc.tags})
+			validationErrors := validateRETags(osm.Relation{Tags: tc.tags})
 			tc.checkFn(t, validationErrors)
 		})
 	}
@@ -164,7 +164,7 @@ func Test_validateREMemberOrder(t *testing.T) {
 
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			validationErrors := validateREMemberOrder(osm.RelationElement{Members: tc.members})
+			validationErrors := validateREMemberOrder(osm.Relation{Members: tc.members})
 			tc.checkFn(t, validationErrors)
 		})
 	}

@@ -3,10 +3,6 @@ package osm
 import "fmt"
 
 type Relation struct {
-	Elements []RelationElement `json:"elements"`
-}
-
-type RelationElement struct {
 	Type    string            `json:"type"`
 	ID      int64             `json:"id"`
 	Version int32             `json:"version"`
@@ -14,12 +10,12 @@ type RelationElement struct {
 	Tags    map[string]string `json:"tags"`
 }
 
-func (re RelationElement) GetTags() map[string]string {
-	return re.Tags
+func (r Relation) GetTags() map[string]string {
+	return r.Tags
 }
 
-func (re RelationElement) GetElementURL() string {
-	return fmt.Sprintf("https://www.openstreetmap.org/relation/%d", re.ID)
+func (r Relation) GetElementURL() string {
+	return fmt.Sprintf("https://www.openstreetmap.org/relation/%d", r.ID)
 }
 
 type Member struct {

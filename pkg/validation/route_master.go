@@ -8,14 +8,6 @@ import (
 
 func (v *Validator) RouteMaster(r osm.Relation) []string {
 	validationErrors := []string{}
-	for _, relationElement := range r.Elements {
-		validationErrors = append(validationErrors, v.RouteMasterElement(relationElement)...)
-	}
-	return validationErrors
-}
-
-func (v *Validator) RouteMasterElement(r osm.RelationElement) []string {
-	validationErrors := []string{}
 
 	for _, member := range r.Members {
 		if member.Type != "relation" {

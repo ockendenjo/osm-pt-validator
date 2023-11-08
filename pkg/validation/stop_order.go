@@ -6,7 +6,7 @@ import (
 	"github.com/ockendenjo/osm-pt-validator/pkg/osm"
 )
 
-func validateStopOrder(wayDirects []wayDirection, re osm.RelationElement) []string {
+func validateStopOrder(wayDirects []wayDirection, re osm.Relation) []string {
 	stops := []osm.Member{}
 	stopMap := map[int64][]int{}
 	validationErrors := []string{}
