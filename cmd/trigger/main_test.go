@@ -5,13 +5,16 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
+	sqsTypes "github.com/aws/aws-sdk-go-v2/service/sqs/types"
 	"github.com/aws/jsii-runtime-go"
+	"github.com/ockendenjo/osm-pt-validator/pkg/handler"
+	"github.com/ockendenjo/osm-pt-validator/pkg/util"
+	"github.com/ockendenjo/osm-pt-validator/pkg/validation"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -94,83 +97,103 @@ func Test_listObjectKeys(t *testing.T) {
 	}
 }
 
-func Test_getRelationIDs(t *testing.T) {
+func Test_readFile(t *testing.T) {
 
 	testcases := []struct {
-		name          string
-		numObjectKeys int
-		files         map[string][]int64
-		checkFn       func(t *testing.T, ids map[int64]bool, err error)
+		name      string
+		getObject getObjectApi
+		checkFn   func(t *testing.T, res readResult)
 	}{
 		{
-			name:          "should load multiple files",
-			numObjectKeys: 2,
-			files: map[string][]int64{
-				"1.json": {11702779, 0, 11087988},
-				"2.json": {11087988, 310090},
-			},
-			checkFn: func(t *testing.T, ids map[int64]bool, err error) {
-				assert.NoError(t, err)
-				exp := map[int64]bool{310090: true, 11087988: true, 11702779: true}
-				assert.Equal(t, exp, ids)
-			},
-		},
-		{
-			name:          "should return error if getObject returns error",
-			numObjectKeys: 2,
-			checkFn: func(t *testing.T, ids map[int64]bool, err error) {
-				assert.Error(t, err)
-			},
-		},
-		{
-			name:          "should read lots of files",
-			numObjectKeys: 12,
-			files: map[string][]int64{
-				"1.json":  {1},
-				"2.json":  {2},
-				"3.json":  {3},
-				"4.json":  {4},
-				"5.json":  {5},
-				"6.json":  {6},
-				"7.json":  {7},
-				"8.json":  {8},
-				"9.json":  {9},
-				"10.json": {10},
-				"11.json": {11},
-				"12.json": {12},
-			},
-			checkFn: func(t *testing.T, ids map[int64]bool, err error) {
-				assert.NoError(t, err)
-				assert.Equal(t, 12, len(ids))
-			},
-		},
-	}
-	for _, tc := range testcases {
-		t.Run(tc.name, func(t *testing.T) {
-			getObject := func(ctx context.Context, params *s3.GetObjectInput, optFns ...func(*s3.Options)) (*s3.GetObjectOutput, error) {
-				ids, found := tc.files[*params.Key]
-				if !found {
-					return nil, errors.New("something bad happened")
-				}
-
-				routeGroup := []Route{}
-				for _, id := range ids {
-					routeGroup = append(routeGroup, Route{RelationID: id})
-				}
-				routeFile := RoutesFile{Routes: map[string][]Route{"foo": routeGroup}, Config: Config{Naptan: true}}
-
+			name: "should read file",
+			getObject: func(ctx context.Context, params *s3.GetObjectInput, optFns ...func(*s3.Options)) (*s3.GetObjectOutput, error) {
+				routeGroup := []Route{{RelationID: 1}, {RelationID: 2}}
+				routeFile := RoutesFile{Routes: map[string][]Route{"foo": routeGroup}, Config: validation.Config{NaptanPlatformTags: true}}
 				b, err := json.Marshal(routeFile)
 				assert.NoError(t, err)
 				return &s3.GetObjectOutput{Body: io.NopCloser(bytes.NewReader(b))}, nil
+			},
+			checkFn: func(t *testing.T, res readResult) {
+				assert.Nil(t, res.err)
+				expected := []handler.CheckRelationEvent{
+					{RelationID: 1, Config: validation.Config{NaptanPlatformTags: true}},
+					{RelationID: 2, Config: validation.Config{NaptanPlatformTags: true}},
+				}
+				assert.Equal(t, expected, res.events)
+			},
+		},
+		{
+			name: "should return error if unmarshalling file body fails",
+			getObject: func(ctx context.Context, params *s3.GetObjectInput, optFns ...func(*s3.Options)) (*s3.GetObjectOutput, error) {
+				return &s3.GetObjectOutput{Body: io.NopCloser(bytes.NewReader([]byte("this_is_not_a_json_file")))}, nil
+			},
+			checkFn: func(t *testing.T, res readResult) {
+				assert.NotNil(t, res.err)
+			},
+		},
+		{
+			name: "should return error if GetObject API returns an error",
+			getObject: func(ctx context.Context, params *s3.GetObjectInput, optFns ...func(*s3.Options)) (*s3.GetObjectOutput, error) {
+				return nil, errors.New("something bad happened")
+			},
+			checkFn: func(t *testing.T, res readResult) {
+				assert.NotNil(t, res.err)
+			},
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+
+			c := make(chan readResult)
+			readFile := getFileReader(tc.getObject, "bucketName")
+			go readFile(context.Background(), "routes.json", c)
+			res := <-c
+			tc.checkFn(t, res)
+		})
+	}
+}
+
+func Test_handler(t *testing.T) {
+
+	testcases := []struct {
+		name      string
+		readFile  fileReader
+		sqsSender func(t *testing.T) util.SQSBatchSender
+	}{
+		{
+			name: "should send events to SQS",
+			readFile: func(ctx context.Context, key string, ch chan readResult) {
+				if key == "foo.json" {
+					ch <- readResult{err: nil, events: []handler.CheckRelationEvent{
+						{RelationID: 1, Config: validation.Config{NaptanPlatformTags: true}},
+						{RelationID: 2, Config: validation.Config{NaptanPlatformTags: true}},
+					}}
+					return
+				}
+				ch <- readResult{err: nil, events: []handler.CheckRelationEvent{
+					{RelationID: 3, Config: validation.Config{NaptanPlatformTags: false}},
+					{RelationID: 4, Config: validation.Config{NaptanPlatformTags: false}},
+				}}
+			},
+			sqsSender: func(t *testing.T) util.SQSBatchSender {
+				return func(ctx context.Context, entries []sqsTypes.SendMessageBatchRequestEntry) error {
+					assert.Len(t, entries, 4)
+					return nil
+				}
+			},
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			listObjectsFn := func(ctx context.Context) ([]string, error) {
+				return []string{"foo.json", "bar.json"}, nil
 			}
 
-			getRelationIDs := buildGetRelationIDs(getObject, "bucketName")
-			objectKeys := make([]string, tc.numObjectKeys)
-			for i := 0; i < tc.numObjectKeys; i++ {
-				objectKeys[i] = fmt.Sprintf("%d.json", i+1)
-			}
-			ids, err := getRelationIDs(context.Background(), objectKeys)
-			tc.checkFn(t, ids, err)
+			handlerFn := buildHandler(listObjectsFn, tc.readFile, tc.sqsSender(t))
+			_, err := handlerFn(context.Background(), nil)
+			assert.Nil(t, err)
 		})
 	}
 }
