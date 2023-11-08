@@ -145,9 +145,10 @@ func getFileReader(getObject getObjectApi, bucketName string) fileReader {
 		events := []handler.CheckRelationEvent{}
 		for _, routes := range file.Routes {
 			for _, route := range routes {
-
-				outEvent := handler.CheckRelationEvent{RelationID: route.RelationID, Config: file.Config}
-				events = append(events, outEvent)
+				if route.RelationID != 0 {
+					outEvent := handler.CheckRelationEvent{RelationID: route.RelationID, Config: file.Config}
+					events = append(events, outEvent)
+				}
 			}
 		}
 		c <- readResult{events: events}

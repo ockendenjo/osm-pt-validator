@@ -123,6 +123,20 @@ func Test_readFile(t *testing.T) {
 			},
 		},
 		{
+			name: "should ignore relations with zero-value relation IDs",
+			getObject: func(ctx context.Context, params *s3.GetObjectInput, optFns ...func(*s3.Options)) (*s3.GetObjectOutput, error) {
+				routeGroup := []Route{{RelationID: 0}}
+				routeFile := RoutesFile{Routes: map[string][]Route{"foo": routeGroup}, Config: validation.Config{NaptanPlatformTags: true}}
+				b, err := json.Marshal(routeFile)
+				assert.NoError(t, err)
+				return &s3.GetObjectOutput{Body: io.NopCloser(bytes.NewReader(b))}, nil
+			},
+			checkFn: func(t *testing.T, res readResult) {
+				assert.Nil(t, res.err)
+				assert.Len(t, res.events, 0)
+			},
+		},
+		{
 			name: "should return error if unmarshalling file body fails",
 			getObject: func(ctx context.Context, params *s3.GetObjectInput, optFns ...func(*s3.Options)) (*s3.GetObjectOutput, error) {
 				return &s3.GetObjectOutput{Body: io.NopCloser(bytes.NewReader([]byte("this_is_not_a_json_file")))}, nil
