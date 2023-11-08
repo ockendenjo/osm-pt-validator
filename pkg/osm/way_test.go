@@ -2,9 +2,10 @@ package osm
 
 import (
 	"encoding/json"
-	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_unmarshallWay(t *testing.T) {
@@ -13,7 +14,7 @@ func Test_unmarshallWay(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	var way Way
+	var way wayResponse
 	err = json.Unmarshal(bytes, &way)
 	if err != nil {
 		t.Fatal(err)

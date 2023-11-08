@@ -75,6 +75,10 @@ type WayCache struct {
 	v  map[int64]Way
 }
 
+type wayResponse struct {
+	Elements []Way `json:"elements"`
+}
+
 func (c *OSMClient) GetWay(ctx context.Context, wayId int64) (Way, error) {
 	cacheWay, found := c.getCachedWay(wayId)
 	if found {
@@ -101,12 +105,13 @@ func (c *OSMClient) GetWay(ctx context.Context, wayId int64) (Way, error) {
 		return Way{}, err
 	}
 
-	var way Way
-	err = json.Unmarshal(bytes, &way)
+	var wayRes wayResponse
+	err = json.Unmarshal(bytes, &wayRes)
 	if err != nil {
 		return Way{}, err
 	}
 
+	way := wayRes.Elements[0]
 	c.cacheWay(way)
 	return way, nil
 }
@@ -179,7 +184,7 @@ func (c *OSMClient) getCachedWay(wayId int64) (Way, bool) {
 }
 
 func (c *OSMClient) cacheWay(way Way) {
-	wayId := way.Elements[0].ID
+	wayId := way.ID
 	c.wayCache.mu.Lock()
 	defer c.wayCache.mu.Unlock()
 	c.wayCache.v[wayId] = way

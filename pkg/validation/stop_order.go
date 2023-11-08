@@ -52,7 +52,7 @@ func validateStopOrder(wayDirects []wayDirection, re osm.RelationElement) []stri
 	return validationErrors
 }
 
-func getNodesInOrder(direction wayTraversal, we osm.WayElement) []int64 {
+func getNodesInOrder(direction wayTraversal, we osm.Way) []int64 {
 	if direction == traverseForward || direction == traverseAny {
 		return we.Nodes
 	}

@@ -2,11 +2,12 @@ package osm
 
 import (
 	"context"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_getRelation(t *testing.T) {
@@ -87,7 +88,7 @@ func Test_getWay(t *testing.T) {
 			},
 			checkFn: func(t *testing.T, w Way, err error) {
 				assert.Nil(t, err)
-				assert.Equal(t, int64(2154620362), w.Elements[0].ID)
+				assert.Equal(t, int64(2154620362), w.ID)
 			},
 		},
 		{

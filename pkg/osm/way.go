@@ -3,10 +3,6 @@ package osm
 import "fmt"
 
 type Way struct {
-	Elements []WayElement `json:"elements"`
-}
-
-type WayElement struct {
 	Type    string            `json:"type"`
 	ID      int64             `json:"id"`
 	Version int32             `json:"version"`
@@ -14,22 +10,22 @@ type WayElement struct {
 	Tags    map[string]string `json:"tags"`
 }
 
-func (we WayElement) GetTags() map[string]string {
-	return we.Tags
+func (w *Way) GetTags() map[string]string {
+	return w.Tags
 }
 
-func (we WayElement) GetElementURL() string {
-	return fmt.Sprintf("https://www.openstreetmap.org/way/%d", we.ID)
+func (w *Way) GetElementURL() string {
+	return fmt.Sprintf("https://www.openstreetmap.org/way/%d", w.ID)
 }
 
-func (we WayElement) GetFirstNode() int64 {
-	return we.Nodes[0]
+func (w *Way) GetFirstNode() int64 {
+	return w.Nodes[0]
 }
 
-func (we WayElement) GetLastNode() int64 {
-	return we.Nodes[len(we.Nodes)-1]
+func (w *Way) GetLastNode() int64 {
+	return w.Nodes[len(w.Nodes)-1]
 }
 
-func (we WayElement) IsCircular() bool {
-	return we.GetFirstNode() == we.GetLastNode()
+func (w *Way) IsCircular() bool {
+	return w.GetFirstNode() == w.GetLastNode()
 }

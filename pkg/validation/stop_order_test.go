@@ -132,7 +132,7 @@ func makeRelation(stops ...int64) osm.RelationElement {
 func makeWayWithDirection(direction wayTraversal, nodes ...int64) wayDirection {
 	return wayDirection{
 		direction: direction,
-		wayElem: osm.WayElement{
+		wayElem: osm.Way{
 			Nodes: nodes,
 		},
 	}

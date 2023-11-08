@@ -33,7 +33,7 @@ func (v *Validator) validateWayOrder(ctx context.Context, re osm.RelationElement
 	hasGap := false
 
 	for _, relationMemberWay := range ways {
-		wayElem := (*waysMap[relationMemberWay.Ref]).Elements[0]
+		wayElem := *waysMap[relationMemberWay.Ref]
 
 		if len(allowedNodes) == 0 {
 			if wayElem.IsCircular() {
@@ -135,7 +135,7 @@ func mapFromNodes(nodes []int64) map[int64]bool {
 	return nodeMap
 }
 
-func getDirectionJoinCircular(circularWay osm.WayElement, joiningWay osm.WayElement) wayTraversal {
+func getDirectionJoinCircular(circularWay osm.Way, joiningWay osm.Way) wayTraversal {
 	startNode := joiningWay.GetFirstNode()
 	lastNode := joiningWay.GetLastNode()
 
@@ -150,7 +150,7 @@ func getDirectionJoinCircular(circularWay osm.WayElement, joiningWay osm.WayElem
 	return traverseError
 }
 
-func getDirectionJoinLinear(secondWay osm.WayElement, direction wayTraversal, joiningWay osm.WayElement) wayTraversal {
+func getDirectionJoinLinear(secondWay osm.Way, direction wayTraversal, joiningWay osm.Way) wayTraversal {
 	lastNode := joiningWay.GetLastNode()
 	compareNode := secondWay.GetFirstNode()
 	if direction == traverseReverse {
@@ -163,7 +163,7 @@ func getDirectionJoinLinear(secondWay osm.WayElement, direction wayTraversal, jo
 	return traverseReverse
 }
 
-func (v *Validator) checkOneway(way osm.WayElement, direction wayTraversal) bool {
+func (v *Validator) checkOneway(way osm.Way, direction wayTraversal) bool {
 	onewayTag := getOnewayTag(way)
 	if onewayTag == "" {
 		//No oneway restrictions
@@ -189,7 +189,7 @@ func (v *Validator) checkOneway(way osm.WayElement, direction wayTraversal) bool
 	return false
 }
 
-func getOnewayTag(way osm.WayElement) string {
+func getOnewayTag(way osm.Way) string {
 	if tag, found := way.Tags["oneway:psv"]; found {
 		return tag
 	}
@@ -206,7 +206,7 @@ func getOnewayTag(way osm.WayElement) string {
 }
 
 type wayDirection struct {
-	wayElem   osm.WayElement
+	wayElem   osm.Way
 	direction wayTraversal
 }
 
