@@ -13,8 +13,8 @@ import (
 	"github.com/aws/jsii-runtime-go"
 	"github.com/google/uuid"
 	"github.com/ockendenjo/osm-pt-validator/pkg/handler"
+	"github.com/ockendenjo/osm-pt-validator/pkg/routes"
 	"github.com/ockendenjo/osm-pt-validator/pkg/util"
-	"github.com/ockendenjo/osm-pt-validator/pkg/validation"
 )
 
 func main() {
@@ -78,11 +78,6 @@ func buildHandler(listObjects listObjects, readFile fileReader, batchSend util.S
 	}
 }
 
-type Route struct {
-	Name       string `json:"name"`
-	RelationID int64  `json:"relation_id"`
-}
-
 type listObjectsV2Api func(ctx context.Context, params *s3.ListObjectsV2Input, optFns ...func(*s3.Options)) (*s3.ListObjectsV2Output, error)
 type listObjects func(ctx context.Context) ([]string, error)
 type getObjectApi func(ctx context.Context, params *s3.GetObjectInput, optFns ...func(*s3.Options)) (*s3.GetObjectOutput, error)
@@ -135,7 +130,7 @@ func getFileReader(getObject getObjectApi, bucketName string) fileReader {
 			return
 		}
 
-		var file RoutesFile
+		var file routes.RoutesFile
 		err = json.Unmarshal(bytes, &file)
 		if err != nil {
 			c <- readResult{err: err}
@@ -158,9 +153,4 @@ func getFileReader(getObject getObjectApi, bucketName string) fileReader {
 type readResult struct {
 	err    error
 	events []handler.CheckRelationEvent
-}
-
-type RoutesFile struct {
-	Config validation.Config  `json:"config"`
-	Routes map[string][]Route `json:"routes"`
 }

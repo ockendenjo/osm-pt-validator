@@ -13,6 +13,7 @@ import (
 	sqsTypes "github.com/aws/aws-sdk-go-v2/service/sqs/types"
 	"github.com/aws/jsii-runtime-go"
 	"github.com/ockendenjo/osm-pt-validator/pkg/handler"
+	"github.com/ockendenjo/osm-pt-validator/pkg/routes"
 	"github.com/ockendenjo/osm-pt-validator/pkg/util"
 	"github.com/ockendenjo/osm-pt-validator/pkg/validation"
 	"github.com/stretchr/testify/assert"
@@ -107,8 +108,8 @@ func Test_readFile(t *testing.T) {
 		{
 			name: "should read file",
 			getObject: func(ctx context.Context, params *s3.GetObjectInput, optFns ...func(*s3.Options)) (*s3.GetObjectOutput, error) {
-				routeGroup := []Route{{RelationID: 1}, {RelationID: 2}}
-				routeFile := RoutesFile{Routes: map[string][]Route{"foo": routeGroup}, Config: validation.Config{NaptanPlatformTags: true}}
+				routeGroup := []routes.Route{{RelationID: 1}, {RelationID: 2}}
+				routeFile := routes.RoutesFile{Routes: map[string][]routes.Route{"foo": routeGroup}, Config: validation.Config{NaptanPlatformTags: true}}
 				b, err := json.Marshal(routeFile)
 				assert.NoError(t, err)
 				return &s3.GetObjectOutput{Body: io.NopCloser(bytes.NewReader(b))}, nil
@@ -125,8 +126,8 @@ func Test_readFile(t *testing.T) {
 		{
 			name: "should ignore relations with zero-value relation IDs",
 			getObject: func(ctx context.Context, params *s3.GetObjectInput, optFns ...func(*s3.Options)) (*s3.GetObjectOutput, error) {
-				routeGroup := []Route{{RelationID: 0}}
-				routeFile := RoutesFile{Routes: map[string][]Route{"foo": routeGroup}, Config: validation.Config{NaptanPlatformTags: true}}
+				routeGroup := []routes.Route{{RelationID: 0}}
+				routeFile := routes.RoutesFile{Routes: map[string][]routes.Route{"foo": routeGroup}, Config: validation.Config{NaptanPlatformTags: true}}
 				b, err := json.Marshal(routeFile)
 				assert.NoError(t, err)
 				return &s3.GetObjectOutput{Body: io.NopCloser(bytes.NewReader(b))}, nil

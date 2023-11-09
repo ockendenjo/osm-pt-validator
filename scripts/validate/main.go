@@ -2,13 +2,16 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"os"
 
 	"github.com/ockendenjo/osm-pt-validator/pkg/osm"
+	"github.com/ockendenjo/osm-pt-validator/pkg/routes"
 	"github.com/ockendenjo/osm-pt-validator/pkg/validation"
 )
 
@@ -19,12 +22,67 @@ func main() {
 	flag.Int64Var(&relationId, "r", 0, "Relation ID")
 	var npt bool
 	flag.BoolVar(&npt, "npt", false, "Verify NaPTAN platform tags")
+	var inputFile string
+	flag.StringVar(&inputFile, "f", "", "Routes file (validation config read from file too)")
 	flag.Parse()
 
-	if relationId < 1 {
-		panic(errors.New("relationID (-r) must be specified"))
+	if relationId < 1 && inputFile == "" {
+		panic(errors.New("relationID (-r) or routes file (-f) must be specified"))
 	}
 
+	if relationId > 0 {
+		validateSingleRelation(ctx, relationId, npt)
+		return
+	}
+	validateFile(ctx, inputFile)
+}
+
+func validateFile(ctx context.Context, inputFile string) {
+	file, err := os.Open(inputFile)
+	if err != nil {
+		panic(err)
+	}
+	bytes, err := io.ReadAll(file)
+	if err != nil {
+		panic(err)
+	}
+	var routesFile routes.RoutesFile
+	err = json.Unmarshal(bytes, &routesFile)
+	if err != nil {
+		panic(err)
+	}
+
+	osmClient := osm.NewClient()
+	validator := validation.NewValidator(routesFile.Config, osmClient)
+
+	allValid := true
+	for _, routeList := range routesFile.Routes {
+		for _, r := range routeList {
+			if r.RelationID < 1 {
+				continue
+			}
+
+			relation, err := osmClient.GetRelation(ctx, r.RelationID)
+			if err != nil {
+				panic(err)
+			}
+
+			isValid, err := doValidation(ctx, validator, osmClient, relation)
+			if err != nil {
+				panic(err)
+			}
+			if !isValid {
+				allValid = false
+			}
+		}
+	}
+
+	if !allValid {
+		os.Exit(1)
+	}
+}
+
+func validateSingleRelation(ctx context.Context, relationId int64, npt bool) {
 	osmClient := osm.NewClient()
 	relation, err := osmClient.GetRelation(ctx, relationId)
 	if err != nil {

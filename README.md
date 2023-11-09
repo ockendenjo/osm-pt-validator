@@ -24,6 +24,16 @@ Provided as a Go script (runnable from terminal) and an AWS application for dail
 go run scripts/validate/main.go -r 103630
 ```
 
+```text
+Usage:
+  -f string
+        Routes file (validation config read from file too)
+  -npt
+        Verify NaPTAN platform tags
+  -r int
+        Relation ID
+```
+
 ## AWS application
 
 Requires AWS CDK to be installed
