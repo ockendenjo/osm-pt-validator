@@ -57,7 +57,10 @@ func validateFile(ctx context.Context, inputFile string) {
 
 	allValid := true
 	for _, routeList := range routesFile.Routes {
-		for _, r := range routeList {
+		for i, r := range routeList {
+			if i > 0 {
+				fmt.Println("")
+			}
 			if r.RelationID < 1 {
 				continue
 			}
