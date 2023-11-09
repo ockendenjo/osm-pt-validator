@@ -5,6 +5,7 @@ type Config struct {
 	MinimumNodeMembers           int     `json:"minimumNodeMembers"`
 	IgnoreTraversalDirectionWays []int64 `json:"ignoreTraversalDirectionWays"`
 	ignoreTraversalMap           map[int64]bool
+	MinimumRouteVariants         int `json:"minimumRouteVariants"`
 }
 
 func DefaultConfig() Config {

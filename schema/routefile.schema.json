@@ -22,6 +22,10 @@
                     "items": {
                         "type": "number"
                     }
+                },
+                "minimumRouteVariants": {
+                    "type": "number",
+                    "description": "The minimum number of routes a route-master relation must have"
                 }
             },
             "additionalProperties": false
