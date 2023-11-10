@@ -14,3 +14,7 @@ type Validator struct {
 	config    Config
 	osmClient *osm.OSMClient
 }
+
+func (v *Validator) GetConfig() Config {
+	return v.config
+}

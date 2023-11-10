@@ -111,7 +111,7 @@ func handleRouteMaster(ctx context.Context, logger *slog.Logger, validator *vali
 	for _, member := range element.Members {
 		if member.Type == "relation" {
 			logger.Info("relation contains relation", "subRelationID", member.Ref)
-			outEvent := handler.CheckRelationEvent{RelationID: member.Ref}
+			outEvent := handler.CheckRelationEvent{RelationID: member.Ref, Config: validator.GetConfig()}
 			bytes, err := json.Marshal(outEvent)
 			if err != nil {
 				return err
