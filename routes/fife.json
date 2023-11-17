@@ -1,0 +1,18 @@
+{
+    "config": {
+        "naptanPlatformTags": true,
+        "minimumNodeMembers": 10,
+        "ignoreTraversalDirectionWays": [
+            61883421,
+            4871756,
+            9234350,
+            224830909
+        ],
+        "minimumRouteVariants": 2
+    },
+    "routes": {
+        "airport": [
+            {"name": "747", "relation_id": 16708033, "comment": "Airport => Halbeath P&R"}
+        ]
+    }
+}
