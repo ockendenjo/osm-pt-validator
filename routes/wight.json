@@ -1,0 +1,21 @@
+{
+    "config": {
+        "naptanPlatformTags": true
+    },
+    "routes": {
+        "isle_of_wight": [
+            {"name": "1", "relation_id": 15641365},
+            {"name": "2", "relation_id": 11919278},
+            {"name": "3", "relation_id": 11943247},
+            {"name": "4", "relation_id": 11990622},
+            {"name": "5", "relation_id": 11992841},
+            {"name": "6", "relation_id": 16052805},
+            {"name": "7", "relation_id": 16055057},
+            {"name": "8", "relation_id": 11911997},
+            {"name": "9", "relation_id": 11990620},
+            {"name": "22", "relation_id": 11911999},
+            {"name": "24", "relation_id": 11911998},
+            {"name": "32", "relation_id": 16055055}
+        ]
+    }
+}
