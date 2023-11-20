@@ -2,6 +2,7 @@ package validation
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/ockendenjo/osm-pt-validator/pkg/osm"
 )
@@ -16,6 +17,11 @@ func (v *Validator) RouteRelation(ctx context.Context, r osm.Relation) ([]string
 
 func (v *Validator) validationRelationElement(ctx context.Context, re osm.Relation) ([]string, error) {
 	allErrors := []string{}
+
+	if !re.IsPTv2() {
+		errStr := fmt.Sprintf("tag 'public_transport:version' should have value '2' - %s", re.GetElementURL())
+		return []string{errStr}, nil
+	}
 
 	tagValidationErrors := validateRETags(re)
 	allErrors = append(allErrors, tagValidationErrors...)

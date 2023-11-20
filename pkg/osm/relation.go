@@ -18,6 +18,14 @@ func (r Relation) GetElementURL() string {
 	return fmt.Sprintf("https://www.openstreetmap.org/relation/%d", r.ID)
 }
 
+func (r Relation) IsPTv2() bool {
+	v, found := r.GetTags()["public_transport:version"]
+	if !found {
+		return false
+	}
+	return v == "2"
+}
+
 type Member struct {
 	Type string `json:"type"`
 	Ref  int64  `json:"ref"`
