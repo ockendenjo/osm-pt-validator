@@ -2,12 +2,6 @@
     "config": {
         "naptanPlatformTags": true,
         "minimumNodeMembers": 10,
-        "ignoreTraversalDirectionWays": [
-            61883421,
-            4871756,
-            9234350,
-            224830909
-        ],
         "minimumRouteVariants": 2
     },
     "routes": {
@@ -114,7 +108,8 @@
         ],
         "stagecoach_east_scotland": [
             {"name": "X52", "relation_id": 16314703},
-            {"name": "X54", "relation_id": 16465378, "comment": "Edinburgh <=> St Andrews"}
+            {"name": "X54", "relation_id": 16465378, "comment": "Edinburgh <=> St Andrews"},
+            {"name": "X55", "relation_id": 16730684, "comment": "Edinburgh <=> Dunfermline"}
         ],
         "ember": [
             {"name": "E1", "relation_id": 16622637, "comment": "Edinburgh <=> Dundee"}
