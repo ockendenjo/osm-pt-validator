@@ -97,7 +97,7 @@ func (lb *LambdaBuilder) WithEnvVar(envValue string, envKey string) *LambdaBuild
 func (lb *LambdaBuilder) Build() *LambdaConstruct {
 
 	lambdaFn := lambda.NewFunction(lb.scope, jsii.String("function"), &lambda.FunctionProps{
-		Runtime:                      lambda.Runtime_PROVIDED_AL2(),
+		Runtime:                      lambda.Runtime_PROVIDED_AL2023(),
 		Architecture:                 lambda.Architecture_ARM_64(),
 		Handler:                      jsii.String("function"),
 		Role:                         lb.role,
