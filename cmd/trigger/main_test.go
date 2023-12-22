@@ -12,7 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	sqsTypes "github.com/aws/aws-sdk-go-v2/service/sqs/types"
 	"github.com/aws/jsii-runtime-go"
-	"github.com/ockendenjo/osm-pt-validator/pkg/handler"
+	"github.com/ockendenjo/osm-pt-validator/pkg/events"
 	"github.com/ockendenjo/osm-pt-validator/pkg/routes"
 	"github.com/ockendenjo/osm-pt-validator/pkg/util"
 	"github.com/ockendenjo/osm-pt-validator/pkg/validation"
@@ -116,7 +116,7 @@ func Test_readFile(t *testing.T) {
 			},
 			checkFn: func(t *testing.T, res readResult) {
 				assert.Nil(t, res.err)
-				expected := []handler.CheckRelationEvent{
+				expected := []events.CheckRelationEvent{
 					{RelationID: 1, Config: validation.Config{NaptanPlatformTags: true}},
 					{RelationID: 2, Config: validation.Config{NaptanPlatformTags: true}},
 				}
@@ -180,13 +180,13 @@ func Test_handler(t *testing.T) {
 			name: "should send events to SQS",
 			readFile: func(ctx context.Context, key string, ch chan readResult) {
 				if key == "foo.json" {
-					ch <- readResult{err: nil, events: []handler.CheckRelationEvent{
+					ch <- readResult{err: nil, events: []events.CheckRelationEvent{
 						{RelationID: 1, Config: validation.Config{NaptanPlatformTags: true}},
 						{RelationID: 2, Config: validation.Config{NaptanPlatformTags: true}},
 					}}
 					return
 				}
-				ch <- readResult{err: nil, events: []handler.CheckRelationEvent{
+				ch <- readResult{err: nil, events: []events.CheckRelationEvent{
 					{RelationID: 3, Config: validation.Config{NaptanPlatformTags: false}},
 					{RelationID: 4, Config: validation.Config{NaptanPlatformTags: false}},
 				}}

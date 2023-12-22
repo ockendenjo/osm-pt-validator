@@ -1,4 +1,4 @@
-package handler
+package events
 
 import "github.com/ockendenjo/osm-pt-validator/pkg/validation"
 

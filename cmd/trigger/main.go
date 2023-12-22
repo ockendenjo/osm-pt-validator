@@ -12,7 +12,8 @@ import (
 	sqsTypes "github.com/aws/aws-sdk-go-v2/service/sqs/types"
 	"github.com/aws/jsii-runtime-go"
 	"github.com/google/uuid"
-	"github.com/ockendenjo/osm-pt-validator/pkg/handler"
+	"github.com/ockendenjo/handler"
+	"github.com/ockendenjo/osm-pt-validator/pkg/events"
 	"github.com/ockendenjo/osm-pt-validator/pkg/routes"
 	"github.com/ockendenjo/osm-pt-validator/pkg/util"
 )
@@ -49,7 +50,7 @@ func buildHandler(listObjects listObjects, readFile fileReader, batchSend util.S
 			remaining++
 		}
 
-		events := []handler.CheckRelationEvent{}
+		events := []events.CheckRelationEvent{}
 		for remaining > 0 {
 			result := <-c
 			remaining--
@@ -137,20 +138,20 @@ func getFileReader(getObject getObjectApi, bucketName string) fileReader {
 			return
 		}
 
-		events := []handler.CheckRelationEvent{}
+		outEvents := []events.CheckRelationEvent{}
 		for _, routes := range file.Routes {
 			for _, route := range routes {
 				if route.RelationID != 0 {
-					outEvent := handler.CheckRelationEvent{RelationID: route.RelationID, Config: file.Config}
-					events = append(events, outEvent)
+					outEvent := events.CheckRelationEvent{RelationID: route.RelationID, Config: file.Config}
+					outEvents = append(outEvents, outEvent)
 				}
 			}
 		}
-		c <- readResult{events: events}
+		c <- readResult{events: outEvents}
 	}
 }
 
 type readResult struct {
 	err    error
-	events []handler.CheckRelationEvent
+	events []events.CheckRelationEvent
 }

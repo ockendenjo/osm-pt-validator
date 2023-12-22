@@ -5,14 +5,15 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/aws/aws-lambda-go/events"
+	sqsEvents "github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sns"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/aws/aws-sdk-go-v2/service/sqs/types"
 	"github.com/aws/jsii-runtime-go"
 	"github.com/google/uuid"
-	"github.com/ockendenjo/osm-pt-validator/pkg/handler"
+	"github.com/ockendenjo/handler"
+	"github.com/ockendenjo/osm-pt-validator/pkg/events"
 	"github.com/ockendenjo/osm-pt-validator/pkg/osm"
 	"github.com/ockendenjo/osm-pt-validator/pkg/snsEvents"
 	"github.com/ockendenjo/osm-pt-validator/pkg/validation"
@@ -24,7 +25,7 @@ func main() {
 	queueUrl := handler.MustGetEnv("QUEUE_URL")
 	topicArn := handler.MustGetEnv("TOPIC_ARN")
 
-	handler.BuildAndStart(func(awsConfig aws.Config) handler.Handler[events.SQSEvent, events.SQSEventResponse] {
+	handler.BuildAndStart(func(awsConfig aws.Config) handler.Handler[sqsEvents.SQSEvent, sqsEvents.SQSEventResponse] {
 		sqsClient := sqs.NewFromConfig(awsConfig)
 		snsClient := sns.NewFromConfig(awsConfig)
 		osmClient := osm.NewClient().WithXRay()
@@ -34,8 +35,8 @@ func main() {
 }
 
 func buildProcessRecord(sendMessageBatch sendMessageBatchApi, queueUrl string, osmClient *osm.OSMClient, publish publishApi, topicArn string) handler.SQSRecordProcessor {
-	return func(ctx context.Context, record events.SQSMessage) error {
-		var event handler.CheckRelationEvent
+	return func(ctx context.Context, record sqsEvents.SQSMessage) error {
+		var event events.CheckRelationEvent
 		err := json.Unmarshal([]byte(record.Body), &event)
 		if err != nil {
 			return err
@@ -65,7 +66,7 @@ func handleRoute(ctx context.Context, logger *slog.Logger, element osm.Relation,
 	logger.Info("processing route relation")
 	messages := []types.SendMessageBatchRequestEntry{}
 
-	outEvent := handler.CheckRelationEvent{RelationID: element.ID, Config: config}
+	outEvent := events.CheckRelationEvent{RelationID: element.ID, Config: config}
 	bytes, err := json.Marshal(outEvent)
 	if err != nil {
 		return err
@@ -111,7 +112,7 @@ func handleRouteMaster(ctx context.Context, logger *slog.Logger, validator *vali
 	for _, member := range element.Members {
 		if member.Type == "relation" {
 			logger.Info("relation contains relation", "subRelationID", member.Ref)
-			outEvent := handler.CheckRelationEvent{RelationID: member.Ref, Config: validator.GetConfig()}
+			outEvent := events.CheckRelationEvent{RelationID: member.Ref, Config: validator.GetConfig()}
 			bytes, err := json.Marshal(outEvent)
 			if err != nil {
 				return err

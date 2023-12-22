@@ -5,21 +5,22 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/ockendenjo/osm-pt-validator/pkg/events"
 	"github.com/ockendenjo/osm-pt-validator/pkg/snsEvents"
 	"github.com/ockendenjo/osm-pt-validator/pkg/validation"
 
-	"github.com/aws/aws-lambda-go/events"
+	sqsEvents "github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sns"
 	"github.com/aws/jsii-runtime-go"
-	"github.com/ockendenjo/osm-pt-validator/pkg/handler"
+	"github.com/ockendenjo/handler"
 	"github.com/ockendenjo/osm-pt-validator/pkg/osm"
 )
 
 func main() {
 	topicArn := handler.MustGetEnv("TOPIC_ARN")
 
-	handler.BuildAndStart(func(awsConfig aws.Config) handler.Handler[events.SQSEvent, events.SQSEventResponse] {
+	handler.BuildAndStart(func(awsConfig aws.Config) handler.Handler[sqsEvents.SQSEvent, sqsEvents.SQSEventResponse] {
 		snsClient := sns.NewFromConfig(awsConfig)
 		osmClient := osm.NewClient().WithXRay()
 
@@ -29,9 +30,9 @@ func main() {
 }
 
 func buildProcessRecord(client *osm.OSMClient, publish publishApi, topicArn string) handler.SQSRecordProcessor {
-	return func(ctx context.Context, record events.SQSMessage) error {
+	return func(ctx context.Context, record sqsEvents.SQSMessage) error {
 
-		var event handler.CheckRelationEvent
+		var event events.CheckRelationEvent
 		err := json.Unmarshal([]byte(record.Body), &event)
 		if err != nil {
 			return err

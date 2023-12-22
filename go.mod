@@ -1,12 +1,11 @@
 module github.com/ockendenjo/osm-pt-validator
 
-go 1.21
+go 1.21.0
 
 require (
 	github.com/aws/aws-cdk-go/awscdk/v2 v2.116.0
 	github.com/aws/aws-lambda-go v1.43.0
 	github.com/aws/aws-sdk-go-v2 v1.24.0
-	github.com/aws/aws-sdk-go-v2/config v1.26.2
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.47.7
 	github.com/aws/aws-sdk-go-v2/service/sns v1.26.6
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.29.6
@@ -14,6 +13,7 @@ require (
 	github.com/aws/constructs-go/constructs/v10 v10.3.0
 	github.com/aws/jsii-runtime-go v1.93.0
 	github.com/google/uuid v1.5.0
+	github.com/ockendenjo/handler v1.0.1
 	github.com/stretchr/testify v1.8.4
 )
 
@@ -22,6 +22,7 @@ require (
 	github.com/andybalholm/brotli v1.0.6 // indirect
 	github.com/aws/aws-sdk-go v1.47.9 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.5.4 // indirect
+	github.com/aws/aws-sdk-go-v2/config v1.26.2 // indirect
 	github.com/aws/aws-sdk-go-v2/credentials v1.16.13 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.14.10 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.2.9 // indirect
