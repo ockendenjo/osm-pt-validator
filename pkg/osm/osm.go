@@ -70,6 +70,36 @@ func (c *OSMClient) GetRelation(ctx context.Context, relationId int64) (Relation
 	return relation.Elements[0], nil
 }
 
+func (c *OSMClient) GetRelationRelations(ctx context.Context, relationId int64) ([]Relation, error) {
+	url := fmt.Sprintf("%s/relation/%d/relations.json", c.baseUrl, relationId)
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	response, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	if response.StatusCode != 200 {
+		return nil, fmt.Errorf("HTTP status code %d", response.StatusCode)
+	}
+
+	bytes, err := io.ReadAll(response.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var relation relationsResponse
+	err = json.Unmarshal(bytes, &relation)
+	if err != nil {
+		return nil, err
+	}
+	return relation.Elements, nil
+
+}
+
 type relationsResponse struct {
 	Elements []Relation `json:"elements"`
 }

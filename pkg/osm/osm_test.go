@@ -2,6 +2,7 @@ package osm
 
 import (
 	"context"
+	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -114,6 +115,60 @@ func Test_getWay(t *testing.T) {
 			client := NewClient().WithBaseUrl(svr.URL)
 			way, err := client.GetWay(context.Background(), 2154620362)
 			tc.checkFn(t, way, err)
+		})
+	}
+}
+
+func Test_getRelationRelations(t *testing.T) {
+	bytes, err := os.ReadFile("testdata/relation_relations.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	testcases := []struct {
+		name      string
+		handlerFn func(t *testing.T) func(w http.ResponseWriter, r *http.Request)
+		checkFn   func(t *testing.T, r []Relation, err error)
+	}{
+		{
+			name: "HTTP 200",
+			handlerFn: func(t *testing.T) func(w http.ResponseWriter, r *http.Request) {
+				return func(w http.ResponseWriter, r *http.Request) {
+					require.Equal(t, "/relation/11562232/relations.json", r.RequestURI)
+					_, err := w.Write(bytes)
+					if err != nil {
+						t.Fatal(err)
+					}
+				}
+			},
+			checkFn: func(t *testing.T, r []Relation, err error) {
+				require.Nil(t, err)
+				require.Len(t, r, 1)
+				require.Equal(t, int64(3009058), r[0].ID)
+			},
+		},
+		{
+			name: "HTTP 404",
+			handlerFn: func(t *testing.T) func(w http.ResponseWriter, r *http.Request) {
+				return func(w http.ResponseWriter, r *http.Request) {
+					w.WriteHeader(404)
+				}
+			},
+			checkFn: func(t *testing.T, r []Relation, err error) {
+				require.EqualError(t, err, "HTTP status code 404")
+			},
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			handlerFn := http.HandlerFunc(tc.handlerFn(t))
+			svr := httptest.NewServer(handlerFn)
+			defer svr.Close()
+
+			client := NewClient().WithBaseUrl(svr.URL)
+			relation, err := client.GetRelationRelations(context.Background(), 11562232)
+			tc.checkFn(t, relation, err)
 		})
 	}
 }

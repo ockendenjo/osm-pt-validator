@@ -1,0 +1,41 @@
+{
+    "version": "0.6",
+    "generator": "CGImap 0.8.10 (1776867 spike-06.openstreetmap.org)",
+    "copyright": "OpenStreetMap and contributors",
+    "attribution": "http://www.openstreetmap.org/copyright",
+    "license": "http://opendatacommons.org/licenses/odbl/1-0/",
+    "elements": [
+        {
+            "type": "relation",
+            "id": 3009058,
+            "timestamp": "2023-11-12T14:14:44Z",
+            "version": 69,
+            "changeset": 143935023,
+            "user": "John-O",
+            "uid": 463360,
+            "members": [
+                {
+                    "type": "relation",
+                    "ref": 11562232,
+                    "role": ""
+                },
+                {
+                    "type": "relation",
+                    "ref": 11562231,
+                    "role": ""
+                }
+            ],
+            "tags": {
+                "name": "Bus 113: Pencaitland <=> Western General Hospital",
+                "network": "Lothian Buses",
+                "network:wikidata": "Q6684760",
+                "network:wikipedia": "en:Lothian Buses",
+                "operator": "Lothian Buses",
+                "ref": "113",
+                "route_master": "bus",
+                "source": "survey",
+                "type": "route_master"
+            }
+        }
+    ]
+}
