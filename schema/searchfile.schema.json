@@ -21,8 +21,15 @@
                             "items": {
                                 "type": "string"
                             }
+                        },
+                        "check_missing": {
+                            "type": "boolean"
+                        },
+                        "check_v1": {
+                            "type": "boolean"
                         }
                     },
+                    "required": ["bbox", "files"],
                     "additionalProperties": false
                 }
             },

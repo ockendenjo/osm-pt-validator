@@ -5,7 +5,9 @@
             "files": [
                 "edinburgh.json",
                 "fife.json"
-            ]
+            ],
+            "check_missing": true,
+            "check_v1": true
         }
     }
 }
