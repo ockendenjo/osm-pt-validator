@@ -58,9 +58,13 @@ jobs:
           wget https://github.com/neilpa/yajsv/releases/download/v1.4.0/yajsv.linux.amd64
           chmod +x ./yajsv.linux.amd64
 
-      - name: Validate JSON
+      - name: Validate routes JSON
         run: |
           find ./routes/ -type f -name "*.json" -print0 | xargs -0 -I{} ./yajsv.linux.amd64 -s schema/routefile.schema.json {}
+
+      - name: Validate search JSON
+        run: |
+          ./yajsv.linux.amd64 -s schema/searchfile.schema.json search/search.json
 
   deploy:
     name: deploy
@@ -101,3 +105,6 @@ jobs:
 
       - name: Sync routes
         run: aws s3 sync routes/ s3://${{vars.BUCKET_NAME}}/routes --delete
+
+      - name: Sync searches
+        run: aws s3 sync search/ s3://${{vars.BUCKET_NAME}}/search --delete

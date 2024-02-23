@@ -1,0 +1,11 @@
+{
+    "searches": {
+        "edinburgh": {
+            "bbox": [55.92, -3.42, 55.96, -2.94],
+            "files": [
+                "edinburgh.json",
+                "fife.json"
+            ]
+        }
+    }
+}
