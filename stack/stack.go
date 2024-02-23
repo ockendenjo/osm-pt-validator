@@ -52,6 +52,8 @@ func NewStack(scope constructs.Construct, id string, props *OSMPTStackProps) aws
 		Build().
 		AddSQSBatchTrigger(routeQueues)
 
+	awscdk.Tags_Of(stack).Add(jsii.String("application"), jsii.String("osm-pt-validator"), nil)
+
 	return stack
 }
 
