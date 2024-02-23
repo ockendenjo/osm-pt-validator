@@ -14,6 +14,7 @@ require (
 	github.com/aws/jsii-runtime-go v1.93.0
 	github.com/google/uuid v1.5.0
 	github.com/ockendenjo/handler v1.0.1
+	github.com/serjvanilla/go-overpass v0.0.0-20220918094045-58606372f808
 	github.com/stretchr/testify v1.8.4
 )
 
