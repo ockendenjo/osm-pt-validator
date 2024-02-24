@@ -1,12 +1,12 @@
 {
     "config": {
         "naptanPlatformTags": true,
-        "minimumNodeMembers": 10,
+        "minimumNodeMembers": 2,
         "minimumRouteVariants": 2
     },
     "routes": {
         "airport": [
-            {"name": "747", "relation_id": 16708033, "comment": "Airport <=> Halbeath P&R"}
+            {"name": "FLY", "relation_id": 14828279, "comment": "Airport <=> Dundee"}
         ]
     }
 }
