@@ -3,11 +3,14 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/jsii-runtime-go"
 	"github.com/ockendenjo/handler"
+	"github.com/ockendenjo/osm-pt-validator/pkg/osm"
 	"github.com/ockendenjo/osm-pt-validator/pkg/routes"
+	"github.com/serjvanilla/go-overpass"
 	"io"
 )
 
@@ -23,15 +26,16 @@ func main() {
 		//readFile := getFileReader(s3Client.GetObject, bucketName)
 
 		//batchSend := util.NewSQSBatchSender(sqsClient.SendMessageBatch, queueUrl)
+		//osmClient := osm.NewClient().WithXRay()
 
 		loadSearches := getConfigLoader(s3Client.GetObject, bucketName)
 		checker := getSearchChecker()
-		return buildHandler2(loadSearches, checker)
+		return buildHandler(loadSearches, checker)
 
 	})
 }
 
-func buildHandler2(loadConfig ConfigLoader, checkArea Checker) handler.Handler[any, any] {
+func buildHandler(loadConfig ConfigLoader, checkArea Checker) handler.Handler[any, any] {
 
 	return func(ctx context.Context, event any) (any, error) {
 
@@ -87,6 +91,50 @@ func getConfigLoader(getObject GetObjectApi, bucket string) ConfigLoader {
 func getSearchChecker() Checker {
 
 	return func(ctx context.Context, c routes.SearchConfig) (any, error) {
+		if c.CheckMissing {
+
+		}
+
+		if c.CheckV1 {
+
+		}
+
 		return nil, nil
 	}
+}
+
+func checkMissing(ctx context.Context, c routes.SearchConfig, osmClient *osm.OSMClient) (any, error) {
+
+	//TODO: Load routes files from S3
+	knownIds := map[int64]bool{}
+
+	client := overpass.New() //FIXME add tracing
+
+	queryStr := fmt.Sprintf(`[bbox:%f,%f,%f,%f][out:json];relation["type"="route"]["route"="bus"]["public_transport:version"="2"];>>;out ids;`, c.BBox[0], c.BBox[1], c.BBox[2], c.BBox[3])
+	res, err := client.Query(queryStr)
+	if err != nil {
+		return nil, err
+	}
+
+	ids := map[int64]bool{}
+
+	for i, _ := range res.Relations {
+		parents, err := osmClient.GetRelationRelations(context.Background(), i)
+		if err != nil {
+			panic(err)
+		}
+		for _, parent := range parents {
+			if parent.Tags["type"] == "route_master" {
+				ids[parent.ID] = true
+			}
+		}
+	}
+
+	for i, _ := range ids {
+		if !knownIds[i] {
+			fmt.Printf("relation %d is not being monitored\n", i) //FIXME
+		}
+	}
+
+	return nil, nil
 }
