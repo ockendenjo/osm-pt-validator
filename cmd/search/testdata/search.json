@@ -1,0 +1,13 @@
+{
+    "searches": {
+        "region": {
+            "bbox": [55.92, -3.42, 55.96, -2.94],
+            "files": [
+                "a.json",
+                "b.json"
+            ],
+            "check_missing": true,
+            "check_v1": true
+        }
+    }
+}
