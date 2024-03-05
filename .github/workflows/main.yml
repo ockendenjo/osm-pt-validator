@@ -25,7 +25,6 @@ jobs:
 
   build:
     name: build
-    needs: [test]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -73,7 +72,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: prod
-    needs: [build, validate]
+    needs: [build, validate, test, sast]
     permissions:
       id-token: write   # This is required for requesting the JWT
       contents: read    # This is required for actions/checkout
