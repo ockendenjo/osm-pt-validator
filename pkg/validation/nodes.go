@@ -3,9 +3,6 @@ package validation
 import (
 	"context"
 	"fmt"
-	"math/rand"
-	"time"
-
 	"github.com/ockendenjo/osm-pt-validator/pkg/osm"
 )
 
@@ -41,12 +38,6 @@ func (v *Validator) validateRelationNodes(ctx context.Context, re osm.Relation) 
 	}
 
 	return validationErrors, nil
-}
-
-func shouldCheckNaptanTags() bool {
-	//Gradual roll out
-	threshold := float64(1695168000-time.Now().Unix()) / (24 * 60 * 60 * 10)
-	return rand.Float64() > threshold
 }
 
 func validatePlatformNode(node *osm.Node, checkNaptan bool) []string {

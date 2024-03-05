@@ -1,6 +1,7 @@
 name: "main"
 
 on:
+  pull_request: {}
   push:
     branches: [ main ]
 
@@ -24,7 +25,6 @@ jobs:
 
   build:
     name: build
-    needs: [test]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -68,10 +68,11 @@ jobs:
 
   deploy:
     name: deploy
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: prod
-    needs: [build, validate]
+    needs: [build, validate, test, sast]
     permissions:
       id-token: write   # This is required for requesting the JWT
       contents: read    # This is required for actions/checkout
@@ -108,3 +109,41 @@ jobs:
 
       - name: Sync searches
         run: aws s3 sync search/ s3://${{vars.BUCKET_NAME}}/search --delete
+
+  sast:
+    name: sast
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+
+      - name: Download Go packages
+        shell: bash
+        run: |
+          go get ./...
+
+      - name: Setup tools
+        shell: bash
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.56.2
+          golangci-lint --version
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+          curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v2.19.0
+
+      - name: golangci-lint
+        shell: bash
+        run: |
+          golangci-lint run --timeout=3m
+
+      - name: govulncheck
+        shell: bash
+        run: |
+          govulncheck ./...
+
+      - name: gosec
+        shell: bash
+        run: |
+          gosec ./...

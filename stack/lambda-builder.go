@@ -22,7 +22,6 @@ type LambdaBuilder struct {
 	functionName string
 	env          map[string]*string
 	role         awsiam.Role
-	timeout      *awscdk.Duration
 	layers       *[]lambda.ILayerVersion
 }
 
