@@ -38,7 +38,7 @@ func main() {
 }
 
 func validateFile(ctx context.Context, inputFile string) {
-	file, err := os.Open(inputFile)
+	file, err := os.Open(inputFile) // #nosec G304 -- File inclusion via variable is intentional
 	if err != nil {
 		panic(err)
 	}
