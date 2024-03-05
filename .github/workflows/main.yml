@@ -113,8 +113,6 @@ jobs:
   sast:
     name: sast
     runs-on: ubuntu-latest
-    env:
-      GO111MODULE: on
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
