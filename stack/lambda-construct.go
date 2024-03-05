@@ -49,9 +49,9 @@ type Rule struct {
 
 func (r *Rule) AddCondition(condition awscdk.CfnCondition) {
 	for _, construct := range *r.rule.Node().Children() {
-		switch construct.(type) {
+		switch ct := construct.(type) {
 		case awscdk.CfnResource:
-			(construct.(awscdk.CfnResource)).CfnOptions().SetCondition(condition)
+			ct.CfnOptions().SetCondition(condition)
 		}
 	}
 }

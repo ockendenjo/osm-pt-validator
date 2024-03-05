@@ -169,7 +169,10 @@ func setupTestServer() (*httptest.Server, error) {
 			writer.WriteHeader(404)
 			return
 		}
-		writer.Write(bytes)
+		_, err := writer.Write(bytes)
+		if err != nil {
+			panic(err)
+		}
 	})
 	return httptest.NewServer(handlerFn), nil
 }

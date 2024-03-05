@@ -49,7 +49,7 @@ func (v *Validator) validateWayOrder(ctx context.Context, re osm.Relation) ([]st
 		wayDir := traverseAny
 		nextAllowedNodes := map[int64]bool{}
 		matches := 0
-		for an, _ := range allowedNodes {
+		for an := range allowedNodes {
 			if wayElem.IsCircular() {
 				for _, node := range wayElem.Nodes {
 					if node == an {
