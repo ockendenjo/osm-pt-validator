@@ -16,23 +16,23 @@ func Test_getOutputPath(t *testing.T) {
 	testcases := []struct {
 		name     string
 		mainFile string
-		expDir   string
+		expPath  string
 	}{
 		{
 			name:     "non-nested directory",
 			mainFile: "./cmd/example-event-post/main.go",
-			expDir:   "build/example-event-post",
+			expPath:  "build/example-event-post/bootstrap",
 		},
 		{
 			name:     "nested directory",
 			mainFile: "./cmd/workflows/BP003/PUB-036/main.go",
-			expDir:   "build/workflows-BP003-PUB-036",
+			expPath:  "build/workflows-BP003-PUB-036/bootstrap",
 		},
 	}
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			outDir := getOutputDir(tc.mainFile)
-			assert.Equal(t, tc.expDir, outDir)
+			outPath := getOutputPath(tc.mainFile)
+			assert.Equal(t, tc.expPath, outPath)
 		})
 	}
 }
