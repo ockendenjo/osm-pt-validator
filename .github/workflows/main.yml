@@ -132,27 +132,25 @@ jobs:
           golangci-lint --version
           go install golang.org/x/vuln/cmd/govulncheck@latest
           curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v2.19.0
-          curl -o $(go env GOPATH)/bin/nancy https://github.com/sonatype-nexus-community/nancy/releases/download/v1.0.45/nancy-v1.0.45-linux-amd64
-          chmod +x $(go env GOPATH)/bin/nancy
+          curl -o "$(go env GOPATH)/bin/nancy" -L "https://github.com/sonatype-nexus-community/nancy/releases/download/v1.0.45/nancy-v1.0.45-linux-amd64"
+          chmod +x "$(go env GOPATH)/bin/nancy"
+
+      - name: golangci-lint
+        shell: bash
+        run: |
+          golangci-lint run --timeout=3m
+
+      - name: govulncheck
+        shell: bash
+        run: |
+          govulncheck ./...
+
+      - name: gosec
+        shell: bash
+        run: |
+          gosec ./...
 
       - name: nancy
         shell: bash
         run: |
-          "$(go env GOPATH)/bin/nancy --version"
-#          go list -json -deps ./...
-#          nancy sleuth
-
-#      - name: golangci-lint
-#        shell: bash
-#        run: |
-#          golangci-lint run --timeout=3m
-#
-#      - name: govulncheck
-#        shell: bash
-#        run: |
-#          govulncheck ./...
-#
-#      - name: gosec
-#        shell: bash
-#        run: |
-#          gosec ./...
+          go list -json -deps ./... | nancy sleuth
