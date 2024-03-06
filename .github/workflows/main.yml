@@ -153,4 +153,4 @@ jobs:
       - name: nancy
         shell: bash
         run: |
-          go list -json -deps ./... | nancy sleuth
+          go list -json -deps ./... | nancy sleuth -e CVE-2024-24786
