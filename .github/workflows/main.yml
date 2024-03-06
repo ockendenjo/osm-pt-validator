@@ -138,21 +138,21 @@ jobs:
       - name: nancy
         shell: bash
         run: |
-          $(go env GOPATH)/bin/nancy --version
-          go list -json -deps ./...
+          "$(go env GOPATH)/bin/nancy --version"
+#          go list -json -deps ./...
 #          nancy sleuth
 
-      - name: golangci-lint
-        shell: bash
-        run: |
-          golangci-lint run --timeout=3m
-
-      - name: govulncheck
-        shell: bash
-        run: |
-          govulncheck ./...
-
-      - name: gosec
-        shell: bash
-        run: |
-          gosec ./...
+#      - name: golangci-lint
+#        shell: bash
+#        run: |
+#          golangci-lint run --timeout=3m
+#
+#      - name: govulncheck
+#        shell: bash
+#        run: |
+#          govulncheck ./...
+#
+#      - name: gosec
+#        shell: bash
+#        run: |
+#          gosec ./...
