@@ -138,7 +138,7 @@ jobs:
       - name: nancy
         shell: bash
         run: |
-          nancy --version
+          $(go env GOPATH)/bin/nancy --version
           go list -json -deps ./...
 #          nancy sleuth
 
