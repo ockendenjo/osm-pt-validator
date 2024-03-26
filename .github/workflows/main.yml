@@ -128,8 +128,8 @@ jobs:
       - name: golangci-lint
         shell: bash
         env:
-          Version: "1.56.2"
-          Checksum: "e1c313fb5fc85a33890fdee5dbb1777d1f5829c84d655a47a55688f3aad5e501"
+          Version: "1.57.1"
+          Checksum: "7e148df10de55dcbda283b43b9ea1c2f2a38b6e96ba91a71ec02eefcf336efbe"
         run: |
           curl -O -L "https://github.com/golangci/golangci-lint/releases/download/v${Version}/golangci-lint-${Version}-linux-amd64.tar.gz"
           echo "${Checksum} golangci-lint-${Version}-linux-amd64.tar.gz" | sha256sum -c
