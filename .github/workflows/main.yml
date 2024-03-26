@@ -125,32 +125,46 @@ jobs:
         run: |
           go get ./...
 
-      - name: Setup tools
-        shell: bash
-        run: |
-          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.56.2
-          golangci-lint --version
-          go install golang.org/x/vuln/cmd/govulncheck@latest
-          curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v2.19.0
-          curl -o "$(go env GOPATH)/bin/nancy" -L "https://github.com/sonatype-nexus-community/nancy/releases/download/v1.0.45/nancy-v1.0.45-linux-amd64"
-          chmod +x "$(go env GOPATH)/bin/nancy"
-
       - name: golangci-lint
         shell: bash
+        env:
+          Version: "1.56.2"
+          Checksum: "e1c313fb5fc85a33890fdee5dbb1777d1f5829c84d655a47a55688f3aad5e501"
         run: |
+          curl -O -L "https://github.com/golangci/golangci-lint/releases/download/v${Version}/golangci-lint-${Version}-linux-amd64.tar.gz"
+          echo "${Checksum} golangci-lint-${Version}-linux-amd64.tar.gz" | sha256sum -c
+          tar -xvzf "golangci-lint-${Version}-linux-amd64.tar.gz" -C "$(go env GOPATH)/bin" --strip-components 1 "golangci-lint-${Version}-linux-amd64/golangci-lint"
+          chmod +x "$(go env GOPATH)/bin/golangci-lint"
+          golangci-lint --version
           golangci-lint run --timeout=3m
 
       - name: govulncheck
         shell: bash
         run: |
+          go install golang.org/x/vuln/cmd/govulncheck@latest
           govulncheck ./...
 
       - name: gosec
         shell: bash
+        env:
+          Version: "2.19.0"
+          Checksum: "7b52e679a98a9a35b9c22dcc8a516cb3c3117212c3060110dd645f4f10df4d42"
         run: |
+          curl -O -L "https://github.com/securego/gosec/releases/download/v${Version}/gosec_${Version}_linux_amd64.tar.gz"    
+          echo "${Checksum} gosec_${Version}_linux_amd64.tar.gz" | sha256sum -c
+          tar -xvzf "gosec_${Version}_linux_amd64.tar.gz" -C "$(go env GOPATH)/bin" "gosec"
+          chmod +x "$(go env GOPATH)/bin/gosec"
           gosec ./...
 
       - name: nancy
         shell: bash
+        env:
+          Version: "1.0.46"
+          Checksum: "467c47c75677411074fcc44e392e616dac90c23d5991ddbc7cd2186057d8c2cf"
         run: |
+          curl -O -L "https://github.com/sonatype-nexus-community/nancy/releases/download/v${Version}/nancy-v${Version}-linux-amd64"
+          echo "${Checksum} nancy-v${Version}-linux-amd64" | sha256sum -c
+          mv "nancy-v${Version}-linux-amd64" "$(go env GOPATH)/bin/nancy"
+          chmod +x "$(go env GOPATH)/bin/nancy"
           go list -json -deps ./... | nancy sleuth -e CVE-2024-24786
+#          no fix available yet for xray-sdk which has dependency on "vulnerable" package
