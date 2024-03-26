@@ -19,10 +19,11 @@ import (
 
 func main() {
 	topicArn := handler.MustGetEnv("TOPIC_ARN")
+	userAgent := handler.MustGetEnv("USER_AGENT")
 
 	handler.BuildAndStart(func(awsConfig aws.Config) handler.Handler[sqsEvents.SQSEvent, sqsEvents.SQSEventResponse] {
 		snsClient := sns.NewFromConfig(awsConfig)
-		osmClient := osm.NewClient().WithXRay()
+		osmClient := osm.NewClient(userAgent).WithXRay()
 
 		processRecord := buildProcessRecord(osmClient, snsClient.Publish, topicArn)
 		return handler.GetSQSHandler(processRecord)

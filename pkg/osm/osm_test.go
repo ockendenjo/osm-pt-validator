@@ -2,11 +2,12 @@ package osm
 
 import (
 	"context"
-	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -58,7 +59,7 @@ func Test_getRelation(t *testing.T) {
 			svr := httptest.NewServer(handlerFn)
 			defer svr.Close()
 
-			client := NewClient().WithBaseUrl(svr.URL)
+			client := NewClient("unit-test/0.0").WithBaseUrl(svr.URL)
 			relation, err := client.GetRelation(context.Background(), 3411082864)
 			tc.checkFn(t, relation, err)
 		})
@@ -112,7 +113,7 @@ func Test_getWay(t *testing.T) {
 			svr := httptest.NewServer(handlerFn)
 			defer svr.Close()
 
-			client := NewClient().WithBaseUrl(svr.URL)
+			client := NewClient("unit-test/0.0").WithBaseUrl(svr.URL)
 			way, err := client.GetWay(context.Background(), 2154620362)
 			tc.checkFn(t, way, err)
 		})
@@ -166,7 +167,7 @@ func Test_getRelationRelations(t *testing.T) {
 			svr := httptest.NewServer(handlerFn)
 			defer svr.Close()
 
-			client := NewClient().WithBaseUrl(svr.URL)
+			client := NewClient("unit-test/0.0").WithBaseUrl(svr.URL)
 			relation, err := client.GetRelationRelations(context.Background(), 11562232)
 			tc.checkFn(t, relation, err)
 		})

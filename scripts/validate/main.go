@@ -9,6 +9,8 @@ import (
 	"io"
 	"log"
 	"os"
+	"os/exec"
+	"strings"
 
 	"github.com/ockendenjo/osm-pt-validator/pkg/osm"
 	"github.com/ockendenjo/osm-pt-validator/pkg/routes"
@@ -37,6 +39,18 @@ func main() {
 	validateFile(ctx, inputFile)
 }
 
+func getUserAgent() (string, error) {
+	cmd := exec.Command("git", "rev-parse", "--short", "HEAD")
+	cmd.Stderr = os.Stderr
+	out, err := cmd.Output()
+	if err != nil {
+		return "", err
+	}
+	hash := strings.Replace(string(out), "\n", "", 1)
+	userAgent := fmt.Sprintf("osm-pt-validator/%s https://github.com/ockendenjo/osm-pt-validator", hash)
+	return userAgent, nil
+}
+
 func validateFile(ctx context.Context, inputFile string) {
 	file, err := os.Open(inputFile) // #nosec G304 -- File inclusion via variable is intentional
 	if err != nil {
@@ -51,8 +65,12 @@ func validateFile(ctx context.Context, inputFile string) {
 	if err != nil {
 		panic(err)
 	}
+	userAgent, err := getUserAgent()
+	if err != nil {
+		panic(err)
+	}
 
-	osmClient := osm.NewClient()
+	osmClient := osm.NewClient(userAgent)
 	validator := validation.NewValidator(routesFile.Config, osmClient)
 
 	allValid := true
@@ -86,7 +104,11 @@ func validateFile(ctx context.Context, inputFile string) {
 }
 
 func validateSingleRelation(ctx context.Context, relationId int64, npt bool) {
-	osmClient := osm.NewClient()
+	userAgent, err := getUserAgent()
+	if err != nil {
+		panic(err)
+	}
+	osmClient := osm.NewClient(userAgent)
 	relation, err := osmClient.GetRelation(ctx, relationId)
 	if err != nil {
 		panic(err)

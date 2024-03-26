@@ -93,6 +93,11 @@ func (lb *LambdaBuilder) WithEnvVar(envValue string, envKey string) *LambdaBuild
 	return lb
 }
 
+func (lb *LambdaBuilder) SetUserAgent(userAgent string) *LambdaBuilder {
+	lb.env["USER_AGENT"] = &userAgent
+	return lb
+}
+
 func (lb *LambdaBuilder) Build() *LambdaConstruct {
 
 	lambdaFn := lambda.NewFunction(lb.scope, jsii.String("function"), &lambda.FunctionProps{
