@@ -1,6 +1,11 @@
 package main
 
 import (
+	"fmt"
+	"os"
+	"os/exec"
+	"strings"
+
 	"github.com/aws/aws-cdk-go/awscdk/v2"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsevents"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awss3"
@@ -35,6 +40,11 @@ func NewStack(scope constructs.Construct, id string, props *OSMPTStackProps) aws
 		RemovalPolicy: awscdk.RemovalPolicy_RETAIN,
 	})
 
+	userAgent, err := getUserAgent()
+	if err != nil {
+		panic(err)
+	}
+
 	NewLambda(stack, "Trigger", "build/trigger").
 		WithQueuePublish(rmQueues, "QUEUE_URL").
 		WithS3Read(bucket, "S3_BUCKET_NAME").
@@ -44,11 +54,13 @@ func NewStack(scope constructs.Construct, id string, props *OSMPTStackProps) aws
 	NewLambda(stack, "SplitRelation", "build/validate-rm").
 		WithQueuePublish(routeQueues, "QUEUE_URL").
 		WithTopicPublish(topic, "TOPIC_ARN").
+		SetUserAgent(userAgent).
 		Build().
 		AddSQSBatchTrigger(rmQueues)
 
 	NewLambda(stack, "ValidateRoute", "build/validate-route").
 		WithTopicPublish(topic, "TOPIC_ARN").
+		SetUserAgent(userAgent).
 		Build().
 		AddSQSBatchTrigger(routeQueues)
 
@@ -73,4 +85,16 @@ func main() {
 
 func env() *awscdk.Environment {
 	return nil
+}
+
+func getUserAgent() (string, error) {
+	cmd := exec.Command("git", "rev-parse", "--short", "HEAD")
+	cmd.Stderr = os.Stderr
+	out, err := cmd.Output()
+	if err != nil {
+		return "", err
+	}
+	hash := strings.Replace(string(out), "\n", "", 1)
+	userAgent := fmt.Sprintf("osm-pt-validator/%s https://github.com/ockendenjo/osm-pt-validator", hash)
+	return userAgent, nil
 }

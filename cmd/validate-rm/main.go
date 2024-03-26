@@ -24,11 +24,12 @@ import (
 func main() {
 	queueUrl := handler.MustGetEnv("QUEUE_URL")
 	topicArn := handler.MustGetEnv("TOPIC_ARN")
+	userAgent := handler.MustGetEnv("USER_AGENT")
 
 	handler.BuildAndStart(func(awsConfig aws.Config) handler.Handler[sqsEvents.SQSEvent, sqsEvents.SQSEventResponse] {
 		sqsClient := sqs.NewFromConfig(awsConfig)
 		snsClient := sns.NewFromConfig(awsConfig)
-		osmClient := osm.NewClient().WithXRay()
+		osmClient := osm.NewClient(userAgent).WithXRay()
 
 		return handler.GetSQSHandler(buildProcessRecord(sqsClient.SendMessageBatch, queueUrl, osmClient, snsClient.Publish, topicArn))
 	})

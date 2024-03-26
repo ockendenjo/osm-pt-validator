@@ -131,7 +131,7 @@ func Test_validateWayOrder(t *testing.T) {
 	}
 	defer svr.Close()
 
-	osmClient := osm.NewClient().WithBaseUrl(svr.URL)
+	osmClient := osm.NewClient("unit-test/0.0").WithBaseUrl(svr.URL)
 
 	for _, tc := range testcases {
 		tc := tc
