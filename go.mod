@@ -13,7 +13,7 @@ require (
 	github.com/aws/constructs-go/constructs/v10 v10.3.0
 	github.com/aws/jsii-runtime-go v1.93.0
 	github.com/google/uuid v1.5.0
-	github.com/ockendenjo/handler v1.0.1
+	github.com/ockendenjo/handler v1.0.2
 	github.com/stretchr/testify v1.8.4
 )
 

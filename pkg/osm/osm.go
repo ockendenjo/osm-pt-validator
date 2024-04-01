@@ -55,14 +55,15 @@ func (c *OSMClient) GetRelation(ctx context.Context, relationId int64) (Relation
 	if err != nil {
 		return Relation{}, err
 	}
-
-	if response.StatusCode != 200 {
-		return Relation{}, fmt.Errorf("HTTP status code %d", response.StatusCode)
-	}
+	defer response.Body.Close()
 
 	bytes, err := io.ReadAll(response.Body)
 	if err != nil {
 		return Relation{}, err
+	}
+
+	if response.StatusCode != 200 {
+		return Relation{}, HttpStatusError{response.StatusCode, string(bytes)}
 	}
 
 	var relation relationsResponse
@@ -85,14 +86,15 @@ func (c *OSMClient) GetRelationRelations(ctx context.Context, relationId int64) 
 	if err != nil {
 		return nil, err
 	}
-
-	if response.StatusCode != 200 {
-		return nil, fmt.Errorf("HTTP status code %d", response.StatusCode)
-	}
+	defer response.Body.Close()
 
 	bytes, err := io.ReadAll(response.Body)
 	if err != nil {
 		return nil, err
+	}
+
+	if response.StatusCode != 200 {
+		return nil, HttpStatusError{response.StatusCode, string(bytes)}
 	}
 
 	var relation relationsResponse
@@ -134,14 +136,15 @@ func (c *OSMClient) GetWay(ctx context.Context, wayId int64) (Way, error) {
 	if err != nil {
 		return Way{}, err
 	}
-
-	if response.StatusCode != 200 {
-		return Way{}, fmt.Errorf("HTTP status code %d", response.StatusCode)
-	}
+	defer response.Body.Close()
 
 	bytes, err := io.ReadAll(response.Body)
 	if err != nil {
 		return Way{}, err
+	}
+
+	if response.StatusCode != 200 {
+		return Way{}, HttpStatusError{response.StatusCode, string(bytes)}
 	}
 
 	var wayRes wayResponse
@@ -177,14 +180,15 @@ func (c *OSMClient) GetNode(ctx context.Context, nodeId int64) (Node, error) {
 	if err != nil {
 		return Node{}, err
 	}
-
-	if response.StatusCode != 200 {
-		return Node{}, fmt.Errorf("HTTP status code %d", response.StatusCode)
-	}
+	defer response.Body.Close()
 
 	bytes, err := io.ReadAll(response.Body)
 	if err != nil {
 		return Node{}, err
+	}
+
+	if response.StatusCode != 200 {
+		return Node{}, HttpStatusError{response.StatusCode, string(bytes)}
 	}
 
 	var nodeRes nodeResponse
@@ -228,4 +232,13 @@ func (c *OSMClient) cacheWay(way Way) {
 	c.wayCache.mu.Lock()
 	defer c.wayCache.mu.Unlock()
 	c.wayCache.v[wayId] = way
+}
+
+type HttpStatusError struct {
+	StatusCode   int
+	ResponseBody string
+}
+
+func (e HttpStatusError) Error() string {
+	return fmt.Sprintf("HTTP status code %d", e.StatusCode)
 }
