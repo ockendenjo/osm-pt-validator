@@ -63,7 +63,7 @@ func (c *OSMClient) GetRelation(ctx context.Context, relationId int64) (Relation
 	}
 
 	if response.StatusCode != 200 {
-		return Relation{}, HttpStatusError{response.StatusCode, bytes}
+		return Relation{}, HttpStatusError{response.StatusCode, string(bytes)}
 	}
 
 	var relation relationsResponse
@@ -94,7 +94,7 @@ func (c *OSMClient) GetRelationRelations(ctx context.Context, relationId int64) 
 	}
 
 	if response.StatusCode != 200 {
-		return nil, HttpStatusError{response.StatusCode, bytes}
+		return nil, HttpStatusError{response.StatusCode, string(bytes)}
 	}
 
 	var relation relationsResponse
@@ -144,7 +144,7 @@ func (c *OSMClient) GetWay(ctx context.Context, wayId int64) (Way, error) {
 	}
 
 	if response.StatusCode != 200 {
-		return Way{}, HttpStatusError{response.StatusCode, bytes}
+		return Way{}, HttpStatusError{response.StatusCode, string(bytes)}
 	}
 
 	var wayRes wayResponse
@@ -188,7 +188,7 @@ func (c *OSMClient) GetNode(ctx context.Context, nodeId int64) (Node, error) {
 	}
 
 	if response.StatusCode != 200 {
-		return Node{}, HttpStatusError{response.StatusCode, bytes}
+		return Node{}, HttpStatusError{response.StatusCode, string(bytes)}
 	}
 
 	var nodeRes nodeResponse
@@ -236,7 +236,7 @@ func (c *OSMClient) cacheWay(way Way) {
 
 type HttpStatusError struct {
 	StatusCode   int
-	ResponseBody []byte
+	ResponseBody string
 }
 
 func (e HttpStatusError) Error() string {
