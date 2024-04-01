@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/ockendenjo/handler"
 	"io"
 	"net/http"
 	"sync"
@@ -64,8 +63,7 @@ func (c *OSMClient) GetRelation(ctx context.Context, relationId int64) (Relation
 	}
 
 	if response.StatusCode != 200 {
-		handler.GetLogger(ctx).Error("HTTP error response", "statusCode", response.StatusCode, "body", string(bytes))
-		return Relation{}, fmt.Errorf("HTTP status code %d", response.StatusCode)
+		return Relation{}, HttpStatusError{response.StatusCode, bytes}
 	}
 
 	var relation relationsResponse
@@ -96,8 +94,7 @@ func (c *OSMClient) GetRelationRelations(ctx context.Context, relationId int64) 
 	}
 
 	if response.StatusCode != 200 {
-		handler.GetLogger(ctx).Error("HTTP error response", "statusCode", response.StatusCode, "body", string(bytes))
-		return nil, fmt.Errorf("HTTP status code %d", response.StatusCode)
+		return nil, HttpStatusError{response.StatusCode, bytes}
 	}
 
 	var relation relationsResponse
@@ -147,8 +144,7 @@ func (c *OSMClient) GetWay(ctx context.Context, wayId int64) (Way, error) {
 	}
 
 	if response.StatusCode != 200 {
-		handler.GetLogger(ctx).Error("HTTP error response", "statusCode", response.StatusCode, "body", string(bytes))
-		return Way{}, fmt.Errorf("HTTP status code %d", response.StatusCode)
+		return Way{}, HttpStatusError{response.StatusCode, bytes}
 	}
 
 	var wayRes wayResponse
@@ -192,8 +188,7 @@ func (c *OSMClient) GetNode(ctx context.Context, nodeId int64) (Node, error) {
 	}
 
 	if response.StatusCode != 200 {
-		handler.GetLogger(ctx).Error("HTTP error response", "statusCode", response.StatusCode, "body", string(bytes))
-		return Node{}, fmt.Errorf("HTTP status code %d", response.StatusCode)
+		return Node{}, HttpStatusError{response.StatusCode, bytes}
 	}
 
 	var nodeRes nodeResponse
@@ -237,4 +232,13 @@ func (c *OSMClient) cacheWay(way Way) {
 	c.wayCache.mu.Lock()
 	defer c.wayCache.mu.Unlock()
 	c.wayCache.v[wayId] = way
+}
+
+type HttpStatusError struct {
+	StatusCode   int
+	ResponseBody []byte
+}
+
+func (e HttpStatusError) Error() string {
+	return fmt.Sprintf("HTTP status code %d", e.StatusCode)
 }
