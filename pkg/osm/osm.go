@@ -13,6 +13,7 @@ import (
 )
 
 const defaultBaseUrl = "https://api.openstreetmap.org/api/0.6"
+const defaultParallelReqs = 2
 
 func NewClient(userAgent string) *OSMClient {
 	httpClient := http.Client{Timeout: time.Duration(3) * time.Second}
@@ -22,7 +23,7 @@ func NewClient(userAgent string) *OSMClient {
 		nodeCache:    NodeCache{v: map[int64]Node{}},
 		wayCache:     WayCache{v: map[int64]Way{}},
 		userAgent:    userAgent,
-		parallelReqs: 2,
+		parallelReqs: defaultParallelReqs,
 	}
 }
 
