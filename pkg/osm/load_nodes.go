@@ -12,7 +12,7 @@ func (c *OSMClient) LoadNodes(ctx context.Context, nodeIds []int64) map[int64]*N
 	for idx, wayId := range nodeIds {
 		go loadNode(ctx, c, wayId, ch)
 		remaining++
-		if idx >= maxParallelOSMRequests {
+		if idx >= c.parallelReqs {
 			//Wait before starting next request
 			nodeResult := <-ch
 			remaining--
