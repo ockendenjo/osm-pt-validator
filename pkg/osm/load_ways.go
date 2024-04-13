@@ -4,8 +4,6 @@ import (
 	"context"
 )
 
-const maxParallelOSMRequests = 10
-
 func (c *OSMClient) LoadWays(ctx context.Context, wayIds []int64) map[int64]*Way {
 	ch := make(chan wayResult, len(wayIds))
 	wayMap := map[int64]*Way{}
@@ -14,7 +12,7 @@ func (c *OSMClient) LoadWays(ctx context.Context, wayIds []int64) map[int64]*Way
 	for idx, wayId := range wayIds {
 		go loadWay(ctx, c, wayId, ch)
 		remaining++
-		if idx >= maxParallelOSMRequests {
+		if idx >= c.parallelReqs {
 			//Wait before starting next request
 			wayResult := <-ch
 			remaining--
