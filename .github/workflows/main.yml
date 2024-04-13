@@ -18,7 +18,7 @@ jobs:
         timeout-minutes: 1
         uses: actions/setup-go@v5
         with:
-          go-version: "1.22.1"
+          go-version-file: "go.mod"
 
       - name: Run tests
         run: make test
@@ -35,7 +35,7 @@ jobs:
         timeout-minutes: 1
         uses: actions/setup-go@v5
         with:
-          go-version: "1.22.1"
+          go-version-file: "go.mod"
 
       - name: Build commands
         run: make build
@@ -84,7 +84,7 @@ jobs:
         timeout-minutes: 1
         uses: actions/setup-go@v5
         with:
-          go-version: "1.22.1"
+          go-version-file: "go.mod"
 
       - name: Download artifact
         uses: actions/download-artifact@v4
@@ -118,18 +118,18 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.22.1"
+          go-version-file: "go.mod"
 
       - name: Download Go packages
         shell: bash
         run: |
           go get ./...
 
-      - name: golangci-lint
+      - name: golangci-lint # https://github.com/golangci/golangci-lint
         shell: bash
         env:
-          Version: "1.57.1"
-          Checksum: "7e148df10de55dcbda283b43b9ea1c2f2a38b6e96ba91a71ec02eefcf336efbe"
+          Version: "1.57.2"
+          Checksum: "391483daa5d58d037832ba2fac709fdb5df0c67471c0d7698d1f67cbfa5f10f0"
         run: |
           curl -O -L "https://github.com/golangci/golangci-lint/releases/download/v${Version}/golangci-lint-${Version}-linux-amd64.tar.gz"
           echo "${Checksum} golangci-lint-${Version}-linux-amd64.tar.gz" | sha256sum -c
@@ -144,7 +144,7 @@ jobs:
           go install golang.org/x/vuln/cmd/govulncheck@latest
           govulncheck ./...
 
-      - name: gosec
+      - name: gosec # https://github.com/securego/gosec
         shell: bash
         env:
           Version: "2.19.0"
@@ -156,7 +156,7 @@ jobs:
           chmod +x "$(go env GOPATH)/bin/gosec"
           gosec ./...
 
-      - name: nancy
+      - name: nancy # https://github.com/sonatype-nexus-community/nancy
         shell: bash
         env:
           Version: "1.0.46"
