@@ -31,7 +31,7 @@ func NewStack(scope constructs.Construct, id string, props *OSMPTStackProps) aws
 	rmQueues := qb.NewQueueWithDLQ("ValidateRMEvents")
 
 	schedule := awsevents.Schedule_Cron(&awsevents.CronOptions{
-		Minute: jsii.String("0"),
+		Minute: jsii.String("23"),
 		Hour:   jsii.String("5"),
 		Day:    jsii.String("*"),
 	})
