@@ -37,7 +37,7 @@ func (b *QueueBuilder) NewQueueWithDLQ(id string) QueueWithDLQ {
 			Queue:           dlq,
 		},
 		ReceiveMessageWaitTime: awscdk.Duration_Seconds(jsii.Number(0)),
-		VisibilityTimeout:      awscdk.Duration_Seconds(jsii.Number(10)),
+		VisibilityTimeout:      awscdk.Duration_Seconds(jsii.Number(90)),
 	})
 
 	return QueueWithDLQ{
