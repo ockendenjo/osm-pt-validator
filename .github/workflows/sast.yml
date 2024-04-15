@@ -3,7 +3,7 @@ name: "sast"
 on:
   pull_request: {}
   schedule:
-    - cron: "36 9 * * *"
+    - cron: '36 9 * * *'
 
 jobs:
   sast:
