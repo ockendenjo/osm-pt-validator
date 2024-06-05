@@ -69,6 +69,9 @@ jobs:
   deploy:
     name: deploy
     if: github.ref == 'refs/heads/main'
+    concurrency:
+      group: deploy-main
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: prod
