@@ -9,7 +9,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.53.1
 	github.com/aws/aws-sdk-go-v2/service/sns v1.29.4
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.31.4
-	github.com/aws/aws-xray-sdk-go v1.8.3
+	github.com/aws/aws-xray-sdk-go v1.8.4
 	github.com/aws/constructs-go/constructs/v10 v10.3.0
 	github.com/aws/jsii-runtime-go v1.97.0
 	github.com/google/uuid v1.6.0

@@ -24,8 +24,8 @@ jobs:
       - name: golangci-lint # https://github.com/golangci/golangci-lint
         shell: bash
         env:
-          Version: "1.57.2"
-          Checksum: "391483daa5d58d037832ba2fac709fdb5df0c67471c0d7698d1f67cbfa5f10f0"
+          Version: '1.59.0'
+          Checksum: '3b14a439f33c4fff83dbe0349950d984042b9a1feb6c62f82787b598fc3ab5f4'
         run: |
           curl -O -L "https://github.com/golangci/golangci-lint/releases/download/v${Version}/golangci-lint-${Version}-linux-amd64.tar.gz"
           echo "${Checksum} golangci-lint-${Version}-linux-amd64.tar.gz" | sha256sum -c
@@ -43,8 +43,8 @@ jobs:
       - name: gosec # https://github.com/securego/gosec
         shell: bash
         env:
-          Version: "2.19.0"
-          Checksum: "7b52e679a98a9a35b9c22dcc8a516cb3c3117212c3060110dd645f4f10df4d42"
+          Version: '2.20.0'
+          Checksum: '2d056644cf265f194efaf98b80d459004c03db7b367fbc3fe7fb345773df684e'
         run: |
           curl -O -L "https://github.com/securego/gosec/releases/download/v${Version}/gosec_${Version}_linux_amd64.tar.gz"    
           echo "${Checksum} gosec_${Version}_linux_amd64.tar.gz" | sha256sum -c
@@ -55,12 +55,11 @@ jobs:
       - name: nancy # https://github.com/sonatype-nexus-community/nancy
         shell: bash
         env:
-          Version: "1.0.46"
-          Checksum: "467c47c75677411074fcc44e392e616dac90c23d5991ddbc7cd2186057d8c2cf"
+          Version: '1.0.46'
+          Checksum: '467c47c75677411074fcc44e392e616dac90c23d5991ddbc7cd2186057d8c2cf'
         run: |
           curl -O -L "https://github.com/sonatype-nexus-community/nancy/releases/download/v${Version}/nancy-v${Version}-linux-amd64"
           echo "${Checksum} nancy-v${Version}-linux-amd64" | sha256sum -c
           mv "nancy-v${Version}-linux-amd64" "$(go env GOPATH)/bin/nancy"
           chmod +x "$(go env GOPATH)/bin/nancy"
-          go list -json -deps ./... | nancy sleuth -e CVE-2024-24786
-  #          no fix available yet for xray-sdk which has dependency on "vulnerable" package
+          go list -json -deps ./... | nancy sleuth
