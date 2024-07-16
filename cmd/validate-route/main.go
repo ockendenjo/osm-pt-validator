@@ -57,10 +57,11 @@ func buildProcessRecord(client *osm.OSMClient, publish publishApi, topicArn stri
 
 			outputEvent := snsEvents.InvalidRelationEvent{
 				RelationID:       event.RelationID,
+				RelationURL:      fmt.Sprintf("https://openstreetmap.org/relation/%d", event.RelationID),
 				RelationName:     relation.Tags["name"],
 				ValidationErrors: validationErrors,
 			}
-			bytes, err := json.Marshal(outputEvent)
+			bytes, err := json.MarshalIndent(outputEvent, "", "    ")
 			if err != nil {
 				return err
 			}
