@@ -34,7 +34,9 @@ func (v *Validator) validationRelationElement(ctx context.Context, re osm.Relati
 	}
 
 	nodeErrors, err := v.validateRelationNodes(ctx, re)
-	allErrors = append(allErrors, nodeErrors...)
+	for _, ve := range nodeErrors {
+		allErrors = append(allErrors, ve.String())
+	}
 	if err != nil {
 		return allErrors, err
 	}
