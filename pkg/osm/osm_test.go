@@ -49,6 +49,9 @@ func Test_getRelation(t *testing.T) {
 			},
 			checkFn: func(t *testing.T, r Relation, err error) {
 				assert.EqualError(t, err, "HTTP status code 404")
+				var hse HttpStatusError
+				assert.ErrorAs(t, err, &hse)
+				assert.Equal(t, 404, hse.StatusCode)
 			},
 		},
 	}
