@@ -160,6 +160,24 @@ func Test_validateREMemberOrder(t *testing.T) {
 				assert.Contains(t, validationErrors, "route does not contain any route ways")
 			},
 		},
+		{
+			name: "unexpected way role",
+			members: []osm.Member{
+				{
+					Type: "node",
+					Ref:  12345,
+					Role: osm.RoleStopEntryOnly,
+				},
+				{
+					Type: "way",
+					Ref:  98712,
+					Role: "forward",
+				},
+			},
+			checkFn: func(t *testing.T, validationErrors []string) {
+				assert.Contains(t, validationErrors[0], "element has unexpected role 'forward'")
+			},
+		},
 	}
 
 	for _, tc := range testcases {
