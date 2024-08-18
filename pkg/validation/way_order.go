@@ -7,10 +7,10 @@ import (
 	"github.com/ockendenjo/osm-pt-validator/pkg/osm"
 )
 
-func (v *Validator) validateWayOrder(ctx context.Context, re osm.Relation) ([]string, []wayDirection, error) {
+func (v *Validator) validateWayOrder(ctx context.Context, re osm.Relation) ([]ValidationError, []wayDirection, error) {
 	wayIds := []int64{}
 	ways := []osm.Member{}
-	validationErrors := []string{}
+	validationErrors := []ValidationError{}
 
 	for _, member := range re.Members {
 		if member.Type == "way" && member.Role == "" {
@@ -24,7 +24,7 @@ func (v *Validator) validateWayOrder(ctx context.Context, re osm.Relation) ([]st
 	//Check for any nil ways
 	for k, way := range waysMap {
 		if way == nil {
-			return []string{}, nil, fmt.Errorf("failed to load way %d", k)
+			return nil, nil, fmt.Errorf("failed to load way %d", k)
 		}
 	}
 
@@ -80,7 +80,8 @@ func (v *Validator) validateWayOrder(ctx context.Context, re osm.Relation) ([]st
 
 		switch matches {
 		case 0:
-			validationErrors = append(validationErrors, fmt.Sprintf("ways are incorrectly ordered - %s", wayElem.GetElementURL()))
+			ve := ValidationError{URL: wayElem.GetElementURL(), Message: "ways are incorrectly ordered"}
+			validationErrors = append(validationErrors, ve)
 			allowedNodes = mapFromNodes(wayElem.Nodes)
 			hasGap = true
 		case 1:
@@ -103,7 +104,8 @@ func (v *Validator) validateWayOrder(ctx context.Context, re osm.Relation) ([]st
 	for _, d := range wayDirects {
 		wayElem := d.wayElem
 		if !v.checkOneway(wayElem, d.direction) {
-			validationErrors = append(validationErrors, fmt.Sprintf("way with oneway tag is traversed in wrong direction - %s", wayElem.GetElementURL()))
+			ve := ValidationError{URL: wayElem.GetElementURL(), Message: "way with oneway tag is traversed in wrong direction"}
+			validationErrors = append(validationErrors, ve)
 		}
 	}
 

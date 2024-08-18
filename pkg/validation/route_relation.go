@@ -40,7 +40,9 @@ func (v *Validator) validationRelationElement(ctx context.Context, re osm.Relati
 	}
 
 	routeErrors, wayDirects, err := v.validateWayOrder(ctx, re)
-	allErrors = append(allErrors, routeErrors...)
+	for _, ve := range routeErrors {
+		allErrors = append(allErrors, ve.String())
+	}
 
 	if len(routeErrors) == 0 {
 		stopErrors := validateStopOrder(wayDirects, re)
