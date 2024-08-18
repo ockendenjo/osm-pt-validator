@@ -22,7 +22,6 @@
             {"name": "15", "relation_id": 16254778},
             {"name": "16", "relation_id": 10529294},
             {"name": "19", "relation_id": 11909907},
-            {"name": "20", "relation_id": 16355489},
             {"name": "21", "relation_id": 11146200},
             {"name": "22", "relation_id": 16254896},
             {"name": "23", "relation_id": 5926221},
@@ -52,7 +51,6 @@
             {"name": "47B", "relation_id": 0},
             {"name": "48", "relation_id": 16364632},
             {"name": "49", "relation_id": 7654545},
-            {"name": "63", "relation_id": 16358697, "comment": "Balerno <=> Queensferry"},
             {"name": "98", "relation_id": 0}
         ],
         "edinburgh_airport": [
