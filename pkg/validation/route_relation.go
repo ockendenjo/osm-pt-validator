@@ -46,7 +46,9 @@ func (v *Validator) validationRelationElement(ctx context.Context, re osm.Relati
 
 	if len(routeErrors) == 0 {
 		stopErrors := validateStopOrder(wayDirects, re)
-		allErrors = append(allErrors, stopErrors...)
+		for _, ve := range stopErrors {
+			allErrors = append(allErrors, ve.String())
+		}
 	}
 
 	if !v.validateNodeMembersCount(re) {

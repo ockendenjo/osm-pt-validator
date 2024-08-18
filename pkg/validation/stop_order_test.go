@@ -12,7 +12,7 @@ func Test_validateStopOrder(t *testing.T) {
 		name       string
 		wayDirects []wayDirection
 		relation   osm.Relation
-		checkFn    func(t *testing.T, validationErrors []string)
+		checkFn    func(t *testing.T, validationErrors []ValidationError)
 	}{
 		{
 			name:     "stops in correct order",
@@ -21,7 +21,7 @@ func Test_validateStopOrder(t *testing.T) {
 				makeWayWithDirection(traverseForward, 101, 102, 103),
 				makeWayWithDirection(traverseForward, 103, 104, 105),
 			},
-			checkFn: func(t *testing.T, validationErrors []string) {
+			checkFn: func(t *testing.T, validationErrors []ValidationError) {
 				assert.Empty(t, validationErrors)
 			},
 		},
@@ -32,9 +32,12 @@ func Test_validateStopOrder(t *testing.T) {
 				makeWayWithDirection(traverseForward, 101, 102, 103),
 				makeWayWithDirection(traverseForward, 103, 104, 105),
 			},
-			checkFn: func(t *testing.T, validationErrors []string) {
-				assert.Len(t, validationErrors, 1)
-				assert.Contains(t, validationErrors, "stop is incorrectly ordered - https://www.openstreetmap.org/node/102")
+			checkFn: func(t *testing.T, validationErrors []ValidationError) {
+				exp := ValidationError{
+					URL:     "https://www.openstreetmap.org/node/102",
+					Message: "stop is incorrectly ordered",
+				}
+				assert.Equal(t, []ValidationError{exp}, validationErrors)
 			},
 		},
 		{
@@ -45,10 +48,16 @@ func Test_validateStopOrder(t *testing.T) {
 				makeWayWithDirection(traverseForward, 103, 104, 105),
 				makeWayWithDirection(traverseForward, 105, 106, 107),
 			},
-			checkFn: func(t *testing.T, validationErrors []string) {
-				assert.Len(t, validationErrors, 2)
-				assert.Contains(t, validationErrors, "stop is incorrectly ordered - https://www.openstreetmap.org/node/102")
-				assert.Contains(t, validationErrors, "stop is incorrectly ordered - https://www.openstreetmap.org/node/103")
+			checkFn: func(t *testing.T, validationErrors []ValidationError) {
+				exp1 := ValidationError{
+					URL:     "https://www.openstreetmap.org/node/102",
+					Message: "stop is incorrectly ordered",
+				}
+				exp2 := ValidationError{
+					URL:     "https://www.openstreetmap.org/node/103",
+					Message: "stop is incorrectly ordered",
+				}
+				assert.Equal(t, []ValidationError{exp1, exp2}, validationErrors)
 			},
 		},
 		{
@@ -57,7 +66,7 @@ func Test_validateStopOrder(t *testing.T) {
 			wayDirects: []wayDirection{
 				makeWayWithDirection(traverseForward, 101, 102, 103, 104, 105),
 			},
-			checkFn: func(t *testing.T, validationErrors []string) {
+			checkFn: func(t *testing.T, validationErrors []ValidationError) {
 				assert.Empty(t, validationErrors)
 			},
 		},
@@ -67,7 +76,7 @@ func Test_validateStopOrder(t *testing.T) {
 			wayDirects: []wayDirection{
 				makeWayWithDirection("backward", 101, 102, 103, 104, 105),
 			},
-			checkFn: func(t *testing.T, validationErrors []string) {
+			checkFn: func(t *testing.T, validationErrors []ValidationError) {
 				assert.Empty(t, validationErrors)
 			},
 		},
@@ -77,9 +86,12 @@ func Test_validateStopOrder(t *testing.T) {
 			wayDirects: []wayDirection{
 				makeWayWithDirection(traverseForward, 101, 102, 103, 104, 105),
 			},
-			checkFn: func(t *testing.T, validationErrors []string) {
-				assert.Len(t, validationErrors, 1)
-				assert.Contains(t, validationErrors, "stop is not on route - https://www.openstreetmap.org/node/109")
+			checkFn: func(t *testing.T, validationErrors []ValidationError) {
+				exp := ValidationError{
+					URL:     "https://www.openstreetmap.org/node/109",
+					Message: "stop is not on route",
+				}
+				assert.Equal(t, []ValidationError{exp}, validationErrors)
 			},
 		},
 		{
@@ -92,7 +104,7 @@ func Test_validateStopOrder(t *testing.T) {
 				makeWayWithDirection(traverseReverse, 102, 109, 103, 104),
 				makeWayWithDirection(traverseForward, 102, 107, 108),
 			},
-			checkFn: func(t *testing.T, validationErrors []string) {
+			checkFn: func(t *testing.T, validationErrors []ValidationError) {
 				assert.Empty(t, validationErrors)
 			},
 		},
@@ -104,7 +116,7 @@ func Test_validateStopOrder(t *testing.T) {
 				makeWayWithDirection(traverseForward, 103, 104, 105),
 				makeWayWithDirection(traverseForward, 106, 107, 101),
 			},
-			checkFn: func(t *testing.T, validationErrors []string) {
+			checkFn: func(t *testing.T, validationErrors []ValidationError) {
 				assert.Empty(t, validationErrors)
 			},
 		},

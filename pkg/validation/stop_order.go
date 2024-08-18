@@ -1,15 +1,13 @@
 package validation
 
 import (
-	"fmt"
-
 	"github.com/ockendenjo/osm-pt-validator/pkg/osm"
 )
 
-func validateStopOrder(wayDirects []wayDirection, re osm.Relation) []string {
+func validateStopOrder(wayDirects []wayDirection, re osm.Relation) []ValidationError {
 	stops := []osm.Member{}
 	stopMap := map[int64][]int{}
-	validationErrors := []string{}
+	validationErrors := []ValidationError{}
 
 	for _, member := range re.Members {
 		if member.Type == "node" && member.RoleIsStop() {
@@ -19,7 +17,7 @@ func validateStopOrder(wayDirects []wayDirection, re osm.Relation) []string {
 	}
 	stopCount := len(stops)
 	if stopCount < 2 {
-		return []string{}
+		return nil
 	}
 
 	//For each stop, record the node index in the route
@@ -36,13 +34,15 @@ func validateStopOrder(wayDirects []wayDirection, re osm.Relation) []string {
 	for _, stop := range stops {
 		indices := stopMap[stop.Ref]
 		if len(indices) < 1 {
-			validationErrors = append(validationErrors, fmt.Sprintf("stop is not on route - %s", stop.GetElementURL()))
+			ve := ValidationError{URL: stop.GetElementURL(), Message: "stop is not on route"}
+			validationErrors = append(validationErrors, ve)
 			continue
 		}
 
 		indices = filterGt(indices, lastIndex)
 		if len(indices) < 1 {
-			validationErrors = append(validationErrors, fmt.Sprintf("stop is incorrectly ordered - %s", stop.GetElementURL()))
+			ve := ValidationError{URL: stop.GetElementURL(), Message: "stop is incorrectly ordered"}
+			validationErrors = append(validationErrors, ve)
 			continue
 		}
 
