@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"net/http"
 
 	sqsEvents "github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -48,6 +50,11 @@ func buildProcessRecord(sendMessageBatch sendMessageBatchApi, queueUrl string, o
 		logger := handler.GetLogger(ctx).With("relationID", event.RelationID)
 		relation, err := osmClient.GetRelation(ctx, event.RelationID)
 		if err != nil {
+			var hse osm.HttpStatusError
+			if errors.As(err, &hse) && hse.StatusCode == http.StatusGone {
+				goneErr := handleGone(ctx, event.RelationID, publish, topicArn)
+				return goneErr
+			}
 			return err
 		}
 
@@ -61,6 +68,27 @@ func buildProcessRecord(sendMessageBatch sendMessageBatchApi, queueUrl string, o
 		}
 		return nil
 	}
+}
+
+func handleGone(ctx context.Context, relationId int64, publish publishApi, topicArn string) error {
+	outputEvent := snsEvents.InvalidRelationEvent{
+		RelationID:       relationId,
+		ValidationErrors: []string{"relation no longer exists"},
+	}
+	bytes, err := json.Marshal(outputEvent)
+	if err != nil {
+		return err
+	}
+
+	_, err = publish(ctx, &sns.PublishInput{
+		Message:  jsii.String(string(bytes)),
+		Subject:  jsii.String(fmt.Sprintf("Unknown relation %d", relationId)),
+		TopicArn: jsii.String(topicArn),
+	})
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func handleRoute(ctx context.Context, logger *slog.Logger, element osm.Relation, config validation.Config, sendMessageBatch sendMessageBatchApi, queueUrl string) error {
