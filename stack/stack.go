@@ -45,23 +45,27 @@ func NewStack(scope constructs.Construct, id string, props *OSMPTStackProps) aws
 		panic(err)
 	}
 
+	alarmTopic := awssns.NewTopic(stack, jsii.String("AlarmTopic"), &awssns.TopicProps{
+		TopicName: jsii.String("osm-pt-alarms"),
+	})
+
 	NewLambda(stack, "Trigger", "build/trigger").
 		WithQueuePublish(rmQueues, "QUEUE_URL").
 		WithS3Read(bucket, "S3_BUCKET_NAME").
-		Build().
+		Build(alarmTopic).
 		RunAtFixedRate("OSMDailyValidate", schedule, nil)
 
 	NewLambda(stack, "SplitRelation", "build/validate-rm").
 		WithQueuePublish(routeQueues, "QUEUE_URL").
 		WithTopicPublish(topic, "TOPIC_ARN").
 		SetUserAgent(userAgent).
-		Build().
+		Build(alarmTopic).
 		AddSQSBatchTrigger(rmQueues)
 
 	NewLambda(stack, "ValidateRoute", "build/validate-route").
 		WithTopicPublish(topic, "TOPIC_ARN").
 		SetUserAgent(userAgent).
-		Build().
+		Build(alarmTopic).
 		AddSQSBatchTrigger(routeQueues)
 
 	awscdk.Tags_Of(stack).Add(jsii.String("application"), jsii.String("osm-pt-validator"), nil)

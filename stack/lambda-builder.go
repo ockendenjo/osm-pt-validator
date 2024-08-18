@@ -6,6 +6,7 @@ import (
 	"github.com/aws/aws-cdk-go/awscdk/v2"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsapigateway"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awscloudwatch"
+	"github.com/aws/aws-cdk-go/awscdk/v2/awscloudwatchactions"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsdynamodb"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsiam"
 	lambda "github.com/aws/aws-cdk-go/awscdk/v2/awslambda"
@@ -98,7 +99,7 @@ func (lb *LambdaBuilder) SetUserAgent(userAgent string) *LambdaBuilder {
 	return lb
 }
 
-func (lb *LambdaBuilder) Build() *LambdaConstruct {
+func (lb *LambdaBuilder) Build(topic awssns.ITopic) *LambdaConstruct {
 
 	lambdaFn := lambda.NewFunction(lb.scope, jsii.String("function"), &lambda.FunctionProps{
 		Runtime:                      lambda.Runtime_PROVIDED_AL2023(),
@@ -115,7 +116,7 @@ func (lb *LambdaBuilder) Build() *LambdaConstruct {
 		ReservedConcurrentExecutions: jsii.Number(2),
 	})
 
-	awscloudwatch.NewAlarm(lb.scope, jsii.String("Alarm"), &awscloudwatch.AlarmProps{
+	alarm := awscloudwatch.NewAlarm(lb.scope, jsii.String("Alarm"), &awscloudwatch.AlarmProps{
 		Metric: awscloudwatch.NewMetric(&awscloudwatch.MetricProps{
 			MetricName: jsii.String("Errors"),
 			Namespace:  jsii.String("AWS/Lambda"),
@@ -132,6 +133,8 @@ func (lb *LambdaBuilder) Build() *LambdaConstruct {
 		ComparisonOperator: awscloudwatch.ComparisonOperator_GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
 		TreatMissingData:   awscloudwatch.TreatMissingData_NOT_BREACHING,
 	})
+
+	alarm.AddAlarmAction(awscloudwatchactions.NewSnsAction(topic))
 
 	return &LambdaConstruct{LambdaFn: lambdaFn, Construct: lb.scope}
 }
