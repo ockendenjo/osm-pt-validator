@@ -24,10 +24,14 @@ func (v *Validator) validationRelationElement(ctx context.Context, re osm.Relati
 	}
 
 	tagValidationErrors := validateRETags(re)
-	allErrors = append(allErrors, tagValidationErrors...)
+	for _, ve := range tagValidationErrors {
+		allErrors = append(allErrors, ve.String())
+	}
 
 	memberOrderErrors := validateREMemberOrder(re)
-	allErrors = append(allErrors, memberOrderErrors...)
+	for _, ve := range memberOrderErrors {
+		allErrors = append(allErrors, ve.String())
+	}
 
 	nodeErrors, err := v.validateRelationNodes(ctx, re)
 	allErrors = append(allErrors, nodeErrors...)
@@ -49,13 +53,12 @@ func (v *Validator) validationRelationElement(ctx context.Context, re osm.Relati
 	return allErrors, err
 }
 
-func validateREMemberOrder(re osm.Relation) []string {
+func validateREMemberOrder(re osm.Relation) []ValidationError {
 	startedStops := false
 	startedRoute := false
 	routeBeforeStops := false
 	stopAfterRoute := false
-	nodeMissingRole := false
-	validationErrors := []string{}
+	validationErrors := []ValidationError{}
 
 	roles := map[string]bool{
 		osm.RoleStop:              true,
@@ -82,36 +85,34 @@ func validateREMemberOrder(re osm.Relation) []string {
 		}
 
 		if member.Type == "node" && member.Role == "" {
-			nodeMissingRole = true
+			ve := ValidationError{URL: member.GetElementURL(), Message: "stop/platform with empty role"}
+			validationErrors = append(validationErrors, ve)
 		}
 
 		if member.Role != "" && !roles[member.Role] {
 			ve := ValidationError{URL: member.GetElementURL(), Message: fmt.Sprintf("element has unexpected role '%s'", member.Role)}
-			validationErrors = append(validationErrors, ve.String())
+			validationErrors = append(validationErrors, ve)
 		}
 	}
 
 	if routeBeforeStops {
-		validationErrors = append(validationErrors, "route way appears before stop/platform")
+		validationErrors = append(validationErrors, ValidationError{Message: "route way appears before stop/platform"})
 	}
 	if stopAfterRoute {
-		validationErrors = append(validationErrors, "stop/platform appears after route ways")
-	}
-	if nodeMissingRole {
-		validationErrors = append(validationErrors, "stop/platform with empty role")
+		validationErrors = append(validationErrors, ValidationError{Message: "stop/platform appears after route ways"})
 	}
 	if !startedStops {
-		validationErrors = append(validationErrors, "route does not contain a stop/platform")
+		validationErrors = append(validationErrors, ValidationError{Message: "route does not contain a stop/platform"})
 	}
 	if !startedRoute {
-		validationErrors = append(validationErrors, "route does not contain any route ways")
+		validationErrors = append(validationErrors, ValidationError{Message: "route does not contain any route ways"})
 	}
 
 	return validationErrors
 }
 
-func validateRETags(re osm.Relation) []string {
-	validationErrors := []string{}
+func validateRETags(re osm.Relation) []ValidationError {
+	validationErrors := []ValidationError{}
 
 	missingTagErrors := checkTagsPresent(re, "from", "to", "name", "operator", "ref")
 	validationErrors = append(validationErrors, missingTagErrors...)
@@ -121,8 +122,8 @@ func validateRETags(re osm.Relation) []string {
 		"public_transport:version": "2",
 	} {
 		ve := checkTagValue(re, k, v)
-		if ve != "" {
-			validationErrors = append(validationErrors, ve)
+		if ve != nil {
+			validationErrors = append(validationErrors, *ve)
 		}
 	}
 

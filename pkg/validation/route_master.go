@@ -24,6 +24,8 @@ func (v *Validator) RouteMaster(r osm.Relation) []string {
 	}
 
 	tagMissingErrors := checkTagsPresent(r, "name", "ref", "operator")
-	validationErrors = append(validationErrors, tagMissingErrors...)
+	for _, ve := range tagMissingErrors {
+		validationErrors = append(validationErrors, ve.String())
+	}
 	return validationErrors
 }

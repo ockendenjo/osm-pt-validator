@@ -3,6 +3,7 @@ package validation
 import (
 	"context"
 	"fmt"
+
 	"github.com/ockendenjo/osm-pt-validator/pkg/osm"
 )
 
@@ -68,7 +69,9 @@ func validatePlatformNode(node *osm.Node, checkNaptan bool) []string {
 
 	if checkNaptan {
 		missingTagErrors := checkTagsPresent(node, "naptan:AtcoCode")
-		validationErrors = append(validationErrors, missingTagErrors...)
+		for _, ve := range missingTagErrors {
+			validationErrors = append(validationErrors, ve.String())
+		}
 	}
 
 	return validationErrors
