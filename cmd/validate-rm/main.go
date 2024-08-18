@@ -73,7 +73,7 @@ func buildProcessRecord(sendMessageBatch sendMessageBatchApi, queueUrl string, o
 func handleGone(ctx context.Context, relationId int64, publish publishApi, topicArn string) error {
 	outputEvent := snsEvents.InvalidRelationEvent{
 		RelationID:       relationId,
-		ValidationErrors: []string{"relation no longer exists"},
+		ValidationErrors: []validation.ValidationError{{Message: "relation no longer exists"}},
 	}
 	bytes, err := json.Marshal(outputEvent)
 	if err != nil {

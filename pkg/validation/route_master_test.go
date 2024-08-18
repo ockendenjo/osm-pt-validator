@@ -13,7 +13,7 @@ func TestValidationRouteMasterMembers(t *testing.T) {
 		members     []osm.Member
 		tags        map[string]string
 		setupConfig func(c *Config)
-		checkFn     func(t *testing.T, validationErrors []string)
+		checkFn     func(t *testing.T, validationErrors []ValidationError)
 	}{
 		{
 			name: "non-relation member",
@@ -23,8 +23,9 @@ func TestValidationRouteMasterMembers(t *testing.T) {
 					Ref:  34567,
 				},
 			},
-			checkFn: func(t *testing.T, validationErrors []string) {
-				assert.Contains(t, validationErrors, "member is not a relation - https://www.openstreetmap.org/way/34567")
+			checkFn: func(t *testing.T, validationErrors []ValidationError) {
+				exp := ValidationError{URL: "https://www.openstreetmap.org/way/34567", Message: "member is not a relation"}
+				assertContainsValidationError(t, validationErrors, exp)
 			},
 		},
 		{
@@ -35,10 +36,11 @@ func TestValidationRouteMasterMembers(t *testing.T) {
 					Ref:  34567,
 				},
 			},
-			checkFn: func(t *testing.T, validationErrors []string) {
-				assert.Contains(t, validationErrors, "missing tag 'name' - https://www.openstreetmap.org/relation/1234")
-				assert.Contains(t, validationErrors, "missing tag 'operator' - https://www.openstreetmap.org/relation/1234")
-				assert.Contains(t, validationErrors, "missing tag 'ref' - https://www.openstreetmap.org/relation/1234")
+			checkFn: func(t *testing.T, validationErrors []ValidationError) {
+				exp1 := ValidationError{URL: "https://www.openstreetmap.org/relation/1234", Message: "missing tag 'name'"}
+				exp2 := ValidationError{URL: "https://www.openstreetmap.org/relation/1234", Message: "missing tag 'operator'"}
+				exp3 := ValidationError{URL: "https://www.openstreetmap.org/relation/1234", Message: "missing tag 'ref'"}
+				assertContainsValidationError(t, validationErrors, exp1, exp2, exp3)
 			},
 		},
 		{
@@ -54,7 +56,7 @@ func TestValidationRouteMasterMembers(t *testing.T) {
 				"operator": "BusCo",
 				"ref":      "1",
 			},
-			checkFn: func(t *testing.T, validationErrors []string) {
+			checkFn: func(t *testing.T, validationErrors []ValidationError) {
 				assert.Empty(t, validationErrors)
 			},
 		},
@@ -69,8 +71,12 @@ func TestValidationRouteMasterMembers(t *testing.T) {
 			setupConfig: func(c *Config) {
 				c.MinimumRouteVariants = 2
 			},
-			checkFn: func(t *testing.T, validationErrors []string) {
-				assert.Contains(t, validationErrors, "not enough route variants - https://www.openstreetmap.org/relation/1234")
+			checkFn: func(t *testing.T, validationErrors []ValidationError) {
+				exp := ValidationError{
+					URL:     "https://www.openstreetmap.org/relation/1234",
+					Message: "not enough route variants",
+				}
+				assertContainsValidationError(t, validationErrors, exp)
 			},
 		},
 		{
@@ -89,7 +95,7 @@ func TestValidationRouteMasterMembers(t *testing.T) {
 				"operator": "BusCo",
 				"ref":      "1",
 			},
-			checkFn: func(t *testing.T, validationErrors []string) {
+			checkFn: func(t *testing.T, validationErrors []ValidationError) {
 				assert.Empty(t, validationErrors)
 			},
 		},

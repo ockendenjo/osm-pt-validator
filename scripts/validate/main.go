@@ -173,7 +173,7 @@ func validateRoute(ctx context.Context, validator *validation.Validator, relatio
 	return isValid, nil
 }
 
-func printErrors(validationErrors []string) {
+func printErrors(validationErrors []validation.ValidationError) {
 	if len(validationErrors) < 1 {
 		log.Println("relation is valid")
 		return

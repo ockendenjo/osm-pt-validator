@@ -7,16 +7,9 @@ import (
 	"github.com/ockendenjo/osm-pt-validator/pkg/osm"
 )
 
-func (v *Validator) RouteRelation(ctx context.Context, r osm.Relation) ([]string, error) {
+func (v *Validator) RouteRelation(ctx context.Context, r osm.Relation) ([]ValidationError, error) {
 	ve, err := v.validationRelationElement(ctx, r)
-	if err != nil {
-		return []string{}, err
-	}
-	s := []string{}
-	for _, i := range ve {
-		s = append(s, i.String())
-	}
-	return s, nil
+	return ve, err
 }
 
 func (v *Validator) validationRelationElement(ctx context.Context, re osm.Relation) ([]ValidationError, error) {
