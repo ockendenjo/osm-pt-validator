@@ -7,20 +7,17 @@ import (
 	"github.com/ockendenjo/osm-pt-validator/pkg/osm"
 )
 
-func (v *Validator) RouteRelation(ctx context.Context, r osm.Relation) ([]string, error) {
+func (v *Validator) RouteRelation(ctx context.Context, r osm.Relation) ([]ValidationError, error) {
 	ve, err := v.validationRelationElement(ctx, r)
-	if err != nil {
-		return []string{}, err
-	}
-	return ve, nil
+	return ve, err
 }
 
-func (v *Validator) validationRelationElement(ctx context.Context, re osm.Relation) ([]string, error) {
-	allErrors := []string{}
+func (v *Validator) validationRelationElement(ctx context.Context, re osm.Relation) ([]ValidationError, error) {
+	allErrors := []ValidationError{}
 
 	if !re.IsPTv2() {
-		errStr := fmt.Sprintf("tag 'public_transport:version' should have value '2' - %s", re.GetElementURL())
-		return []string{errStr}, nil
+		ve := ValidationError{URL: re.GetElementURL(), Message: "tag 'public_transport:version' should have value '2'"}
+		return []ValidationError{ve}, nil
 	}
 
 	tagValidationErrors := validateRETags(re)
@@ -44,18 +41,18 @@ func (v *Validator) validationRelationElement(ctx context.Context, re osm.Relati
 	}
 
 	if !v.validateNodeMembersCount(re) {
-		allErrors = append(allErrors, "relation does not have enough node members")
+		ve := ValidationError{URL: re.GetElementURL(), Message: "relation does not have enough node members"}
+		allErrors = append(allErrors, ve)
 	}
 	return allErrors, err
 }
 
-func validateREMemberOrder(re osm.Relation) []string {
+func validateREMemberOrder(re osm.Relation) []ValidationError {
 	startedStops := false
 	startedRoute := false
 	routeBeforeStops := false
 	stopAfterRoute := false
-	nodeMissingRole := false
-	validationErrors := []string{}
+	validationErrors := []ValidationError{}
 
 	roles := map[string]bool{
 		osm.RoleStop:              true,
@@ -82,36 +79,34 @@ func validateREMemberOrder(re osm.Relation) []string {
 		}
 
 		if member.Type == "node" && member.Role == "" {
-			nodeMissingRole = true
+			ve := ValidationError{URL: member.GetElementURL(), Message: "stop/platform with empty role"}
+			validationErrors = append(validationErrors, ve)
 		}
 
 		if member.Role != "" && !roles[member.Role] {
 			ve := ValidationError{URL: member.GetElementURL(), Message: fmt.Sprintf("element has unexpected role '%s'", member.Role)}
-			validationErrors = append(validationErrors, ve.String())
+			validationErrors = append(validationErrors, ve)
 		}
 	}
 
 	if routeBeforeStops {
-		validationErrors = append(validationErrors, "route way appears before stop/platform")
+		validationErrors = append(validationErrors, ValidationError{Message: "route way appears before stop/platform"})
 	}
 	if stopAfterRoute {
-		validationErrors = append(validationErrors, "stop/platform appears after route ways")
-	}
-	if nodeMissingRole {
-		validationErrors = append(validationErrors, "stop/platform with empty role")
+		validationErrors = append(validationErrors, ValidationError{Message: "stop/platform appears after route ways"})
 	}
 	if !startedStops {
-		validationErrors = append(validationErrors, "route does not contain a stop/platform")
+		validationErrors = append(validationErrors, ValidationError{Message: "route does not contain a stop/platform"})
 	}
 	if !startedRoute {
-		validationErrors = append(validationErrors, "route does not contain any route ways")
+		validationErrors = append(validationErrors, ValidationError{Message: "route does not contain any route ways"})
 	}
 
 	return validationErrors
 }
 
-func validateRETags(re osm.Relation) []string {
-	validationErrors := []string{}
+func validateRETags(re osm.Relation) []ValidationError {
+	validationErrors := []ValidationError{}
 
 	missingTagErrors := checkTagsPresent(re, "from", "to", "name", "operator", "ref")
 	validationErrors = append(validationErrors, missingTagErrors...)
@@ -121,8 +116,8 @@ func validateRETags(re osm.Relation) []string {
 		"public_transport:version": "2",
 	} {
 		ve := checkTagValue(re, k, v)
-		if ve != "" {
-			validationErrors = append(validationErrors, ve)
+		if ve != nil {
+			validationErrors = append(validationErrors, *ve)
 		}
 	}
 

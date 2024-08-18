@@ -15,16 +15,19 @@ import (
 
 func Test_validateWayOrder(t *testing.T) {
 
-	expectedValid := func(t *testing.T, validationErrors []string, err error) {
+	expectedValid := func(t *testing.T, validationErrors []ValidationError, err error) {
 		assert.Nil(t, err)
 		assert.Empty(t, validationErrors)
 	}
 
-	expectedOneWayError := func(wayId int64) func(t *testing.T, validationErrors []string, err error) {
-		return func(t *testing.T, validationErrors []string, err error) {
+	expectedOneWayError := func(wayId int64) func(t *testing.T, validationErrors []ValidationError, err error) {
+		return func(t *testing.T, validationErrors []ValidationError, err error) {
 			assert.Nil(t, err)
-			errStr := fmt.Sprintf("way with oneway tag is traversed in wrong direction - https://www.openstreetmap.org/way/%d", wayId)
-			assert.Contains(t, validationErrors, errStr)
+			exp := ValidationError{
+				URL:     fmt.Sprintf("https://www.openstreetmap.org/way/%d", wayId),
+				Message: "way with oneway tag is traversed in wrong direction",
+			}
+			assertContainsValidationError(t, validationErrors, exp)
 		}
 	}
 
@@ -32,7 +35,7 @@ func Test_validateWayOrder(t *testing.T) {
 		name      string
 		members   []osm.Member
 		setConfig func(config *Config)
-		checkFn   func(t *testing.T, validationErrors []string, err error)
+		checkFn   func(t *testing.T, validationErrors []ValidationError, err error)
 	}{
 		{
 			name:    "valid route",
@@ -42,9 +45,13 @@ func Test_validateWayOrder(t *testing.T) {
 		{
 			name:    "invalid route",
 			members: setupWays(1, 3, 2),
-			checkFn: func(t *testing.T, validationErrors []string, err error) {
+			checkFn: func(t *testing.T, validationErrors []ValidationError, err error) {
 				assert.Nil(t, err)
-				assert.Contains(t, validationErrors, "ways are incorrectly ordered - https://www.openstreetmap.org/way/3")
+				exp := ValidationError{
+					URL:     "https://www.openstreetmap.org/way/3",
+					Message: "ways are incorrectly ordered",
+				}
+				assertContainsValidationError(t, validationErrors, exp)
 			},
 		},
 		{
@@ -60,9 +67,13 @@ func Test_validateWayOrder(t *testing.T) {
 		{
 			name:    "invalid route starting with circular way",
 			members: setupWays(4, 1),
-			checkFn: func(t *testing.T, validationErrors []string, err error) {
+			checkFn: func(t *testing.T, validationErrors []ValidationError, err error) {
 				assert.Nil(t, err)
-				assert.Contains(t, validationErrors, "ways are incorrectly ordered - https://www.openstreetmap.org/way/1")
+				exp := ValidationError{
+					URL:     "https://www.openstreetmap.org/way/1",
+					Message: "ways are incorrectly ordered",
+				}
+				assertContainsValidationError(t, validationErrors, exp)
 			},
 		},
 		{

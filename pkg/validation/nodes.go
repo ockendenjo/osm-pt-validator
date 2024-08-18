@@ -3,13 +3,14 @@ package validation
 import (
 	"context"
 	"fmt"
+
 	"github.com/ockendenjo/osm-pt-validator/pkg/osm"
 )
 
-func (v *Validator) validateRelationNodes(ctx context.Context, re osm.Relation) ([]string, error) {
+func (v *Validator) validateRelationNodes(ctx context.Context, re osm.Relation) ([]ValidationError, error) {
 	nodeIds := []int64{}
 	nodes := []osm.Member{}
-	validationErrors := []string{}
+	validationErrors := []ValidationError{}
 
 	for _, member := range re.Members {
 		if member.Type == "node" {
@@ -22,7 +23,7 @@ func (v *Validator) validateRelationNodes(ctx context.Context, re osm.Relation) 
 
 	for k, way := range nodesMap {
 		if way == nil {
-			return []string{}, fmt.Errorf("failed to load node %d", k)
+			return nil, fmt.Errorf("failed to load node %d", k)
 		}
 	}
 
@@ -40,30 +41,30 @@ func (v *Validator) validateRelationNodes(ctx context.Context, re osm.Relation) 
 	return validationErrors, nil
 }
 
-func validatePlatformNode(node *osm.Node, checkNaptan bool) []string {
-	validationErrors := []string{}
+func validatePlatformNode(node *osm.Node, checkNaptan bool) []ValidationError {
+	validationErrors := []ValidationError{}
 
 	pt, found := node.Tags["public_transport"]
 	if !found {
-		validationErrors = append(validationErrors, fmt.Sprintf("node is missing public_transport tag - %s", node.GetElementURL()))
+		validationErrors = append(validationErrors, ValidationError{URL: node.GetElementURL(), Message: "node is missing public_transport tag"})
 	} else if pt != "platform" {
-		validationErrors = append(validationErrors, fmt.Sprintf("node should have public_transport=platform - %s", node.GetElementURL()))
+		validationErrors = append(validationErrors, ValidationError{URL: node.GetElementURL(), Message: "node should have public_transport=platform"})
 	}
 
 	_, found = node.Tags["disused:highway"]
 	if found {
-		validationErrors = append(validationErrors, fmt.Sprintf("node has disused:highway tag - %s", node.GetElementURL()))
+		validationErrors = append(validationErrors, ValidationError{URL: node.GetElementURL(), Message: "node has disused:highway tag"})
 	}
 
 	//Don't require the highway tag to be present - Naptan imported stops don't have it set (to prevent rendering)
 	highway, found := node.Tags["highway"]
 	if found && highway != "bus_stop" {
-		validationErrors = append(validationErrors, fmt.Sprintf("node should have highway=bus_stop - %s", node.GetElementURL()))
+		validationErrors = append(validationErrors, ValidationError{URL: node.GetElementURL(), Message: "node should have highway=bus_stop"})
 	}
 
 	_, found = node.Tags["name"]
 	if !found {
-		validationErrors = append(validationErrors, fmt.Sprintf("node is missing name tag - %s", node.GetElementURL()))
+		validationErrors = append(validationErrors, ValidationError{URL: node.GetElementURL(), Message: "node is missing name tag"})
 	}
 
 	if checkNaptan {
@@ -74,24 +75,24 @@ func validatePlatformNode(node *osm.Node, checkNaptan bool) []string {
 	return validationErrors
 }
 
-func validateStopNode(node *osm.Node) []string {
-	validationErrors := []string{}
+func validateStopNode(node *osm.Node) []ValidationError {
+	validationErrors := []ValidationError{}
 
 	pt, found := node.Tags["public_transport"]
 	if !found {
-		validationErrors = append(validationErrors, fmt.Sprintf("node is missing public_transport tag - %s", node.GetElementURL()))
+		validationErrors = append(validationErrors, ValidationError{URL: node.GetElementURL(), Message: "node is missing public_transport tag"})
 	} else if pt != "stop_position" {
-		validationErrors = append(validationErrors, fmt.Sprintf("node should have public_transport=stop_position - %s", node.GetElementURL()))
+		validationErrors = append(validationErrors, ValidationError{URL: node.GetElementURL(), Message: "node should have public_transport=stop_position"})
 	}
 
 	bus, found := node.Tags["bus"]
 	if found && bus != "yes" {
-		validationErrors = append(validationErrors, fmt.Sprintf("node should have bus=yes - %s", node.GetElementURL()))
+		validationErrors = append(validationErrors, ValidationError{URL: node.GetElementURL(), Message: "node should have bus=yes"})
 	}
 
 	name, found := node.Tags["name"]
 	if !found || len(name) < 1 {
-		validationErrors = append(validationErrors, fmt.Sprintf("node is missing name tag - %s", node.GetElementURL()))
+		validationErrors = append(validationErrors, ValidationError{URL: node.GetElementURL(), Message: "node is missing name tag"})
 	}
 
 	return validationErrors

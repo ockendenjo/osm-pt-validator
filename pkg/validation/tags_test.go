@@ -12,30 +12,41 @@ func Test_checkTagsPresent(t *testing.T) {
 	testcases := []struct {
 		name    string
 		object  Taggable
-		checkFn func(t *testing.T, ve []string)
+		checkFn func(t *testing.T, ve []ValidationError)
 
 		want []string
 	}{
 		{
 			name:   "all tags present",
 			object: osm.Node{Tags: map[string]string{"foo": "value", "bar": "value"}},
-			checkFn: func(t *testing.T, ve []string) {
-				assert.Empty(t, ve)
+			checkFn: func(t *testing.T, validationErrors []ValidationError) {
+				assert.Empty(t, validationErrors)
 			},
 		},
 		{
 			name:   "one tag missing",
 			object: osm.Node{Tags: map[string]string{"foo": "value"}},
-			checkFn: func(t *testing.T, ve []string) {
-				assert.Contains(t, ve, "missing tag 'bar' - https://www.openstreetmap.org/node/0")
+			checkFn: func(t *testing.T, validationErrors []ValidationError) {
+				exp := ValidationError{
+					URL:     "https://www.openstreetmap.org/node/0",
+					Message: "missing tag 'bar'",
+				}
+				assertContainsValidationError(t, validationErrors, exp)
 			},
 		},
 		{
 			name:   "multiple tags missing",
 			object: osm.Node{Tags: map[string]string{}},
-			checkFn: func(t *testing.T, ve []string) {
-				assert.Contains(t, ve, "missing tag 'foo' - https://www.openstreetmap.org/node/0")
-				assert.Contains(t, ve, "missing tag 'bar' - https://www.openstreetmap.org/node/0")
+			checkFn: func(t *testing.T, validationErrors []ValidationError) {
+				expFoo := ValidationError{
+					URL:     "https://www.openstreetmap.org/node/0",
+					Message: "missing tag 'bar'",
+				}
+				expBar := ValidationError{
+					URL:     "https://www.openstreetmap.org/node/0",
+					Message: "missing tag 'bar'",
+				}
+				assertContainsValidationError(t, validationErrors, expFoo, expBar)
 			},
 		},
 	}

@@ -24,7 +24,7 @@ func (v *Validator) GetConfig() Config {
 }
 
 type ValidationError struct {
-	URL     string `json:"url"`
+	URL     string `json:"url,omitempty"`
 	Message string `json:"message"`
 }
 
