@@ -41,7 +41,7 @@ func (m Member) GetElementURL() string {
 }
 
 func (m Member) RoleIsStop() bool {
-	roles := []string{"stop", "stop_entry_only", "stop_exit_only"}
+	roles := []string{RoleStop, RoleStopEntryOnly, RoleStopExitOnly}
 	for _, role := range roles {
 		if m.Role == role {
 			return true
@@ -51,7 +51,7 @@ func (m Member) RoleIsStop() bool {
 }
 
 func (m Member) RoleIsPlatform() bool {
-	roles := []string{"platform", "platform_entry_only", "platform_exit_only"}
+	roles := []string{RolePlatform, RolePlatformEntryOnly, RolePlatformExitOnly}
 	for _, role := range roles {
 		if m.Role == role {
 			return true
