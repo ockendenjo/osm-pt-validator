@@ -24,8 +24,8 @@ jobs:
       - name: golangci-lint # https://github.com/golangci/golangci-lint
         shell: bash
         env:
-          Version: '1.59.0'
-          Checksum: '3b14a439f33c4fff83dbe0349950d984042b9a1feb6c62f82787b598fc3ab5f4'
+          Version: '1.60.1'
+          Checksum: '06a803675ec83944d8c9e5a8dfa32845270cc447e7ebe0173c4b8ba7e205c9da'
         run: |
           curl -O -L "https://github.com/golangci/golangci-lint/releases/download/v${Version}/golangci-lint-${Version}-linux-amd64.tar.gz"
           echo "${Checksum} golangci-lint-${Version}-linux-amd64.tar.gz" | sha256sum -c
