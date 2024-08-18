@@ -119,7 +119,7 @@ func Test_validateStopOrder(t *testing.T) {
 
 func makeRelation(stops ...int64) osm.Relation {
 	members := make([]osm.Member, len(stops))
-	roles := []string{"stop", "stop_entry_only", "stop_exit_only"}
+	roles := []string{osm.RoleStop, osm.RoleStopEntryOnly, osm.RoleStopExitOnly}
 	for i, stop := range stops {
 		members[i] = osm.Member{Type: "node", Role: roles[i%3], Ref: stop}
 	}

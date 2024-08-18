@@ -58,7 +58,7 @@ func Test_validateREMemberOrder(t *testing.T) {
 				{
 					Type: "node",
 					Ref:  1234,
-					Role: "stop",
+					Role: osm.RoleStop,
 				},
 				{
 					Type: "way",
@@ -81,7 +81,7 @@ func Test_validateREMemberOrder(t *testing.T) {
 				{
 					Type: "node",
 					Ref:  1234,
-					Role: "stop",
+					Role: osm.RoleStop,
 				},
 				{
 					Type: "way",
@@ -99,7 +99,7 @@ func Test_validateREMemberOrder(t *testing.T) {
 				{
 					Type: "node",
 					Ref:  1234,
-					Role: "stop",
+					Role: osm.RoleStop,
 				},
 				{
 					Type: "way",
@@ -109,7 +109,7 @@ func Test_validateREMemberOrder(t *testing.T) {
 				{
 					Type: "node",
 					Ref:  1234,
-					Role: "platform",
+					Role: osm.RolePlatform,
 				},
 			},
 			checkFn: func(t *testing.T, validationErrors []string) {
@@ -153,7 +153,7 @@ func Test_validateREMemberOrder(t *testing.T) {
 				{
 					Type: "node",
 					Ref:  34567,
-					Role: "platform_exit_only",
+					Role: osm.RolePlatformExitOnly,
 				},
 			},
 			checkFn: func(t *testing.T, validationErrors []string) {

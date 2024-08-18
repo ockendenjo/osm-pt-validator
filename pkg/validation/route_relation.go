@@ -58,12 +58,12 @@ func validateREMemberOrder(re osm.Relation) []string {
 	validationErrors := []string{}
 
 	roles := map[string]bool{
-		"stop":                true,
-		"stop_exit_only":      true,
-		"stop_entry_only":     true,
-		"platform":            true,
-		"platform_exit_only":  true,
-		"platform_entry_only": true,
+		osm.RoleStop:              true,
+		osm.RoleStopEntryOnly:     true,
+		osm.RoleStopExitOnly:      true,
+		osm.RolePlatform:          true,
+		osm.RolePlatformEntryOnly: true,
+		osm.RolePlatformExitOnly:  true,
 	}
 
 	for _, member := range re.Members {
