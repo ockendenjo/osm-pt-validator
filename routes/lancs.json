@@ -30,7 +30,6 @@
             {"name": "881", "relation_id": 0, "comment": "Malham - service might not exist (8481752)"}
         ],
         "lancashire": [
-            {"name": "550", "relation_id": 10945935, "comment": "Morecambe <-> Milnthorpe"},
             {"name": "755", "relation_id": 10840953}
         ]
     }
