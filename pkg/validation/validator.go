@@ -1,6 +1,10 @@
 package validation
 
-import "github.com/ockendenjo/osm-pt-validator/pkg/osm"
+import (
+	"fmt"
+
+	"github.com/ockendenjo/osm-pt-validator/pkg/osm"
+)
 
 func DefaultValidator(client *osm.OSMClient) *Validator {
 	return &Validator{config: DefaultConfig(), osmClient: client}
@@ -17,4 +21,13 @@ type Validator struct {
 
 func (v *Validator) GetConfig() Config {
 	return v.config
+}
+
+type ValidationError struct {
+	URL     string `json:"url"`
+	Message string `json:"message"`
+}
+
+func (v ValidationError) String() string {
+	return fmt.Sprintf("%s - %s", v.Message, v.URL)
 }

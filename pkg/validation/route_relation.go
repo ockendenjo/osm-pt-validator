@@ -84,6 +84,11 @@ func validateREMemberOrder(re osm.Relation) []string {
 		if member.Type == "node" && member.Role == "" {
 			nodeMissingRole = true
 		}
+
+		if member.Role != "" && !roles[member.Role] {
+			ve := ValidationError{URL: member.GetElementURL(), Message: fmt.Sprintf("element has unexpected role '%s'", member.Role)}
+			validationErrors = append(validationErrors, ve.String())
+		}
 	}
 
 	if routeBeforeStops {
