@@ -12,49 +12,44 @@ func (v *Validator) RouteRelation(ctx context.Context, r osm.Relation) ([]string
 	if err != nil {
 		return []string{}, err
 	}
-	return ve, nil
+	s := []string{}
+	for _, i := range ve {
+		s = append(s, i.String())
+	}
+	return s, nil
 }
 
-func (v *Validator) validationRelationElement(ctx context.Context, re osm.Relation) ([]string, error) {
-	allErrors := []string{}
+func (v *Validator) validationRelationElement(ctx context.Context, re osm.Relation) ([]ValidationError, error) {
+	allErrors := []ValidationError{}
 
 	if !re.IsPTv2() {
-		errStr := fmt.Sprintf("tag 'public_transport:version' should have value '2' - %s", re.GetElementURL())
-		return []string{errStr}, nil
+		ve := ValidationError{URL: re.GetElementURL(), Message: "tag 'public_transport:version' should have value '2'"}
+		return []ValidationError{ve}, nil
 	}
 
 	tagValidationErrors := validateRETags(re)
-	for _, ve := range tagValidationErrors {
-		allErrors = append(allErrors, ve.String())
-	}
+	allErrors = append(allErrors, tagValidationErrors...)
 
 	memberOrderErrors := validateREMemberOrder(re)
-	for _, ve := range memberOrderErrors {
-		allErrors = append(allErrors, ve.String())
-	}
+	allErrors = append(allErrors, memberOrderErrors...)
 
 	nodeErrors, err := v.validateRelationNodes(ctx, re)
-	for _, ve := range nodeErrors {
-		allErrors = append(allErrors, ve.String())
-	}
+	allErrors = append(allErrors, nodeErrors...)
 	if err != nil {
 		return allErrors, err
 	}
 
 	routeErrors, wayDirects, err := v.validateWayOrder(ctx, re)
-	for _, ve := range routeErrors {
-		allErrors = append(allErrors, ve.String())
-	}
+	allErrors = append(allErrors, routeErrors...)
 
 	if len(routeErrors) == 0 {
 		stopErrors := validateStopOrder(wayDirects, re)
-		for _, ve := range stopErrors {
-			allErrors = append(allErrors, ve.String())
-		}
+		allErrors = append(allErrors, stopErrors...)
 	}
 
 	if !v.validateNodeMembersCount(re) {
-		allErrors = append(allErrors, "relation does not have enough node members")
+		ve := ValidationError{URL: re.GetElementURL(), Message: "relation does not have enough node members"}
+		allErrors = append(allErrors, ve)
 	}
 	return allErrors, err
 }
