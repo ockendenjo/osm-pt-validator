@@ -12,6 +12,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-go@v5
         with:
           go-version-file: "go.mod"
@@ -23,13 +24,11 @@ jobs:
 
       - name: golangci-lint # https://github.com/golangci/golangci-lint
         shell: bash
-        env:
-          Version: '1.60.1'
-          Checksum: '06a803675ec83944d8c9e5a8dfa32845270cc447e7ebe0173c4b8ba7e205c9da'
         run: |
-          curl -O -L "https://github.com/golangci/golangci-lint/releases/download/v${Version}/golangci-lint-${Version}-linux-amd64.tar.gz"
-          echo "${Checksum} golangci-lint-${Version}-linux-amd64.tar.gz" | sha256sum -c
-          tar -xvzf "golangci-lint-${Version}-linux-amd64.tar.gz" -C "$(go env GOPATH)/bin" --strip-components 1 "golangci-lint-${Version}-linux-amd64/golangci-lint"
+          VERSION=$(curl -s https://api.github.com/repos/golangci/golangci-lint/releases/latest | jq -r ".tag_name" | cut -c2-)
+          echo "Latest version is $VERSION"
+          curl -O -L "https://github.com/golangci/golangci-lint/releases/download/v${VERSION}/golangci-lint-${Version}-linux-amd64.tar.gz"
+          tar -xvzf "golangci-lint-${VERSION}-linux-amd64.tar.gz" -C "$(go env GOPATH)/bin" --strip-components 1 "golangci-lint-${VERSION}-linux-amd64/golangci-lint"
           chmod +x "$(go env GOPATH)/bin/golangci-lint"
           golangci-lint --version
           golangci-lint run --timeout=3m
@@ -42,24 +41,20 @@ jobs:
 
       - name: gosec # https://github.com/securego/gosec
         shell: bash
-        env:
-          Version: '2.20.0'
-          Checksum: '2d056644cf265f194efaf98b80d459004c03db7b367fbc3fe7fb345773df684e'
         run: |
-          curl -O -L "https://github.com/securego/gosec/releases/download/v${Version}/gosec_${Version}_linux_amd64.tar.gz"    
-          echo "${Checksum} gosec_${Version}_linux_amd64.tar.gz" | sha256sum -c
-          tar -xvzf "gosec_${Version}_linux_amd64.tar.gz" -C "$(go env GOPATH)/bin" "gosec"
+          VERSION=$(curl -s https://api.github.com/repos/securego/gosec/releases/latest | jq -r ".tag_name" | cut -c2-)
+          echo "Latest version is $VERSION"
+          curl -O -L "https://github.com/securego/gosec/releases/download/v${VERSION}/gosec_${VERSION}_linux_amd64.tar.gz"    
+          tar -xvzf "gosec_${VERSION}_linux_amd64.tar.gz" -C "$(go env GOPATH)/bin" "gosec"
           chmod +x "$(go env GOPATH)/bin/gosec"
           gosec ./...
 
       - name: nancy # https://github.com/sonatype-nexus-community/nancy
         shell: bash
-        env:
-          Version: '1.0.46'
-          Checksum: '467c47c75677411074fcc44e392e616dac90c23d5991ddbc7cd2186057d8c2cf'
         run: |
-          curl -O -L "https://github.com/sonatype-nexus-community/nancy/releases/download/v${Version}/nancy-v${Version}-linux-amd64"
-          echo "${Checksum} nancy-v${Version}-linux-amd64" | sha256sum -c
-          mv "nancy-v${Version}-linux-amd64" "$(go env GOPATH)/bin/nancy"
+          VERSION=$(curl -s https://api.github.com/repos/sonatype-nexus-community/nancy/releases/latest | jq -r ".tag_name" | cut -c2-)
+          echo "Latest version is $VERSION"
+          curl -O -L "https://github.com/sonatype-nexus-community/nancy/releases/download/v${VERSION}/nancy-v${VERSION}-linux-amd64"
+          mv "nancy-v${VERSION}-linux-amd64" "$(go env GOPATH)/bin/nancy"
           chmod +x "$(go env GOPATH)/bin/nancy"
           go list -json -deps ./... | nancy sleuth
