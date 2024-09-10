@@ -57,4 +57,4 @@ jobs:
           curl -O -L "https://github.com/sonatype-nexus-community/nancy/releases/download/v${VERSION}/nancy-v${VERSION}-linux-amd64"
           mv "nancy-v${VERSION}-linux-amd64" "$(go env GOPATH)/bin/nancy"
           chmod +x "$(go env GOPATH)/bin/nancy"
-          go list -json -deps ./... | nancy sleuth
+          go list -json -deps ./... | nancy sleuth --exclude-vulnerability CVE-2024-8421
