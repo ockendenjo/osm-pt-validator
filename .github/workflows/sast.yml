@@ -27,7 +27,7 @@ jobs:
         run: |
           VERSION=$(curl -s https://api.github.com/repos/golangci/golangci-lint/releases/latest | jq -r ".tag_name" | cut -c2-)
           echo "Latest version is $VERSION"
-          curl -O -L "https://github.com/golangci/golangci-lint/releases/download/v${VERSION}/golangci-lint-${Version}-linux-amd64.tar.gz"
+          curl -O -L "https://github.com/golangci/golangci-lint/releases/download/v${VERSION}/golangci-lint-${$VERSION}-linux-amd64.tar.gz"
           tar -xvzf "golangci-lint-${VERSION}-linux-amd64.tar.gz" -C "$(go env GOPATH)/bin" --strip-components 1 "golangci-lint-${VERSION}-linux-amd64/golangci-lint"
           chmod +x "$(go env GOPATH)/bin/golangci-lint"
           golangci-lint --version
