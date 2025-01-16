@@ -12,4 +12,5 @@ type RoutesFile struct {
 type Route struct {
 	Name       string `json:"name"`
 	RelationID int64  `json:"relation_id"`
+	Skip       bool   `json:"skip"`
 }
