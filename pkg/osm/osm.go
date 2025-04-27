@@ -58,7 +58,9 @@ func (c *OSMClient) GetRelation(ctx context.Context, relationId int64) (Relation
 	if err != nil {
 		return Relation{}, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		_ = response.Body.Close()
+	}()
 
 	bytes, err := io.ReadAll(response.Body)
 	if err != nil {
@@ -89,7 +91,9 @@ func (c *OSMClient) GetRelationRelations(ctx context.Context, relationId int64) 
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer func(Body io.ReadCloser) {
+		_ = Body.Close()
+	}(response.Body)
 
 	bytes, err := io.ReadAll(response.Body)
 	if err != nil {
@@ -139,7 +143,9 @@ func (c *OSMClient) GetWay(ctx context.Context, wayId int64) (Way, error) {
 	if err != nil {
 		return Way{}, err
 	}
-	defer response.Body.Close()
+	defer func(Body io.ReadCloser) {
+		_ = Body.Close()
+	}(response.Body)
 
 	bytes, err := io.ReadAll(response.Body)
 	if err != nil {
@@ -183,7 +189,9 @@ func (c *OSMClient) GetNode(ctx context.Context, nodeId int64) (Node, error) {
 	if err != nil {
 		return Node{}, err
 	}
-	defer response.Body.Close()
+	defer func(Body io.ReadCloser) {
+		_ = Body.Close()
+	}(response.Body)
 
 	bytes, err := io.ReadAll(response.Body)
 	if err != nil {
