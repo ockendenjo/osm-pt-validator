@@ -92,7 +92,8 @@ func validateStopNode(node *osm.Node) []ValidationError {
 
 	name, found := node.Tags["name"]
 	if !found || len(name) < 1 {
-		validationErrors = append(validationErrors, ValidationError{URL: node.GetElementURL(), Message: "node is missing name tag"})
+		//TODO: Add better validation to check if stop is part of public_transport=stop_area
+		//validationErrors = append(validationErrors, ValidationError{URL: node.GetElementURL(), Message: "node is missing name tag"})
 	}
 
 	return validationErrors
