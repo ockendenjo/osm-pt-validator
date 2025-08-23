@@ -90,11 +90,11 @@ func validateStopNode(node *osm.Node) []ValidationError {
 		validationErrors = append(validationErrors, ValidationError{URL: node.GetElementURL(), Message: "node should have bus=yes"})
 	}
 
-	name, found := node.Tags["name"]
-	if !found || len(name) < 1 {
-		//TODO: Add better validation to check if stop is part of public_transport=stop_area
-		//validationErrors = append(validationErrors, ValidationError{URL: node.GetElementURL(), Message: "node is missing name tag"})
-	}
+	//name, found := node.Tags["name"]
+	//if !found || len(name) < 1 {
+	//TODO: Add better validation to check if stop is part of public_transport=stop_area
+	//validationErrors = append(validationErrors, ValidationError{URL: node.GetElementURL(), Message: "node is missing name tag"})
+	//}
 
 	return validationErrors
 }
