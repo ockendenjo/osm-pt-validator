@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/aws/aws-xray-sdk-go/xray"
+	"github.com/aws/aws-xray-sdk-go/v2/xray"
 )
 
 const defaultBaseUrl = "https://api.openstreetmap.org/api/0.6"
