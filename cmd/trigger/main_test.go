@@ -12,6 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	sqsTypes "github.com/aws/aws-sdk-go-v2/service/sqs/types"
 	"github.com/aws/jsii-runtime-go"
+	"github.com/ockendenjo/handler"
 	"github.com/ockendenjo/osm-pt-validator/pkg/events"
 	"github.com/ockendenjo/osm-pt-validator/pkg/routes"
 	"github.com/ockendenjo/osm-pt-validator/pkg/util"
@@ -92,7 +93,7 @@ func Test_listObjectKeys(t *testing.T) {
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
 			listObjectKeys := buildListObjectKeys(tc.getListObjects(t), "bucketName")
-			objectKeys, err := listObjectKeys(context.Background())
+			objectKeys, err := listObjectKeys(handler.Get(t.Context()))
 			tc.checkFn(t, objectKeys, err)
 		})
 	}
@@ -202,12 +203,12 @@ func Test_handler(t *testing.T) {
 
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			listObjectsFn := func(ctx context.Context) ([]string, error) {
+			listObjectsFn := func(ctx *handler.Context) ([]string, error) {
 				return []string{"foo.json", "bar.json"}, nil
 			}
 
 			handlerFn := buildHandler(listObjectsFn, tc.readFile, tc.sqsSender(t))
-			_, err := handlerFn(context.Background(), nil)
+			_, err := handlerFn(handler.Get(t.Context()), nil)
 			assert.Nil(t, err)
 		})
 	}

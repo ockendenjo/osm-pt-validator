@@ -6,7 +6,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/aws/aws-sdk-go-v2/service/sqs/types"
 	"github.com/aws/jsii-runtime-go"
-	"github.com/ockendenjo/handler"
 )
 
 type SendMessageBatchApi func(ctx context.Context, params *sqs.SendMessageBatchInput, optFns ...func(*sqs.Options)) (*sqs.SendMessageBatchOutput, error)
@@ -18,7 +17,6 @@ func NewSQSBatchSender(sendMessage SendMessageBatchApi, queueUrl string) SQSBatc
 
 	return func(ctx context.Context, entries []types.SendMessageBatchRequestEntry) error {
 		size := len(entries)
-		logger := handler.GetLogger(ctx)
 
 		for i := 0; i < size; i += chunkSize {
 			end := i + chunkSize
@@ -34,7 +32,6 @@ func NewSQSBatchSender(sendMessage SendMessageBatchApi, queueUrl string) SQSBatc
 			if err != nil {
 				return err
 			}
-			logger.Info("Sent messages to SQS", "count", len(subSlice))
 		}
 		return nil
 	}
