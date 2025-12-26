@@ -35,7 +35,7 @@ func main() {
 }
 
 func buildHandler(listObjects listObjects, readFile fileReader, batchSend util.SQSBatchSender) handler.Handler[any, any] {
-	return func(ctx context.Context, _ any) (any, error) {
+	return func(ctx *handler.Context, _ any) (any, error) {
 
 		objectKeys, err := listObjects(ctx)
 		if err != nil {
@@ -80,15 +80,15 @@ func buildHandler(listObjects listObjects, readFile fileReader, batchSend util.S
 }
 
 type listObjectsV2Api func(ctx context.Context, params *s3.ListObjectsV2Input, optFns ...func(*s3.Options)) (*s3.ListObjectsV2Output, error)
-type listObjects func(ctx context.Context) ([]string, error)
+type listObjects func(ctx *handler.Context) ([]string, error)
 type getObjectApi func(ctx context.Context, params *s3.GetObjectInput, optFns ...func(*s3.Options)) (*s3.GetObjectOutput, error)
 type fileReader func(ctx context.Context, key string, ch chan readResult)
 
 func buildListObjectKeys(listObjects listObjectsV2Api, bucketName string) listObjects {
 	keys := []string{}
 
-	return func(ctx context.Context) ([]string, error) {
-		logger := handler.GetLogger(ctx)
+	return func(ctx *handler.Context) ([]string, error) {
+		logger := ctx.GetLogger()
 		var token *string
 		for {
 			result, err := listObjects(ctx, &s3.ListObjectsV2Input{Bucket: &bucketName, ContinuationToken: token, Prefix: jsii.String("routes")})

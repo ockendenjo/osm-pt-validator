@@ -12,15 +12,12 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/sns"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/aws/aws-sdk-go-v2/service/sqs/types"
-	"github.com/aws/jsii-runtime-go"
 	"github.com/google/uuid"
 	"github.com/ockendenjo/handler"
 	"github.com/ockendenjo/osm-pt-validator/pkg/events"
 	"github.com/ockendenjo/osm-pt-validator/pkg/osm"
 	"github.com/ockendenjo/osm-pt-validator/pkg/snsEvents"
 	"github.com/ockendenjo/osm-pt-validator/pkg/validation"
-
-	"log/slog"
 )
 
 func main() {
@@ -33,44 +30,52 @@ func main() {
 		snsClient := sns.NewFromConfig(awsConfig)
 		osmClient := osm.NewClient(userAgent).WithXRay()
 
-		return handler.GetSQSHandler(buildProcessRecord(sqsClient.SendMessageBatch, queueUrl, osmClient, snsClient.Publish, topicArn))
+		h := &lambdaHandler{
+			sendMessageBatch: sqsClient.SendMessageBatch,
+			queueUrl:         queueUrl,
+			osmClient:        osmClient,
+			publish:          snsClient.Publish,
+			topicArn:         topicArn,
+		}
+		return handler.GetSQSHandler(h, nil)
 	})
 }
 
-func buildProcessRecord(sendMessageBatch sendMessageBatchApi, queueUrl string, osmClient *osm.OSMClient, publish publishApi, topicArn string) handler.SQSRecordProcessor {
-	return func(ctx context.Context, record sqsEvents.SQSMessage) error {
-		var event events.CheckRelationEvent
-		err := json.Unmarshal([]byte(record.Body), &event)
-		if err != nil {
-			return err
-		}
-
-		validator := validation.NewValidator(event.Config, osmClient)
-
-		logger := handler.GetLogger(ctx).With("relationID", event.RelationID)
-		relation, err := osmClient.GetRelation(ctx, event.RelationID)
-		if err != nil {
-			var hse osm.HttpStatusError
-			if errors.As(err, &hse) && hse.StatusCode == http.StatusGone {
-				goneErr := handleGone(ctx, event.RelationID, publish, topicArn)
-				return goneErr
-			}
-			return err
-		}
-
-		logger.Info("processing relation", "type", relation.Tags["type"])
-
-		if relation.Tags["type"] == "route_master" {
-			return handleRouteMaster(ctx, logger, validator, relation, sendMessageBatch, queueUrl, publish, topicArn)
-		}
-		if relation.Tags["type"] == "route" {
-			return handleRoute(ctx, logger, relation, event.Config, sendMessageBatch, queueUrl)
-		}
-		return nil
-	}
+type lambdaHandler struct {
+	sendMessageBatch sendMessageBatchApi
+	queueUrl         string
+	osmClient        *osm.OSMClient
+	publish          publishApi
+	topicArn         string
 }
 
-func handleGone(ctx context.Context, relationId int64, publish publishApi, topicArn string) error {
+func (h *lambdaHandler) ProcessSQSEvent(ctx *handler.Context, event events.CheckRelationEvent, _ map[string]sqsEvents.SQSMessageAttribute) error {
+
+	validator := validation.NewValidator(event.Config, h.osmClient)
+
+	logger := ctx.GetLogger().AddParam("relationID", event.RelationID)
+	relation, err := h.osmClient.GetRelation(ctx, event.RelationID)
+	if err != nil {
+		var hse osm.HttpStatusError
+		if errors.As(err, &hse) && hse.StatusCode == http.StatusGone {
+			goneErr := h.handleGone(ctx, event.RelationID)
+			return goneErr
+		}
+		return err
+	}
+
+	logger.Info("processing relation", "type", relation.Tags["type"])
+
+	if relation.Tags["type"] == "route_master" {
+		return h.handleRouteMaster(ctx, validator, relation)
+	}
+	if relation.Tags["type"] == "route" {
+		return h.handleRoute(ctx, relation, event.Config)
+	}
+	return nil
+}
+
+func (h *lambdaHandler) handleGone(ctx context.Context, relationId int64) error {
 	outputEvent := snsEvents.InvalidRelationEvent{
 		RelationID:       relationId,
 		ValidationErrors: []validation.ValidationError{{Message: "relation no longer exists"}},
@@ -80,10 +85,10 @@ func handleGone(ctx context.Context, relationId int64, publish publishApi, topic
 		return err
 	}
 
-	_, err = publish(ctx, &sns.PublishInput{
-		Message:  jsii.String(string(bytes)),
-		Subject:  jsii.String(fmt.Sprintf("Unknown relation %d", relationId)),
-		TopicArn: jsii.String(topicArn),
+	_, err = h.publish(ctx, &sns.PublishInput{
+		Message:  aws.String(string(bytes)),
+		Subject:  aws.String(fmt.Sprintf("Unknown relation %d", relationId)),
+		TopicArn: aws.String(h.topicArn),
 	})
 	if err != nil {
 		return err
@@ -91,7 +96,8 @@ func handleGone(ctx context.Context, relationId int64, publish publishApi, topic
 	return nil
 }
 
-func handleRoute(ctx context.Context, logger *slog.Logger, element osm.Relation, config validation.Config, sendMessageBatch sendMessageBatchApi, queueUrl string) error {
+func (h *lambdaHandler) handleRoute(ctx *handler.Context, element osm.Relation, config validation.Config) error {
+	logger := ctx.GetLogger()
 	logger.Info("processing route relation")
 	messages := []types.SendMessageBatchRequestEntry{}
 
@@ -102,15 +108,16 @@ func handleRoute(ctx context.Context, logger *slog.Logger, element osm.Relation,
 	}
 
 	message := types.SendMessageBatchRequestEntry{
-		MessageBody: jsii.String(string(bytes)),
-		Id:          jsii.String(uuid.New().String()),
+		MessageBody: aws.String(string(bytes)),
+		Id:          aws.String(uuid.New().String()),
 	}
 	messages = append(messages, message)
-	_, err = sendMessageBatch(ctx, &sqs.SendMessageBatchInput{QueueUrl: jsii.String(queueUrl), Entries: messages})
+	_, err = h.sendMessageBatch(ctx, &sqs.SendMessageBatchInput{QueueUrl: &h.queueUrl, Entries: messages})
 	return err
 }
 
-func handleRouteMaster(ctx context.Context, logger *slog.Logger, validator *validation.Validator, element osm.Relation, sendMessageBatch sendMessageBatchApi, queueUrl string, publish publishApi, topicArn string) error {
+func (h *lambdaHandler) handleRouteMaster(ctx *handler.Context, validator *validation.Validator, element osm.Relation) error {
+	logger := ctx.GetLogger()
 	logger.Info("processing route_master relation")
 	messages := []types.SendMessageBatchRequestEntry{}
 
@@ -128,10 +135,10 @@ func handleRouteMaster(ctx context.Context, logger *slog.Logger, validator *vali
 			return err
 		}
 
-		_, err = publish(ctx, &sns.PublishInput{
-			Message:  jsii.String(string(bytes)),
-			Subject:  jsii.String(fmt.Sprintf("Invalid relation %d", element.ID)),
-			TopicArn: jsii.String(topicArn),
+		_, err = h.publish(ctx, &sns.PublishInput{
+			Message:  aws.String(string(bytes)),
+			Subject:  aws.String(fmt.Sprintf("Invalid relation %d", element.ID)),
+			TopicArn: aws.String(h.topicArn),
 		})
 		if err != nil {
 			return err
@@ -148,14 +155,14 @@ func handleRouteMaster(ctx context.Context, logger *slog.Logger, validator *vali
 			}
 
 			message := types.SendMessageBatchRequestEntry{
-				MessageBody: jsii.String(string(bytes)),
-				Id:          jsii.String(uuid.New().String()),
+				MessageBody: aws.String(string(bytes)),
+				Id:          aws.String(uuid.New().String()),
 			}
 			messages = append(messages, message)
 		}
 	}
 	if len(messages) > 0 {
-		_, err := sendMessageBatch(ctx, &sqs.SendMessageBatchInput{QueueUrl: jsii.String(queueUrl), Entries: messages})
+		_, err := h.sendMessageBatch(ctx, &sqs.SendMessageBatchInput{QueueUrl: &h.queueUrl, Entries: messages})
 		return err
 	}
 	return nil
