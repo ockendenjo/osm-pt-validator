@@ -6,12 +6,12 @@ require (
 	github.com/aws/aws-cdk-go/awscdk/v2 v2.233.0
 	github.com/aws/aws-lambda-go v1.51.1
 	github.com/aws/aws-sdk-go-v2 v1.41.0
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.94.0
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.95.0
 	github.com/aws/aws-sdk-go-v2/service/sns v1.39.10
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.42.20
 	github.com/aws/aws-xray-sdk-go/v2 v2.0.0
 	github.com/aws/constructs-go/constructs/v10 v10.4.4
-	github.com/aws/jsii-runtime-go v1.121.0
+	github.com/aws/jsii-runtime-go v1.122.0
 	github.com/google/uuid v1.6.0
 	github.com/ockendenjo/handler v1.0.5
 	github.com/stretchr/testify v1.11.1
