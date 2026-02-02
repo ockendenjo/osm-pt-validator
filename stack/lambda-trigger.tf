@@ -20,6 +20,14 @@ module "iam_s3_lambda_trigger" {
   role_id    = module.lambda_trigger.role_id
 }
 
+module "iam_sqs_lambda_trigger" {
+  source  = "github.com/ockendenjo/tfmods//iam-sqs"
+  role_id = module.lambda_trigger.role_id
+  sqs_arns = [
+    module.sqs_validate_rm_events.queue_arn,
+  ]
+}
+
 resource "aws_cloudwatch_event_rule" "daily_schedule" {
   name                = "osmptv-${var.env}-daily-schedule"
   description         = "Trigger validation once per day at 23:05 UTC"
