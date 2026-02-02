@@ -166,7 +166,9 @@ func uploadFile(ctx context.Context, s3Client *s3.Client, filePath, key, bucket 
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		_ = file.Close()
+	}(file)
 
 	_, err = s3Client.PutObject(ctx, &s3.PutObjectInput{
 		Bucket: &bucket,
