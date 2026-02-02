@@ -50,6 +50,20 @@ See [routefile.schema.json](schema/routefile.schema.json) for the JSON-schema or
 
 [xcfile.dev](https://xcfile.dev) tasks
 
+### build-cmd
+
+requires: clean
+
+```shell
+go run ./scripts/build-cmd --zip
+```
+
+### clean
+
+```shell
+rm -rf build/* || true
+```
+
 ### format
 
 directory: stack
@@ -69,6 +83,7 @@ terraform init -backend-config=tfvars/backend.tfvars
 
 ### plan
 
+requires: upload-cmd
 directory: stack
 environment: AWS_PROFILE=osmptv
 
@@ -78,9 +93,21 @@ terraform plan -var-file=tfvars/pro.tfvars
 
 ### apply
 
+requires: upload-cmd
 directory: stack
 environment: AWS_PROFILE=osmptv
 
 ```shell
 terraform apply -var-file=tfvars/pro.tfvars -auto-approve
+```
+
+### upload-cmd
+
+requires: build-cmd
+environment: AWS_PROFILE=osmptv
+
+```shell
+#!/bin/bash
+source stack/tfvars/.env
+BINARY_BUCKET=$BINARY_BUCKET go run ./scripts/upload-binaries
 ```
