@@ -32,6 +32,8 @@ jobs:
   build:
     name: build
     environment: pro
+    permissions:
+      id-token: write
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -95,8 +97,7 @@ jobs:
     environment: pro
     needs: [build, validate, test]
     permissions:
-      id-token: write   # This is required for requesting the JWT
-      contents: read    # This is required for actions/checkout
+      id-token: write
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
