@@ -143,6 +143,7 @@ jobs:
           EOF
 
       - name: Deploy stack
+        working-directory: stack
         shell: bash
         run: |
           terraform apply -auto-approve
