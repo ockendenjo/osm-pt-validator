@@ -75,3 +75,12 @@ environment: AWS_PROFILE=osmptv
 ```shell
 terraform plan -var-file=tfvars/pro.tfvars
 ```
+
+### apply
+
+directory: stack
+environment: AWS_PROFILE=osmptv
+
+```shell
+terraform apply -var-file=tfvars/pro.tfvars -auto-approve
+```
