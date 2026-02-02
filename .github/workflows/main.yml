@@ -141,6 +141,11 @@ jobs:
           permissions_boundary_arn = "${{ secrets.PERMISSIONS_BOUNDARY_ARN }}"
           EOF
 
+      - name: Deploy stack
+        shell: bash
+        run: |
+          terraform apply -auto-approve
+
       - name: Sync routes
         run: aws s3 sync routes/ s3://${{ secrets.DATA_BUCKET }}/routes --delete
 
