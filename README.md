@@ -111,3 +111,9 @@ environment: AWS_PROFILE=osmptv
 source stack/tfvars/.env
 BINARY_BUCKET=$BINARY_BUCKET go run ./scripts/upload-binaries
 ```
+
+### test
+
+```shell
+go test -json ./... | tparse
+```

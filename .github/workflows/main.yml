@@ -20,8 +20,14 @@ jobs:
         with:
           go-version-file: "go.mod"
 
-      - name: Run tests
-        run: make test
+      - name: Install tparse
+        run: |
+          go install github.com/mfridman/tparse@latest
+
+      - name: Build
+        uses: joerdav/run-xc@v1.1.0
+        with:
+          task: test
 
   build:
     name: build
@@ -37,14 +43,10 @@ jobs:
         with:
           go-version-file: "go.mod"
 
-      - name: Build commands
-        run: make build
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      - name: Build
+        uses: joerdav/run-xc@v1.1.0
         with:
-          name: build
-          path: build
+          task: build-cmd
 
   validate:
     name: validate
