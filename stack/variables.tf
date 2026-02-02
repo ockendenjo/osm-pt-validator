@@ -15,3 +15,13 @@ variable "permissions_boundary_arn" {
 variable "lambda_binaries_bucket" {
   type = string
 }
+
+variable "alarm_emails" {
+  type    = list(string)
+  default = []
+}
+
+variable "invalid_relation_emails" {
+  type    = list(string)
+  default = []
+}

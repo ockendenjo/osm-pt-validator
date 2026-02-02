@@ -140,6 +140,8 @@ jobs:
           env                      = "pro"
           lambda_binaries_bucket   = "${{ secrets.BINARY_BUCKET }}"
           permissions_boundary_arn = "${{ secrets.PERMISSIONS_BOUNDARY_ARN }}"
+          alarm_emails             = "${{ secrets.ALARM_EMAILS }}"
+          invalid_relation_emails  = "${{ secrets.INVALID_RELATION_EMAILS }}"
           EOF
 
       - name: Deploy stack
