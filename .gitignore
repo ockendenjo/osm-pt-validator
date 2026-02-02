@@ -5,3 +5,5 @@ coverage.out
 build/
 cdk.out
 !scripts/build
+.terraform
+tfvars

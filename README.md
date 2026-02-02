@@ -45,3 +45,33 @@ make deploy
 Looks for `.json` files in `s3://<bucketName>/routes/**.json`
 
 See [routefile.schema.json](schema/routefile.schema.json) for the JSON-schema or [routes](routes) for example files.
+
+## Tasks
+
+[xcfile.dev](https://xcfile.dev) tasks
+
+### format
+
+directory: stack
+
+```shell
+terraform fmt --recursive
+```
+
+### init
+
+directory: stack
+environment: AWS_PROFILE=osmptv
+
+```shell
+terraform init -backend-config=tfvars/backend.tfvars
+```
+
+### plan
+
+directory: stack
+environment: AWS_PROFILE=osmptv
+
+```shell
+terraform plan -var-file=tfvars/pro.tfvars
+```
