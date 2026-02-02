@@ -20,11 +20,18 @@ jobs:
         with:
           go-version-file: "go.mod"
 
+      - name: Install tparse
+        run: |
+          go install github.com/mfridman/tparse@latest
+
       - name: Run tests
-        run: make test
+        uses: joerdav/run-xc@v1.1.0
+        with:
+          task: test
 
   build:
     name: build
+    environment: pro
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -37,14 +44,25 @@ jobs:
         with:
           go-version-file: "go.mod"
 
-      - name: Build commands
-        run: make build
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      - name: Build
+        uses: joerdav/run-xc@v1.1.0
         with:
-          name: build
-          path: build
+          task: build-cmd
+
+      - name: configure aws credentials
+        if: github.ref == 'refs/heads/main'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Upload binaries
+        if: github.ref == 'refs/heads/main'
+        shell: bash
+        env:
+          BINARY_BUCKET: ${{ secrets.BINARY_BUCKET }}
+        run: |
+          go run ./scripts/upload-binaries
 
   validate:
     name: validate
@@ -74,7 +92,7 @@ jobs:
       cancel-in-progress: false
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    environment: prod
+    environment: pro
     needs: [build, validate, test]
     permissions:
       id-token: write   # This is required for requesting the JWT
@@ -89,26 +107,47 @@ jobs:
         with:
           go-version-file: "go.mod"
 
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: build
-          path: build
-
       - name: configure aws credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{vars.DEPLOYMENT_ROLE_ARN}}
-          aws-region: eu-west-1
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Install CDK
-        run: npm i -g aws-cdk
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
 
-      - name: CDK deploy
-        run: cdk deploy --require-approval never
+      - name: setup backend config
+        working-directory: stack
+        shell: bash
+        run: |
+          cat > backend.hcl << 'EOF'
+          bucket         = "${{ secrets.TF_STATE_BUCKET }}"
+          key            = "${{ secrets.TF_STATE_OBJECT_KEY }}"
+          region         = "${{ secrets.AWS_REGION }}"
+          EOF
+
+      - name: init
+        working-directory: stack
+        run: |
+          terraform init -backend-config=backend.hcl
+
+      - name: setup variables
+        working-directory: stack
+        shell: bash
+        run: |
+          cat > pro.auto.tfvars << 'EOF'
+          env                      = "pro"
+          lambda_binaries_bucket   = "${{ secrets.BINARY_BUCKET }}"
+          permissions_boundary_arn = "${{ secrets.PERMISSIONS_BOUNDARY_ARN }}"
+          EOF
+
+      - name: Deploy stack
+        shell: bash
+        run: |
+          terraform apply -auto-approve
 
       - name: Sync routes
-        run: aws s3 sync routes/ s3://${{vars.BUCKET_NAME}}/routes --delete
+        run: aws s3 sync routes/ s3://${{ secrets.DATA_BUCKET }}/routes --delete
 
       - name: Sync searches
-        run: aws s3 sync search/ s3://${{vars.BUCKET_NAME}}/search --delete
+        run: aws s3 sync search/ s3://${{ secrets.DATA_BUCKET }}/search --delete

@@ -10,7 +10,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	sqsTypes "github.com/aws/aws-sdk-go-v2/service/sqs/types"
-	"github.com/aws/jsii-runtime-go"
 	"github.com/google/uuid"
 	"github.com/ockendenjo/handler"
 	"github.com/ockendenjo/osm-pt-validator/pkg/events"
@@ -69,8 +68,8 @@ func buildHandler(listObjects listObjects, readFile fileReader, batchSend util.S
 			}
 
 			entries = append(entries, sqsTypes.SendMessageBatchRequestEntry{
-				Id:          jsii.String(uuid.New().String()),
-				MessageBody: jsii.String(string(body)),
+				Id:          aws.String(uuid.New().String()),
+				MessageBody: aws.String(string(body)),
 			})
 		}
 
@@ -91,7 +90,7 @@ func buildListObjectKeys(listObjects listObjectsV2Api, bucketName string) listOb
 		logger := ctx.GetLogger()
 		var token *string
 		for {
-			result, err := listObjects(ctx, &s3.ListObjectsV2Input{Bucket: &bucketName, ContinuationToken: token, Prefix: jsii.String("routes")})
+			result, err := listObjects(ctx, &s3.ListObjectsV2Input{Bucket: &bucketName, ContinuationToken: token, Prefix: aws.String("routes")})
 			if err != nil {
 				return nil, err
 			}

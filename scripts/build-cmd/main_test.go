@@ -7,9 +7,9 @@ import (
 )
 
 func Test_getInputDirectory(t *testing.T) {
-	mainFile := "./cmd/example-event-post/main.go"
+	mainFile := "./cmd/workflows/BP005/data-processing/main.go"
 	inputDir := getInputDirectory(mainFile)
-	assert.Equal(t, "./cmd/example-event-post", inputDir)
+	assert.Equal(t, "./cmd/workflows/BP005/data-processing", inputDir)
 }
 
 func Test_getOutputPath(t *testing.T) {
@@ -20,8 +20,8 @@ func Test_getOutputPath(t *testing.T) {
 	}{
 		{
 			name:     "non-nested directory",
-			mainFile: "./cmd/example-event-post/main.go",
-			expPath:  "build/example-event-post/bootstrap",
+			mainFile: "./cmd/send-pub-to-dip/main.go",
+			expPath:  "build/send-pub-to-dip/bootstrap",
 		},
 		{
 			name:     "nested directory",

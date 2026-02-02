@@ -8,10 +8,10 @@ import (
 	"io"
 	"testing"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	sqsTypes "github.com/aws/aws-sdk-go-v2/service/sqs/types"
-	"github.com/aws/jsii-runtime-go"
 	"github.com/ockendenjo/handler"
 	"github.com/ockendenjo/osm-pt-validator/pkg/events"
 	"github.com/ockendenjo/osm-pt-validator/pkg/routes"
@@ -34,12 +34,12 @@ func Test_listObjectKeys(t *testing.T) {
 					assert.Equal(t, "routes", *params.Prefix)
 
 					contents := []types.Object{
-						{Key: jsii.String(".")},
-						{Key: jsii.String("foo.csv")},
-						{Key: jsii.String("edinburgh.json")},
-						{Key: jsii.String("bar/baz.txt")},
-						{Key: jsii.String("bar/baz.txt")},
-						{Key: jsii.String("bar/lancs.json")},
+						{Key: aws.String(".")},
+						{Key: aws.String("foo.csv")},
+						{Key: aws.String("edinburgh.json")},
+						{Key: aws.String("bar/baz.txt")},
+						{Key: aws.String("bar/baz.txt")},
+						{Key: aws.String("bar/lancs.json")},
 					}
 					return &s3.ListObjectsV2Output{Contents: contents}, nil
 				}
@@ -71,14 +71,14 @@ func Test_listObjectKeys(t *testing.T) {
 					if i == 1 {
 						assert.Nil(t, params.ContinuationToken)
 						contents := []types.Object{
-							{Key: jsii.String("edinburgh.json")},
+							{Key: aws.String("edinburgh.json")},
 						}
-						return &s3.ListObjectsV2Output{Contents: contents, NextContinuationToken: jsii.String("token")}, nil
+						return &s3.ListObjectsV2Output{Contents: contents, NextContinuationToken: aws.String("token")}, nil
 					}
 
 					assert.Equal(t, "token", *params.ContinuationToken)
 					contents := []types.Object{
-						{Key: jsii.String("glasgow.json")},
+						{Key: aws.String("glasgow.json")},
 					}
 					return &s3.ListObjectsV2Output{Contents: contents}, nil
 				}

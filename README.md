@@ -45,3 +45,75 @@ make deploy
 Looks for `.json` files in `s3://<bucketName>/routes/**.json`
 
 See [routefile.schema.json](schema/routefile.schema.json) for the JSON-schema or [routes](routes) for example files.
+
+## Tasks
+
+[xcfile.dev](https://xcfile.dev) tasks
+
+### apply
+
+requires: upload-cmd
+directory: stack
+environment: AWS_PROFILE=osmptv
+
+```shell
+terraform apply -var-file=tfvars/pro.tfvars -auto-approve
+```
+
+### build-cmd
+
+requires: clean
+
+```shell
+go run ./scripts/build-cmd --zip
+```
+
+### clean
+
+```shell
+rm -rf build/* || true
+```
+
+### format
+
+directory: stack
+
+```shell
+terraform fmt --recursive
+```
+
+### init
+
+directory: stack
+environment: AWS_PROFILE=osmptv
+
+```shell
+terraform init -backend-config=tfvars/backend.tfvars
+```
+
+### plan
+
+requires: upload-cmd
+directory: stack
+environment: AWS_PROFILE=osmptv
+
+```shell
+terraform plan -var-file=tfvars/pro.tfvars
+```
+
+### test
+
+```shell
+go test -json ./... | tparse
+```
+
+### upload-cmd
+
+requires: build-cmd
+environment: AWS_PROFILE=osmptv
+
+```shell
+#!/bin/bash
+source stack/tfvars/.env
+BINARY_BUCKET=$BINARY_BUCKET go run ./scripts/upload-binaries
+```

@@ -5,7 +5,6 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/aws/aws-sdk-go-v2/service/sqs/types"
-	"github.com/aws/jsii-runtime-go"
 )
 
 type SendMessageBatchApi func(ctx context.Context, params *sqs.SendMessageBatchInput, optFns ...func(*sqs.Options)) (*sqs.SendMessageBatchOutput, error)
@@ -27,7 +26,7 @@ func NewSQSBatchSender(sendMessage SendMessageBatchApi, queueUrl string) SQSBatc
 
 			_, err := sendMessage(ctx, &sqs.SendMessageBatchInput{
 				Entries:  subSlice,
-				QueueUrl: jsii.String(queueUrl),
+				QueueUrl: &queueUrl,
 			})
 			if err != nil {
 				return err
