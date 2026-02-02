@@ -22,7 +22,9 @@ func GetBinarySHA256Hex(filePath string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to open file: %w", err)
 	}
-	defer f.Close()
+	defer func(f *os.File) {
+		_ = f.Close()
+	}(f)
 
 	h := sha256.New()
 	if _, err := io.Copy(h, f); err != nil {

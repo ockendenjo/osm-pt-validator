@@ -202,10 +202,14 @@ func buildZip(outputPath string) error {
 	if err != nil {
 		return err
 	}
-	defer zipFile.Close()
+	defer func(zipFile *os.File) {
+		_ = zipFile.Close()
+	}(zipFile)
 
 	zipWriter := zip.NewWriter(zipFile)
-	defer zipWriter.Close()
+	defer func(zipWriter *zip.Writer) {
+		_ = zipWriter.Close()
+	}(zipWriter)
 
 	err = addFileToZipDeterministic(zipWriter, outputPath)
 	if err != nil {
@@ -220,7 +224,9 @@ func addFileToZipDeterministic(zipWriter *zip.Writer, filename string) error {
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		_ = file.Close()
+	}(file)
 
 	// Define a fixed timestamp (e.g., Unix epoch) to ensure determinism
 	fixedTime := time.Date(time.Now().UTC().Year(), 1, 1, 0, 0, 0, 0, time.UTC)
@@ -263,7 +269,9 @@ func getBinarySha256(filePath string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to open file: %w", err)
 	}
-	defer f.Close()
+	defer func(f *os.File) {
+		_ = f.Close()
+	}(f)
 
 	h := sha256.New()
 	if _, err := io.Copy(h, f); err != nil {

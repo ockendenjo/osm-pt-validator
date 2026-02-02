@@ -24,7 +24,7 @@ jobs:
         run: |
           go install github.com/mfridman/tparse@latest
 
-      - name: Build
+      - name: Run tests
         uses: joerdav/run-xc@v1.1.0
         with:
           task: test
