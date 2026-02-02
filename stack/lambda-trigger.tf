@@ -14,6 +14,12 @@ module "lambda_trigger" {
   }
 }
 
+module "iam_s3_lambda_trigger" {
+  source     = "github.com/ockendenjo/tfmods//iam-s3"
+  bucket_arn = aws_s3_bucket.data.arn
+  role_id    = module.lambda_trigger.role_id
+}
+
 resource "aws_cloudwatch_event_rule" "daily_schedule" {
   name                = "osmptv-${var.env}-daily-schedule"
   description         = "Trigger validation once per day at 23:05 UTC"
