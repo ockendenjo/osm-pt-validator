@@ -56,8 +56,7 @@ func (h *lambdaHandler) ProcessSQSEvent(ctx *handler.Context, event events.Check
 	logger := ctx.GetLogger().AddParam("relationID", event.RelationID)
 	relation, err := h.osmClient.GetRelation(ctx, event.RelationID)
 	if err != nil {
-		var hse osm.HttpStatusError
-		if errors.As(err, &hse) && hse.StatusCode == http.StatusGone {
+		if hse, ok := errors.AsType[osm.HttpStatusError](err); ok && hse.StatusCode == http.StatusGone {
 			goneErr := h.handleGone(ctx, event.RelationID)
 			return goneErr
 		}
