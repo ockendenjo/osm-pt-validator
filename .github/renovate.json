@@ -11,14 +11,16 @@
             "vulnerabilityAlerts": {"enabled": true},
             "enabled": true,
             "labels": ["security"],
-            "automerge": true
+            "automerge": true,
+            "groupName": "GitHub Actions security updates"
         },
         {
             "matchManagers": ["gomod"],
             "vulnerabilityAlerts": {"enabled": true},
             "enabled": true,
             "labels": ["security"],
-            "automerge": true
+            "automerge": true,
+            "groupName": "Go security updates"
         }
     ],
     "minimumReleaseAge": "3 days"
