@@ -1,0 +1,18 @@
+{
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": ["config:recommended"],
+    "gitAuthor": "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>",
+    "enabledManagers": ["github-actions"],
+    "packageRules": [
+        {"matchManagers": ["github-actions"], "enabled": false},
+        {
+            "matchManagers": ["github-actions"],
+            "matchUpdateTypes": ["patch"],
+            "vulnerabilityAlerts": {"enabled": true},
+            "enabled": true,
+            "labels": ["security"],
+            "automerge": true
+        }
+    ],
+    "minimumReleaseAge": "3 days"
+}
