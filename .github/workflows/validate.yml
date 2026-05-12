@@ -1,0 +1,29 @@
+name: validate
+
+on:
+  workflow_call: {}
+
+jobs:
+  validate:
+    name: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Install JSON validator
+        run: |
+          wget https://github.com/neilpa/yajsv/releases/download/v1.4.1/yajsv.linux.amd64
+          echo "4bd6d2b1d6292ab1f7ba63db83c182a603a790d431429cf71f05cb0fcc677def  yajsv.linux.amd64" | sha256sum --check
+          chmod +x ./yajsv.linux.amd64
+
+      - name: Validate routes JSON
+        run: |
+          find ./routes/ -type f -name "*.json" -print0 | xargs -0 -I{} ./yajsv.linux.amd64 -s schema/routefile.schema.json {}
+
+      - name: Validate search JSON
+        run: |
+          ./yajsv.linux.amd64 -s schema/searchfile.schema.json search/search.json

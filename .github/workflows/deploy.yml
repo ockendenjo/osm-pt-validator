@@ -1,0 +1,84 @@
+name: deploy
+
+on:
+  workflow_call:
+    secrets:
+      AWS_ROLE_ARN:
+        required: true
+      AWS_REGION:
+        required: true
+      TF_STATE_BUCKET:
+        required: true
+      TF_STATE_OBJECT_KEY:
+        required: true
+      BINARY_BUCKET:
+        required: true
+      PERMISSIONS_BOUNDARY_ARN:
+        required: true
+      DATA_BUCKET:
+        required: true
+
+jobs:
+  deploy:
+    name: deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: pro
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up Go
+        timeout-minutes: 1
+        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
+        with:
+          go-version-file: "go.mod"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85 # v4.0.0
+
+      - name: Setup backend config
+        working-directory: stack
+        shell: bash
+        run: |
+          cat > backend.hcl << 'EOF'
+          bucket         = "${{ secrets.TF_STATE_BUCKET }}"
+          key            = "${{ secrets.TF_STATE_OBJECT_KEY }}"
+          region         = "${{ secrets.AWS_REGION }}"
+          EOF
+
+      - name: Init
+        working-directory: stack
+        run: |
+          terraform init -backend-config=backend.hcl
+
+      - name: Setup variables
+        working-directory: stack
+        shell: bash
+        run: |
+          cat > pro.auto.tfvars << 'EOF'
+          env                      = "pro"
+          lambda_binaries_bucket   = "${{ secrets.BINARY_BUCKET }}"
+          permissions_boundary_arn = "${{ secrets.PERMISSIONS_BOUNDARY_ARN }}"
+          EOF
+
+      - name: Deploy stack
+        working-directory: stack
+        shell: bash
+        run: |
+          terraform apply -auto-approve
+
+      - name: Sync routes
+        run: aws s3 sync routes/ s3://${{ secrets.DATA_BUCKET }}/routes --delete
+
+      - name: Sync searches
+        run: aws s3 sync search/ s3://${{ secrets.DATA_BUCKET }}/search --delete

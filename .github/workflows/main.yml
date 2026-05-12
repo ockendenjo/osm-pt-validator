@@ -1,155 +1,24 @@
-name: "main"
+name: main
 
 on:
-  pull_request: {}
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   test:
-    name: test
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
-      - name: Set up Go
-        timeout-minutes: 1
-        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
-        with:
-          go-version-file: "go.mod"
-
-      - name: Install tparse
-        run: |
-          go install github.com/mfridman/tparse@latest
-
-      - name: Run tests
-        uses: joerdav/run-xc@90943eab4a2a42ae264ff2ba0c815de39e51bc9f # v1.1.0
-        with:
-          task: test
-
-  build:
-    name: build
-    environment: pro
-    permissions:
-      id-token: write
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
-      - name: Set up Go
-        timeout-minutes: 1
-        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
-        with:
-          go-version-file: "go.mod"
-
-      - name: Build
-        uses: joerdav/run-xc@90943eab4a2a42ae264ff2ba0c815de39e51bc9f # v1.1.0
-        with:
-          task: build-cmd
-
-      - name: configure aws credentials
-        if: github.ref == 'refs/heads/main'
-        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: Upload binaries
-        if: github.ref == 'refs/heads/main'
-        shell: bash
-        env:
-          BINARY_BUCKET: ${{ secrets.BINARY_BUCKET }}
-        run: |
-          go run ./scripts/upload-binaries
+    uses: ./.github/workflows/test.yml
 
   validate:
-    name: validate
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout source code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    uses: ./.github/workflows/validate.yml
 
-      - name: Install JSON validator
-        run: |
-          wget https://github.com/neilpa/yajsv/releases/download/v1.4.0/yajsv.linux.amd64
-          chmod +x ./yajsv.linux.amd64
-
-      - name: Validate routes JSON
-        run: |
-          find ./routes/ -type f -name "*.json" -print0 | xargs -0 -I{} ./yajsv.linux.amd64 -s schema/routefile.schema.json {}
-
-      - name: Validate search JSON
-        run: |
-          ./yajsv.linux.amd64 -s schema/searchfile.schema.json search/search.json
+  upload:
+    uses: ./.github/workflows/upload.yml
+    secrets: inherit
 
   deploy:
-    name: deploy
-    if: github.ref == 'refs/heads/main'
+    needs: [test, validate, upload]
     concurrency:
       group: deploy-main
       cancel-in-progress: false
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    environment: pro
-    needs: [build, validate, test]
-    permissions:
-      id-token: write
-    steps:
-      - name: Checkout source code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
-      - name: Set up Go
-        timeout-minutes: 1
-        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
-        with:
-          go-version-file: "go.mod"
-
-      - name: configure aws credentials
-        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85 # v4.0.0
-
-      - name: setup backend config
-        working-directory: stack
-        shell: bash
-        run: |
-          cat > backend.hcl << 'EOF'
-          bucket         = "${{ secrets.TF_STATE_BUCKET }}"
-          key            = "${{ secrets.TF_STATE_OBJECT_KEY }}"
-          region         = "${{ secrets.AWS_REGION }}"
-          EOF
-
-      - name: init
-        working-directory: stack
-        run: |
-          terraform init -backend-config=backend.hcl
-
-      - name: setup variables
-        working-directory: stack
-        shell: bash
-        run: |
-          cat > pro.auto.tfvars << 'EOF'
-          env                      = "pro"
-          lambda_binaries_bucket   = "${{ secrets.BINARY_BUCKET }}"
-          permissions_boundary_arn = "${{ secrets.PERMISSIONS_BOUNDARY_ARN }}"
-          EOF
-
-      - name: Deploy stack
-        working-directory: stack
-        shell: bash
-        run: |
-          terraform apply -auto-approve
-
-      - name: Sync routes
-        run: aws s3 sync routes/ s3://${{ secrets.DATA_BUCKET }}/routes --delete
-
-      - name: Sync searches
-        run: aws s3 sync search/ s3://${{ secrets.DATA_BUCKET }}/search --delete
+    uses: ./.github/workflows/deploy.yml
+    secrets: inherit
