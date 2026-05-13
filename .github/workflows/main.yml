@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   test:
     uses: ./.github/workflows/test.yml
@@ -13,7 +16,10 @@ jobs:
 
   upload:
     uses: ./.github/workflows/upload.yml
-    secrets: inherit
+    secrets:
+      AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      BINARY_BUCKET: ${{ secrets.BINARY_BUCKET }}
     permissions:
       id-token: write
       contents: read
@@ -24,7 +30,14 @@ jobs:
       group: deploy-main
       cancel-in-progress: false
     uses: ./.github/workflows/deploy.yml
-    secrets: inherit
+    secrets:
+      AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      BINARY_BUCKET: ${{ secrets.BINARY_BUCKET }}
+      DATA_BUCKET: ${{ secrets.DATA_BUCKET }}
+      PERMISSIONS_BOUNDARY_ARN: ${{ secrets.PERMISSIONS_BOUNDARY_ARN }}
+      TF_STATE_BUCKET: ${{ secrets.TF_STATE_BUCKET }}
+      TF_STATE_OBJECT_KEY: ${{ secrets.TF_STATE_OBJECT_KEY }}
     permissions:
       id-token: write
       contents: read
