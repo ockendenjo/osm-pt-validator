@@ -177,7 +177,7 @@ func setupTestServer() (*httptest.Server, error) {
 		name = strings.Replace(name, ".json", "", 1)
 		bytes, found := files[name]
 		if !found {
-			writer.WriteHeader(404)
+			writer.WriteHeader(http.StatusNotFound)
 			return
 		}
 		_, err := writer.Write(bytes)

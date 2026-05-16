@@ -10,7 +10,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/aws/aws-sdk-go-v2/service/s3/types"
+	s3Types "github.com/aws/aws-sdk-go-v2/service/s3/types"
 	sqsTypes "github.com/aws/aws-sdk-go-v2/service/sqs/types"
 	"github.com/ockendenjo/handler"
 	"github.com/ockendenjo/osm-pt-validator/pkg/events"
@@ -33,7 +33,7 @@ func Test_listObjectKeys(t *testing.T) {
 					assert.Equal(t, "bucketName", *params.Bucket)
 					assert.Equal(t, "routes", *params.Prefix)
 
-					contents := []types.Object{
+					contents := []s3Types.Object{
 						{Key: aws.String(".")},
 						{Key: aws.String("foo.csv")},
 						{Key: aws.String("edinburgh.json")},
@@ -70,14 +70,14 @@ func Test_listObjectKeys(t *testing.T) {
 
 					if i == 1 {
 						assert.Nil(t, params.ContinuationToken)
-						contents := []types.Object{
+						contents := []s3Types.Object{
 							{Key: aws.String("edinburgh.json")},
 						}
 						return &s3.ListObjectsV2Output{Contents: contents, NextContinuationToken: aws.String("token")}, nil
 					}
 
 					assert.Equal(t, "token", *params.ContinuationToken)
-					contents := []types.Object{
+					contents := []s3Types.Object{
 						{Key: aws.String("glasgow.json")},
 					}
 					return &s3.ListObjectsV2Output{Contents: contents}, nil
@@ -135,7 +135,7 @@ func Test_readFile(t *testing.T) {
 			},
 			checkFn: func(t *testing.T, res readResult) {
 				assert.Nil(t, res.err)
-				assert.Len(t, res.events, 0)
+				assert.Empty(t, res.events)
 			},
 		},
 		{

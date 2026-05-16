@@ -101,6 +101,14 @@ environment: AWS_PROFILE=osmptv
 terraform plan -var-file=tfvars/pro.tfvars
 ```
 
+### sast
+
+```shell
+wget -O .golangci.json https://raw.githubusercontent.com/ockendenjo/actions/refs/heads/main/.golangci.json
+golangci-lint run
+govulncheck ./...
+```
+
 ### test
 
 ```shell

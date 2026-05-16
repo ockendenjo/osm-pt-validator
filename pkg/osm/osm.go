@@ -48,7 +48,7 @@ func (c *OSMClient) WithXRay() *OSMClient {
 
 func (c *OSMClient) GetRelation(ctx context.Context, relationId int64) (Relation, error) {
 	url := fmt.Sprintf("%s/relation/%d.json", c.baseUrl, relationId)
-	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return Relation{}, err
 	}
@@ -67,7 +67,7 @@ func (c *OSMClient) GetRelation(ctx context.Context, relationId int64) (Relation
 		return Relation{}, err
 	}
 
-	if response.StatusCode != 200 {
+	if response.StatusCode != http.StatusOK {
 		return Relation{}, HttpStatusError{response.StatusCode, string(bytes)}
 	}
 
@@ -81,7 +81,7 @@ func (c *OSMClient) GetRelation(ctx context.Context, relationId int64) (Relation
 
 func (c *OSMClient) GetRelationRelations(ctx context.Context, relationId int64) ([]Relation, error) {
 	url := fmt.Sprintf("%s/relation/%d/relations.json", c.baseUrl, relationId)
-	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -91,16 +91,16 @@ func (c *OSMClient) GetRelationRelations(ctx context.Context, relationId int64) 
 	if err != nil {
 		return nil, err
 	}
-	defer func(Body io.ReadCloser) {
-		_ = Body.Close()
-	}(response.Body)
+	defer func() {
+		_ = response.Body.Close()
+	}()
 
 	bytes, err := io.ReadAll(response.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	if response.StatusCode != 200 {
+	if response.StatusCode != http.StatusOK {
 		return nil, HttpStatusError{response.StatusCode, string(bytes)}
 	}
 
@@ -133,7 +133,7 @@ func (c *OSMClient) GetWay(ctx context.Context, wayId int64) (Way, error) {
 	}
 
 	url := fmt.Sprintf("%s/way/%d.json", c.baseUrl, wayId)
-	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return Way{}, err
 	}
@@ -143,16 +143,16 @@ func (c *OSMClient) GetWay(ctx context.Context, wayId int64) (Way, error) {
 	if err != nil {
 		return Way{}, err
 	}
-	defer func(Body io.ReadCloser) {
-		_ = Body.Close()
-	}(response.Body)
+	defer func() {
+		_ = response.Body.Close()
+	}()
 
 	bytes, err := io.ReadAll(response.Body)
 	if err != nil {
 		return Way{}, err
 	}
 
-	if response.StatusCode != 200 {
+	if response.StatusCode != http.StatusOK {
 		return Way{}, HttpStatusError{response.StatusCode, string(bytes)}
 	}
 
@@ -179,7 +179,7 @@ func (c *OSMClient) GetNode(ctx context.Context, nodeId int64) (Node, error) {
 	}
 
 	url := fmt.Sprintf("%s/node/%d.json", c.baseUrl, nodeId)
-	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return Node{}, err
 	}
@@ -189,16 +189,16 @@ func (c *OSMClient) GetNode(ctx context.Context, nodeId int64) (Node, error) {
 	if err != nil {
 		return Node{}, err
 	}
-	defer func(Body io.ReadCloser) {
-		_ = Body.Close()
-	}(response.Body)
+	defer func() {
+		_ = response.Body.Close()
+	}()
 
 	bytes, err := io.ReadAll(response.Body)
 	if err != nil {
 		return Node{}, err
 	}
 
-	if response.StatusCode != 200 {
+	if response.StatusCode != http.StatusOK {
 		return Node{}, HttpStatusError{response.StatusCode, string(bytes)}
 	}
 

@@ -44,7 +44,7 @@ func Test_getRelation(t *testing.T) {
 			handlerFn: func(t *testing.T) func(w http.ResponseWriter, r *http.Request) {
 				return func(w http.ResponseWriter, r *http.Request) {
 					assert.Equal(t, "/relation/3411082864.json", r.RequestURI)
-					w.WriteHeader(404)
+					w.WriteHeader(http.StatusNotFound)
 				}
 			},
 			checkFn: func(t *testing.T, r Relation, err error) {
@@ -101,7 +101,7 @@ func Test_getWay(t *testing.T) {
 			handlerFn: func(t *testing.T) func(w http.ResponseWriter, r *http.Request) {
 				return func(w http.ResponseWriter, r *http.Request) {
 					assert.Equal(t, "/way/2154620362.json", r.RequestURI)
-					w.WriteHeader(404)
+					w.WriteHeader(http.StatusNotFound)
 				}
 			},
 			checkFn: func(t *testing.T, w Way, err error) {
@@ -155,7 +155,7 @@ func Test_getRelationRelations(t *testing.T) {
 			name: "HTTP 404",
 			handlerFn: func(t *testing.T) func(w http.ResponseWriter, r *http.Request) {
 				return func(w http.ResponseWriter, r *http.Request) {
-					w.WriteHeader(404)
+					w.WriteHeader(http.StatusNotFound)
 				}
 			},
 			checkFn: func(t *testing.T, r []Relation, err error) {
