@@ -6,3 +6,4 @@ build/
 !scripts/build
 .terraform
 tfvars
+.golangci.json

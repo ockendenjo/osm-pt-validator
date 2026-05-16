@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
-	"github.com/aws/aws-sdk-go-v2/service/sqs/types"
+	sqsTypes "github.com/aws/aws-sdk-go-v2/service/sqs/types"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -42,9 +42,9 @@ func TestNewSQSBatchSender(t *testing.T) {
 			}
 			sendMessages := NewSQSBatchSender(sendMessageBatchApi, "https://sqs.eu-west-1.amazonaws.com/123456789012/QueueName")
 
-			entries := []types.SendMessageBatchRequestEntry{}
+			entries := []sqsTypes.SendMessageBatchRequestEntry{}
 			for i := 0; i < tc.numMessages; i++ {
-				entry := types.SendMessageBatchRequestEntry{}
+				entry := sqsTypes.SendMessageBatchRequestEntry{}
 				entries = append(entries, entry)
 			}
 

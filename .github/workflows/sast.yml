@@ -8,4 +8,4 @@ jobs:
   sast:
     permissions:
       contents: read
-    uses: ockendenjo/actions/.github/workflows/sast.yaml@a165d037971cc650b531716c82413fd736dea80a # main
+    uses: ockendenjo/actions/.github/workflows/sast.yaml@76e60c05f85023793893a7e8fd0cc3a85a8c80cb # main

@@ -55,7 +55,7 @@ func Test_validateRETags(t *testing.T) {
 	}
 }
 
-func assertContainsValidationError(t *testing.T, list []ValidationError, ves ...ValidationError) bool {
+func assertContainsValidationError(t *testing.T, list []ValidationError, ves ...ValidationError) {
 
 outer:
 	for _, ve := range ves {
@@ -65,10 +65,9 @@ outer:
 			}
 		}
 
-		return assert.Fail(t, fmt.Sprintf("%#v does not contain %#v", list, ve))
+		assert.Fail(t, fmt.Sprintf("%#v does not contain %#v", list, ve))
+		return
 	}
-
-	return true
 }
 
 func Test_validateREMemberOrder(t *testing.T) {

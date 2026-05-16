@@ -11,7 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sns"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
-	"github.com/aws/aws-sdk-go-v2/service/sqs/types"
+	sqsTypes "github.com/aws/aws-sdk-go-v2/service/sqs/types"
 	"github.com/google/uuid"
 	"github.com/ockendenjo/handler"
 	"github.com/ockendenjo/osm-pt-validator/pkg/events"
@@ -98,7 +98,7 @@ func (h *lambdaHandler) handleGone(ctx context.Context, relationId int64) error 
 func (h *lambdaHandler) handleRoute(ctx *handler.Context, element osm.Relation, config validation.Config) error {
 	logger := ctx.GetLogger()
 	logger.Info("processing route relation")
-	messages := []types.SendMessageBatchRequestEntry{}
+	messages := []sqsTypes.SendMessageBatchRequestEntry{}
 
 	outEvent := events.CheckRelationEvent{RelationID: element.ID, Config: config}
 	bytes, err := json.Marshal(outEvent)
@@ -106,7 +106,7 @@ func (h *lambdaHandler) handleRoute(ctx *handler.Context, element osm.Relation, 
 		return err
 	}
 
-	message := types.SendMessageBatchRequestEntry{
+	message := sqsTypes.SendMessageBatchRequestEntry{
 		MessageBody: aws.String(string(bytes)),
 		Id:          aws.String(uuid.New().String()),
 	}
@@ -118,7 +118,7 @@ func (h *lambdaHandler) handleRoute(ctx *handler.Context, element osm.Relation, 
 func (h *lambdaHandler) handleRouteMaster(ctx *handler.Context, validator *validation.Validator, element osm.Relation) error {
 	logger := ctx.GetLogger()
 	logger.Info("processing route_master relation")
-	messages := []types.SendMessageBatchRequestEntry{}
+	messages := []sqsTypes.SendMessageBatchRequestEntry{}
 
 	validationErrors := validator.RouteMaster(element)
 	if len(validationErrors) > 0 {
@@ -153,7 +153,7 @@ func (h *lambdaHandler) handleRouteMaster(ctx *handler.Context, validator *valid
 				return err
 			}
 
-			message := types.SendMessageBatchRequestEntry{
+			message := sqsTypes.SendMessageBatchRequestEntry{
 				MessageBody: aws.String(string(bytes)),
 				Id:          aws.String(uuid.New().String()),
 			}
