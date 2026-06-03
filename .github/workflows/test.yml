@@ -27,6 +27,6 @@ jobs:
           go install github.com/mfridman/tparse@v0.18.0
 
       - name: Run tests
-        uses: joerdav/run-xc@90943eab4a2a42ae264ff2ba0c815de39e51bc9f # v1.1.0
-        with:
-          task: test
+        shell: bash
+        run: |
+          go test -json ./... | tparse

@@ -23,6 +23,6 @@ jobs:
           go-version-file: "go.mod"
 
       - name: Build
-        uses: joerdav/run-xc@90943eab4a2a42ae264ff2ba0c815de39e51bc9f # v1.1.0
-        with:
-          task: build-cmd
+        shell: bash
+        run: |
+          go run ./scripts/build-cmd --zip
