@@ -1,5 +1,7 @@
 package osm
 
+import "slices"
+
 import "fmt"
 
 type Relation struct {
@@ -42,20 +44,10 @@ func (m Member) GetElementURL() string {
 
 func (m Member) RoleIsStop() bool {
 	roles := []string{RoleStop, RoleStopEntryOnly, RoleStopExitOnly}
-	for _, role := range roles {
-		if m.Role == role {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(roles, m.Role)
 }
 
 func (m Member) RoleIsPlatform() bool {
 	roles := []string{RolePlatform, RolePlatformEntryOnly, RolePlatformExitOnly}
-	for _, role := range roles {
-		if m.Role == role {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(roles, m.Role)
 }

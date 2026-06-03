@@ -18,10 +18,7 @@ func NewSQSBatchSender(sendMessage SendMessageBatchApi, queueUrl string) SQSBatc
 		size := len(entries)
 
 		for i := 0; i < size; i += chunkSize {
-			end := i + chunkSize
-			if end > size {
-				end = size
-			}
+			end := min(i+chunkSize, size)
 			subSlice := entries[i:end]
 
 			_, err := sendMessage(ctx, &sqs.SendMessageBatchInput{

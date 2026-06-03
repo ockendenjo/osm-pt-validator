@@ -3,6 +3,7 @@ package validation
 import (
 	"context"
 	"fmt"
+	"slices"
 
 	"github.com/ockendenjo/osm-pt-validator/pkg/osm"
 )
@@ -51,12 +52,9 @@ func (v *Validator) validateWayOrder(ctx context.Context, re osm.Relation) ([]Va
 		matches := 0
 		for an := range allowedNodes {
 			if wayElem.IsCircular() {
-				for _, node := range wayElem.Nodes {
-					if node == an {
-						nextAllowedNodes = mapFromNodes(wayElem.Nodes)
-						matches++
-						break
-					}
+				if slices.Contains(wayElem.Nodes, an) {
+					nextAllowedNodes = mapFromNodes(wayElem.Nodes)
+					matches++
 				}
 			} else if an == wayElem.GetFirstNode() {
 				if wayElem.IsCircular() {

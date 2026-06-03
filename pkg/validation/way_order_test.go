@@ -145,7 +145,6 @@ func Test_validateWayOrder(t *testing.T) {
 	osmClient := osm.NewClient("unit-test/0.0").WithBaseUrl(svr.URL)
 
 	for _, tc := range testcases {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			c := Config{}
 			if tc.setConfig != nil {
