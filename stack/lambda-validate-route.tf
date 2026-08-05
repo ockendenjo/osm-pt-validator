@@ -7,6 +7,7 @@ module "lambda_validate_route" {
   s3_bucket                = var.lambda_binaries_bucket
   s3_object_key            = local.manifest["validate-route"]
   alarm_topic_arn          = aws_sns_topic.alarms.arn
+  timeout                  = 20
 
   environment = {
     TOPIC_ARN  = aws_sns_topic.invalid_relations.arn
