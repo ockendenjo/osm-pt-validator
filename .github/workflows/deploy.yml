@@ -48,36 +48,26 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
 
-      - name: Setup backend config
+      - name: Pull terraform config
         working-directory: stack
         shell: bash
         run: |
-          cat > backend.hcl << 'EOF'
-          bucket         = "${{ secrets.TF_STATE_BUCKET }}"
-          key            = "${{ secrets.TF_STATE_OBJECT_KEY }}"
-          region         = "${{ secrets.AWS_REGION }}"
-          EOF
+          mkdir -p tfvars
+          aws s3 cp "s3://${INPUTS_BUCKET}/pro.auto.tfvars" tfvars/
+          aws s3 cp "s3://${INPUTS_BUCKET}/pro.backend.tfvars" tfvars/
+        env:
+          INPUTS_BUCKET: ${{ secrets.TF_STATE_BUCKET }}
 
       - name: Init
         working-directory: stack
         run: |
-          terraform init -backend-config=backend.hcl
-
-      - name: Setup variables
-        working-directory: stack
-        shell: bash
-        run: |
-          cat > pro.auto.tfvars << 'EOF'
-          env                      = "pro"
-          lambda_binaries_bucket   = "${{ secrets.BINARY_BUCKET }}"
-          permissions_boundary_arn = "${{ secrets.PERMISSIONS_BOUNDARY_ARN }}"
-          EOF
+          terraform init -backend-config=tfvars/pro.backend.tfvars
 
       - name: Deploy stack
         working-directory: stack
         shell: bash
         run: |
-          terraform apply -auto-approve
+          terraform apply -auto-approve -var-file="tfvars/pro.auto.tfvars" -input=false
 
       - name: Sync routes
         run: aws s3 sync routes/ s3://${{ secrets.DATA_BUCKET }}/routes --delete
