@@ -7,3 +7,4 @@ build/
 .terraform
 tfvars
 .golangci.json
+stack/tfvars

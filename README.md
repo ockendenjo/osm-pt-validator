@@ -57,7 +57,7 @@ directory: stack
 environment: AWS_PROFILE=osmptv
 
 ```shell
-terraform apply -var-file=tfvars/pro.tfvars -auto-approve
+terraform apply -var-file=tfvars/pro.auto.tfvars -auto-approve
 ```
 
 ### build-cmd
@@ -88,7 +88,7 @@ directory: stack
 environment: AWS_PROFILE=osmptv
 
 ```shell
-terraform init -backend-config=tfvars/backend.tfvars
+terraform init -backend-config=tfvars/pro.backend.tfvars
 ```
 
 ### plan
@@ -98,7 +98,31 @@ directory: stack
 environment: AWS_PROFILE=osmptv
 
 ```shell
-terraform plan -var-file=tfvars/pro.tfvars
+terraform plan -var-file=tfvars/pro.auto.tfvars
+```
+
+### pull-config
+
+environment: AWS_PROFILE=osmptv
+inputs: STATE_BUCKET
+directory: stack
+
+```shell
+mkdir -p tfvars
+aws s3 cp "s3://${STATE_BUCKET}" tfvars/pro.auto.tfvars
+aws s3 cp "s3://${STATE_BUCKET}" tfvars/pro.backend.tfvars
+```
+
+### push-config
+
+environment: AWS_PROFILE=osmptv
+inputs: STATE_BUCKET
+directory: stack
+
+```shell
+mkdir -p tfvars
+aws s3 cp tfvars/pro.auto.tfvars "s3://${STATE_BUCKET}"
+aws s3 cp tfvars/pro.backend.tfvars "s3://${STATE_BUCKET}"
 ```
 
 ### sast
