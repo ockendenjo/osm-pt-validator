@@ -1,15 +1,15 @@
 package validation
 
 type Config struct {
-	NaptanPlatformTags   bool          `json:"naptanPlatformTags"`
-	MinimumNodeMembers   int           `json:"minimumNodeMembers"`
-	MinimumRouteVariants int           `json:"minimumRouteVariants"`
-	Ignore               *IgnoreConfig `json:"ignore"`
+	NaptanPlatformTags   bool         `json:"naptanPlatformTags"`
+	MinimumNodeMembers   int          `json:"minimumNodeMembers"`
+	MinimumRouteVariants int          `json:"minimumRouteVariants"`
+	Ignore               IgnoreConfig `json:"ignore"`
 }
 
 type IgnoreConfig struct {
-	Ways  *IgnoreWayConfig   `json:"ways"`
-	Nodes *IgnoreNodesConfig `json:"nodes"`
+	Ways  IgnoreWayConfig   `json:"ways"`
+	Nodes IgnoreNodesConfig `json:"nodes"`
 }
 
 type IgnoreWayConfig struct {
@@ -27,9 +27,6 @@ func DefaultConfig() Config {
 }
 
 func (c *Config) IsWayDirectionIgnored(wayId int64) bool {
-	if c.Ignore == nil || c.Ignore.Ways == nil {
-		return false
-	}
 	if c.Ignore.Ways.traversalMap == nil {
 		c.buildTraversalMap()
 	}
@@ -49,9 +46,6 @@ func (c *Config) buildTraversalMap() {
 }
 
 func (c *Config) IsNodeErrorIgnored(nodeId int64) bool {
-	if c.Ignore == nil || c.Ignore.Nodes == nil {
-		return false
-	}
 	if c.Ignore.Nodes.anyMap == nil {
 		c.buildNodeMap()
 	}

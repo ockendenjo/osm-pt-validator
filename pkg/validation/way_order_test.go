@@ -130,8 +130,8 @@ func Test_validateWayOrder(t *testing.T) {
 			name:    "route with oneway way traversed in wrong direction, but allowed because of config",
 			members: setupWays(5, 7),
 			setConfig: func(config *Config) {
-				config.Ignore = &IgnoreConfig{
-					Ways: &IgnoreWayConfig{
+				config.Ignore = IgnoreConfig{
+					Ways: IgnoreWayConfig{
 						TraversalDirection: []int64{7},
 					},
 				}
