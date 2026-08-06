@@ -21,7 +21,7 @@ jobs:
       AWS_REGION: ${{ secrets.AWS_REGION }}
       BINARY_BUCKET: ${{ secrets.BINARY_BUCKET }}
     permissions:
-      id-token: write
+      id-token: write  # Required for OIDC authentication with AWS
       contents: read
 
   deploy:
@@ -39,5 +39,5 @@ jobs:
       TF_STATE_BUCKET: ${{ secrets.TF_STATE_BUCKET }}
       TF_STATE_OBJECT_KEY: ${{ secrets.TF_STATE_OBJECT_KEY }}
     permissions:
-      id-token: write
+      id-token: write  # Required for OIDC authentication with AWS
       contents: read
