@@ -28,6 +28,10 @@ func (v *Validator) validateRelationNodes(ctx context.Context, re osm.Relation) 
 	}
 
 	for _, node := range nodes {
+		if v.config.IsNodeErrorIgnored(node.Ref) {
+			continue
+		}
+
 		nodeObj := nodesMap[node.Ref]
 		if node.RoleIsPlatform() {
 			validationErrors = append(validationErrors, validatePlatformNode(nodeObj, v.config.NaptanPlatformTags)...)
