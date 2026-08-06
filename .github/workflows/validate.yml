@@ -3,6 +3,8 @@ name: validate
 on:
   workflow_call: {}
 
+permissions: {}
+
 jobs:
   validate:
     name: validate

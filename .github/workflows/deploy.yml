@@ -18,6 +18,8 @@ on:
       DATA_BUCKET:
         required: true
 
+permissions: {}
+
 jobs:
   deploy:
     name: deploy
@@ -25,7 +27,7 @@ jobs:
     timeout-minutes: 15
     environment: pro
     permissions:
-      id-token: write
+      id-token: write  # Required for OIDC authentication with AWS
       contents: read
     steps:
       - name: Checkout source code
@@ -70,7 +72,11 @@ jobs:
           terraform apply -auto-approve -var-file="tfvars/pro.auto.tfvars" -input=false
 
       - name: Sync routes
-        run: aws s3 sync routes/ s3://${{ secrets.DATA_BUCKET }}/routes --delete
+        run: aws s3 sync routes/ s3://$DATA_BUCKET/routes --delete
+        env:
+          DATA_BUCKET: ${{ secrets.DATA_BUCKET }}
 
       - name: Sync searches
-        run: aws s3 sync search/ s3://${{ secrets.DATA_BUCKET }}/search --delete
+        run: aws s3 sync search/ s3://$DATA_BUCKET/search --delete
+        env:
+          DATA_BUCKET: ${{ secrets.DATA_BUCKET }}

@@ -10,6 +10,12 @@ on:
     paths:
       - ".github/**"
 
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   zizmor:
     name: Run zizmor
@@ -25,11 +31,11 @@ jobs:
       - name: Download zizmor
         shell: bash
         run: |
-          wget -nv https://github.com/zizmorcore/zizmor/releases/download/v1.24.1/zizmor-x86_64-unknown-linux-gnu.tar.gz
-          echo "a8000f3c683319a523d3b20df0e75457ba591f049cfcbfa98966631b56733c03  zizmor-x86_64-unknown-linux-gnu.tar.gz" | sha256sum --check
+          wget -nv https://github.com/zizmorcore/zizmor/releases/download/v1.29.0/zizmor-x86_64-unknown-linux-gnu.tar.gz
+          echo "dd96df044a6e8538d5f423790f453bdd03d49e5b2bcc38214acc41a2f1297839  zizmor-x86_64-unknown-linux-gnu.tar.gz" | sha256sum --check
           tar -xvzf zizmor-x86_64-unknown-linux-gnu.tar.gz
 
       - name: Run zizmor
         shell: bash
         run: |
-          ./zizmor ./.github/
+          ./zizmor ./.github/ --pedantic
