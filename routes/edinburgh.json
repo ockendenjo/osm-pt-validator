@@ -1,8 +1,14 @@
 {
+    "$schema": "../schema/routefile.schema.json",
     "config": {
         "naptanPlatformTags": true,
         "minimumNodeMembers": 10,
-        "minimumRouteVariants": 2
+        "minimumRouteVariants": 2,
+        "ignore": {
+            "nodes": {
+                "any": [13342506992]
+            }
+        }
     },
     "routes": {
         "edinburgh_city": [

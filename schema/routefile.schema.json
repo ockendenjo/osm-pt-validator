@@ -4,6 +4,9 @@
     "description": "A file with routes to be validated",
     "type": "object",
     "properties": {
+        "$schema": {
+            "type": "string"
+        },
         "config": {
             "type": "object",
             "description": "Configuration options for the validator",
@@ -16,16 +19,38 @@
                     "type": "number",
                     "description": "Minimum number of nodes (platforms/stops) a route must contain to be considered valid"
                 },
-                "ignoreTraversalDirectionWays": {
-                    "description": "Ways where the one-way direction will not be checked",
-                    "type": "array",
-                    "items": {
-                        "type": "number"
-                    }
-                },
                 "minimumRouteVariants": {
                     "type": "number",
                     "description": "The minimum number of routes a route-master relation must have"
+                },
+                "ignore": {
+                    "type": "object",
+                    "properties": {
+                        "ways": {
+                            "type": "object",
+                            "properties": {
+                                "traversalDirection": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "number"
+                                    }
+                                }
+                            }
+                        },
+                        "nodes": {
+                            "type": "object",
+                            "properties": {
+                                "any": {
+                                    "type": "array",
+                                    "items": {
+                                        "items": {
+                                            "type": "number"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             },
             "additionalProperties": false

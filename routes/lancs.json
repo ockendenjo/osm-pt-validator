@@ -1,4 +1,5 @@
 {
+    "$schema": "../schema/routefile.schema.json",
     "config": {
         "naptanPlatformTags": true
     },

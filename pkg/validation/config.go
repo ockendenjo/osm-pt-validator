@@ -1,11 +1,25 @@
 package validation
 
 type Config struct {
-	NaptanPlatformTags           bool    `json:"naptanPlatformTags"`
-	MinimumNodeMembers           int     `json:"minimumNodeMembers"`
-	IgnoreTraversalDirectionWays []int64 `json:"ignoreTraversalDirectionWays"`
-	ignoreTraversalMap           map[int64]bool
-	MinimumRouteVariants         int `json:"minimumRouteVariants"`
+	NaptanPlatformTags   bool         `json:"naptanPlatformTags"`
+	MinimumNodeMembers   int          `json:"minimumNodeMembers"`
+	MinimumRouteVariants int          `json:"minimumRouteVariants"`
+	Ignore               IgnoreConfig `json:"ignore"`
+}
+
+type IgnoreConfig struct {
+	Ways  IgnoreWayConfig   `json:"ways"`
+	Nodes IgnoreNodesConfig `json:"nodes"`
+}
+
+type IgnoreWayConfig struct {
+	TraversalDirection []int64 `json:"traversalDirection"`
+	traversalMap       map[int64]bool
+}
+
+type IgnoreNodesConfig struct {
+	Any    []int64 `json:"any"`
+	anyMap map[int64]bool
 }
 
 func DefaultConfig() Config {
@@ -13,20 +27,39 @@ func DefaultConfig() Config {
 }
 
 func (c *Config) IsWayDirectionIgnored(wayId int64) bool {
-	if c.ignoreTraversalMap == nil {
-		c.buildMap()
+	if c.Ignore.Ways.traversalMap == nil {
+		c.buildTraversalMap()
 	}
-	value, found := c.ignoreTraversalMap[wayId]
+	value, found := c.Ignore.Ways.traversalMap[wayId]
 	if found {
 		return value
 	}
 	return false
 }
 
-func (c *Config) buildMap() {
+func (c *Config) buildTraversalMap() {
 	m := map[int64]bool{}
-	for _, way := range c.IgnoreTraversalDirectionWays {
+	for _, way := range c.Ignore.Ways.TraversalDirection {
 		m[way] = true
 	}
-	c.ignoreTraversalMap = m
+	c.Ignore.Ways.traversalMap = m
+}
+
+func (c *Config) IsNodeErrorIgnored(nodeId int64) bool {
+	if c.Ignore.Nodes.anyMap == nil {
+		c.buildNodeMap()
+	}
+	value, found := c.Ignore.Nodes.anyMap[nodeId]
+	if found {
+		return value
+	}
+	return false
+}
+
+func (c *Config) buildNodeMap() {
+	m := map[int64]bool{}
+	for _, node := range c.Ignore.Nodes.Any {
+		m[node] = true
+	}
+	c.Ignore.Nodes.anyMap = m
 }
