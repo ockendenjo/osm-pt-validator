@@ -5,12 +5,12 @@ import (
 	"encoding/json"
 	"io"
 	"strings"
+	"uuid"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	sqsTypes "github.com/aws/aws-sdk-go-v2/service/sqs/types"
-	"github.com/google/uuid"
 	"github.com/ockendenjo/handler"
 	"github.com/ockendenjo/osm-pt-validator/pkg/events"
 	"github.com/ockendenjo/osm-pt-validator/pkg/routes"
@@ -68,7 +68,7 @@ func buildHandler(listObjects listObjects, readFile fileReader, batchSend util.S
 			}
 
 			entries = append(entries, sqsTypes.SendMessageBatchRequestEntry{
-				Id:          aws.String(uuid.New().String()),
+				Id:          aws.String(uuid.NewV4().String()),
 				MessageBody: aws.String(string(body)),
 			})
 		}
