@@ -77,16 +77,7 @@ func validateREMemberOrder(re osm.Relation) []ValidationError {
 				routeBeforeStops = true
 			}
 		}
-
-		if member.Type == "node" && member.Role == "" {
-			ve := ValidationError{URL: member.GetElementURL(), Message: "stop/platform with empty role"}
-			validationErrors = append(validationErrors, ve)
-		}
-
-		if member.Role != "" && !roles[member.Role] {
-			ve := ValidationError{URL: member.GetElementURL(), Message: fmt.Sprintf("element has unexpected role '%s'", member.Role)}
-			validationErrors = append(validationErrors, ve)
-		}
+		validationErrors = append(validationErrors, validateMemberRole(member, roles)...)
 	}
 
 	if routeBeforeStops {
@@ -103,6 +94,17 @@ func validateREMemberOrder(re osm.Relation) []ValidationError {
 	}
 
 	return validationErrors
+}
+
+func validateMemberRole(member osm.Member, validRoles map[string]bool) []ValidationError {
+	var errors []ValidationError
+	if member.Type == "node" && member.Role == "" {
+		errors = append(errors, ValidationError{URL: member.GetElementURL(), Message: "stop/platform with empty role"})
+	}
+	if member.Role != "" && !validRoles[member.Role] {
+		errors = append(errors, ValidationError{URL: member.GetElementURL(), Message: fmt.Sprintf("element has unexpected role '%s'", member.Role)})
+	}
+	return errors
 }
 
 func validateRETags(re osm.Relation) []ValidationError {

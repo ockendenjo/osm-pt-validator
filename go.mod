@@ -10,7 +10,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sns v1.47.0
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.52.0
 	github.com/aws/aws-xray-sdk-go/v2 v2.0.3
-	github.com/google/uuid v1.6.0
 	github.com/ockendenjo/handler v1.0.8
 	github.com/stretchr/testify v1.12.1
 )
