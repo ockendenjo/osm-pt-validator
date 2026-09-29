@@ -39,8 +39,8 @@ func main() {
 	validateFile(ctx, inputFile)
 }
 
-func getUserAgent() (string, error) {
-	cmd := exec.Command("git", "rev-parse", "--short", "HEAD")
+func getUserAgent(ctx context.Context) (string, error) {
+	cmd := exec.CommandContext(ctx, "git", "rev-parse", "--short", "HEAD")
 	cmd.Stderr = os.Stderr
 	out, err := cmd.Output()
 	if err != nil {
@@ -51,21 +51,35 @@ func getUserAgent() (string, error) {
 	return userAgent, nil
 }
 
-func validateFile(ctx context.Context, inputFile string) {
+func loadRoutesFile(inputFile string) (*routes.RoutesFile, error) {
 	file, err := os.Open(inputFile) // #nosec G304 -- File inclusion via variable is intentional
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	bytes, err := io.ReadAll(file)
+	defer file.Close()
+	b, err := io.ReadAll(file)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	var routesFile routes.RoutesFile
-	err = json.Unmarshal(bytes, &routesFile)
+	err = json.Unmarshal(b, &routesFile)
+	return &routesFile, err
+}
+
+func processRouteEntry(ctx context.Context, validator *validation.Validator, osmClient *osm.OSMClient, relationID int64) (bool, error) {
+	relation, err := osmClient.GetRelation(ctx, relationID)
+	if err != nil {
+		return false, err
+	}
+	return doValidation(ctx, validator, osmClient, relation)
+}
+
+func validateFile(ctx context.Context, inputFile string) {
+	routesFile, err := loadRoutesFile(inputFile)
 	if err != nil {
 		panic(err)
 	}
-	userAgent, err := getUserAgent()
+	userAgent, err := getUserAgent(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -82,13 +96,7 @@ func validateFile(ctx context.Context, inputFile string) {
 			if r.RelationID < 1 {
 				continue
 			}
-
-			relation, err := osmClient.GetRelation(ctx, r.RelationID)
-			if err != nil {
-				panic(err)
-			}
-
-			isValid, err := doValidation(ctx, validator, osmClient, relation)
+			isValid, err := processRouteEntry(ctx, validator, osmClient, r.RelationID)
 			if err != nil {
 				panic(err)
 			}
@@ -104,7 +112,7 @@ func validateFile(ctx context.Context, inputFile string) {
 }
 
 func validateSingleRelation(ctx context.Context, relationId int64, npt bool) {
-	userAgent, err := getUserAgent()
+	userAgent, err := getUserAgent(ctx)
 	if err != nil {
 		panic(err)
 	}

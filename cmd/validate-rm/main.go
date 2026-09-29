@@ -6,13 +6,13 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	sqsEvents "github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sns"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	sqsTypes "github.com/aws/aws-sdk-go-v2/service/sqs/types"
-	"github.com/google/uuid"
 	"github.com/ockendenjo/handler"
 	"github.com/ockendenjo/osm-pt-validator/pkg/events"
 	"github.com/ockendenjo/osm-pt-validator/pkg/osm"
@@ -108,7 +108,7 @@ func (h *lambdaHandler) handleRoute(ctx *handler.Context, element osm.Relation, 
 
 	message := sqsTypes.SendMessageBatchRequestEntry{
 		MessageBody: aws.String(string(bytes)),
-		Id:          aws.String(uuid.New().String()),
+		Id:          aws.String("0"),
 	}
 	messages = append(messages, message)
 	_, err = h.sendMessageBatch(ctx, &sqs.SendMessageBatchInput{QueueUrl: &h.queueUrl, Entries: messages})
@@ -155,7 +155,7 @@ func (h *lambdaHandler) handleRouteMaster(ctx *handler.Context, validator *valid
 
 			message := sqsTypes.SendMessageBatchRequestEntry{
 				MessageBody: aws.String(string(bytes)),
-				Id:          aws.String(uuid.New().String()),
+				Id:          aws.String(strconv.Itoa(len(messages))),
 			}
 			messages = append(messages, message)
 		}
