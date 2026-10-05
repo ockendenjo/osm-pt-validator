@@ -32,7 +32,9 @@ module "iam_sqs_lambda_split_relation" {
 }
 
 module "sqs_eventsource_lambda_split_relation" {
-  source = "github.com/ockendenjo/tfmods//lambda-sqs-source"
-  lambda = module.lambda_split_relation
-  queue  = module.sqs_validate_rm_events
+  source              = "github.com/ockendenjo/tfmods//lambda-sqs-source"
+  lambda              = module.lambda_split_relation
+  queue               = module.sqs_validate_rm_events
+  batch_size          = 1
+  maximum_concurrency = 2
 }
