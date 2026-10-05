@@ -8,28 +8,17 @@ func (c *OSMClient) LoadNodes(ctx context.Context, nodeIds []int64) map[int64]*N
 	nodeMap := map[int64]*Node{}
 
 	for _, nodeID := range nodeIds {
-		nodeRes := loadNode(ctx, c, nodeID)
-		nodeMap[nodeRes.nodeID] = nodeRes.node
+		nodeObj := loadNode(ctx, c, nodeID)
+		nodeMap[nodeID] = nodeObj
 	}
 
 	return nodeMap
 }
 
-func loadNode(ctx context.Context, client *OSMClient, wayId int64) nodeResult {
+func loadNode(ctx context.Context, client *OSMClient, wayId int64) *Node {
 	node, err := client.GetNode(ctx, wayId)
 	if err != nil {
-		return nodeResult{
-			nodeID: wayId,
-			node:   nil,
-		}
+		return nil
 	}
-	return nodeResult{
-		nodeID: wayId,
-		node:   &node,
-	}
-}
-
-type nodeResult struct {
-	nodeID int64
-	node   *Node
+	return &node
 }
