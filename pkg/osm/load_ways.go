@@ -5,37 +5,25 @@ import (
 )
 
 func (c *OSMClient) LoadWays(ctx context.Context, wayIds []int64) map[int64]*Way {
-	ch := make(chan wayResult, len(wayIds))
 	wayMap := map[int64]*Way{}
 
-	remaining := 0
-	for idx, wayId := range wayIds {
-		go loadWay(ctx, c, wayId, ch)
-		remaining++
-		if idx >= c.parallelReqs {
-			//Wait before starting next request
-			wayResult := <-ch
-			remaining--
-			wayMap[wayResult.WayID] = wayResult.Way
-		}
-	}
-	for i := 0; i < remaining; i++ {
-		wayResult := <-ch
+	for _, wayId := range wayIds {
+		wayResult := loadWay(ctx, c, wayId)
 		wayMap[wayResult.WayID] = wayResult.Way
 	}
+
 	return wayMap
 }
 
-func loadWay(ctx context.Context, client *OSMClient, wayId int64, c chan wayResult) {
+func loadWay(ctx context.Context, client *OSMClient, wayId int64) wayResult {
 	way, err := client.GetWay(ctx, wayId)
 	if err != nil {
-		c <- wayResult{
+		return wayResult{
 			WayID: wayId,
 			Way:   nil,
 		}
-		return
 	}
-	c <- wayResult{
+	return wayResult{
 		WayID: wayId,
 		Way:   &way,
 	}
