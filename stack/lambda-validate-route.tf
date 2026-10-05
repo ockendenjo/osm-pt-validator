@@ -24,7 +24,9 @@ module "iam_sns_lambda_validate_route" {
 }
 
 module "sqs_eventsource_validate_route" {
-  source = "github.com/ockendenjo/tfmods//lambda-sqs-source"
-  lambda = module.lambda_validate_route
-  queue  = module.sqs_validate_route_events
+  source              = "github.com/ockendenjo/tfmods//lambda-sqs-source"
+  lambda              = module.lambda_validate_route
+  queue               = module.sqs_validate_route_events
+  batch_size          = 1
+  maximum_concurrency = 2
 }

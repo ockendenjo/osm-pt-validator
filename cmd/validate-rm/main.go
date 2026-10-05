@@ -107,8 +107,9 @@ func (h *lambdaHandler) handleRoute(ctx *handler.Context, element osm.Relation, 
 	}
 
 	message := sqsTypes.SendMessageBatchRequestEntry{
-		MessageBody: aws.String(string(bytes)),
-		Id:          aws.String("0"),
+		MessageBody:  aws.String(string(bytes)),
+		Id:           aws.String("0"),
+		DelaySeconds: int32(600),
 	}
 	messages = append(messages, message)
 	_, err = h.sendMessageBatch(ctx, &sqs.SendMessageBatchInput{QueueUrl: &h.queueUrl, Entries: messages})
@@ -154,8 +155,9 @@ func (h *lambdaHandler) handleRouteMaster(ctx *handler.Context, validator *valid
 			}
 
 			message := sqsTypes.SendMessageBatchRequestEntry{
-				MessageBody: aws.String(string(bytes)),
-				Id:          aws.String(strconv.Itoa(len(messages))),
+				MessageBody:  aws.String(string(bytes)),
+				Id:           aws.String(strconv.Itoa(len(messages))),
+				DelaySeconds: int32(600),
 			}
 			messages = append(messages, message)
 		}
